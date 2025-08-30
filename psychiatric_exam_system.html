@@ -1,0 +1,2687 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Psiquiátrico - Sistema de Evaluación Premium</title>
+    <!-- Fuentes y Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Variables CSS para el tema y colores psiquiátricos */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Púrpura/azul para psiquiatría */
+            --secondary-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); /* Verde para estabilidad */
+            --alert-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%); /* Rojo para crisis/riesgo */
+            --warning-gradient: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%); /* Amarillo para atención */
+            --normal-color: #06d6a0; /* Verde para normal/estable */
+            --warning-color: #f9844a; /* Naranja para síntomas moderados */
+            --alert-color: #e74c3c; /* Rojo para síntomas severos/riesgo */
+            --info-color: #667eea; /* Azul púrpura para información */
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --dark-bg: #1a1a1a;
+            --dark-card: #3d3d3d;
+            --text-color-light: #2c3e50;
+            --text-color-dark: #ffffff;
+        }
+
+        /* Modo Oscuro */
+        [data-theme="dark"] {
+            --light-bg: var(--dark-bg);
+            --card-bg: var(--dark-card);
+            color: var(--text-color-dark);
+        }
+
+        /* Estilos generales del cuerpo */
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding-top: 160px;
+            background-color: var(--light-bg);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            color: var(--text-color-light);
+        }
+        
+        /* 🎪 DASHBOARD SUPERIOR FIJO */
+        .dashboard-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary-gradient);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 15px 20px;
+        }
+
+        .dashboard-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .dashboard-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 6px 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            color: white;
+            text-align: center;
+            font-size: 11px;
+            flex: 1 1 auto;
+            min-width: 80px;
+            max-width: 150px;
+        }
+
+        .dashboard-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-item i {
+            font-size: 16px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .dashboard-alert {
+            color: var(--alert-color) !important;
+            animation: pulse 2s infinite;
+        }
+
+        .dashboard-warning {
+            color: var(--warning-color) !important;
+        }
+
+        .dashboard-normal {
+            color: var(--normal-color) !important;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 🎛️ CONTROLES SUPERIORES */
+        .control-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Colores de botones usando variables */
+        .btn-primary { background: var(--primary-gradient); }
+        .btn-success { background: var(--secondary-gradient); }
+        .btn-warning { background: var(--warning-gradient); }
+        .btn-danger { background: var(--alert-gradient); }
+
+        /* 🎯 PANEL LATERAL DE NAVEGACIÓN */
+        .nav-panel {
+            position: fixed;
+            left: 20px;
+            top: 160px;
+            width: 250px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+            z-index: 998;
+            transform: translateX(-280px);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-panel.open {
+            transform: translateX(0);
+        }
+
+        .nav-panel h3 {
+            margin: 0 0 15px 0;
+            color: var(--info-color);
+            font-size: 16px;
+            border-bottom: 2px solid var(--info-color);
+            padding-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .nav-item:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .nav-item.completed {
+            background: rgba(40, 167, 69, 0.1);
+            color: var(--normal-color);
+        }
+
+        .nav-item.completed i {
+            color: var(--normal-color);
+        }
+
+        .nav-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* 📊 PANEL LATERAL STICKY */
+        .sticky-panel {
+            position: fixed;
+            top: 160px;
+            right: -420px;
+            width: 400px;
+            height: calc(100vh - 180px);
+            background: var(--card-bg);
+            border-radius: 12px 0 0 12px;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+            z-index: 997;
+            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow: hidden;
+            border: 2px solid var(--primary-gradient);
+        }
+
+        .sticky-panel.active {
+            right: 0;
+        }
+
+        .sticky-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .sticky-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sticky-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .sticky-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .sticky-content {
+            padding: 20px;
+            height: calc(100% - 70px);
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            background: var(--light-bg);
+        }
+
+        .update-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--primary-gradient);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        .update-indicator.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notificación de copia */
+        .copy-notification {
+            position: fixed;
+            top: 200px;
+            right: 20px;
+            background: var(--normal-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+            z-index: 1002;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Ajustar contenido principal cuando panel está activo */
+        body.split-view-active .main-container {
+            margin-right: 420px;
+            transition: margin-right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        body.split-view .main-container {
+            margin-left: 290px;
+            margin-right: 20px;
+            transition: margin-left 0.3s ease, margin-right 0.3s ease;
+        }
+
+        /* Contenedor principal */
+        .main-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 0 20px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Título principal */
+        h1 {
+            color: var(--text-color-light);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding-bottom: 15px;
+        }
+        
+        /* Secciones */
+        .section {
+            margin-bottom: 25px;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+        
+        .section.active {
+            border-color: var(--info-color);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+        }
+
+        .section-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .section-header:hover {
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
+        }
+        
+        .section-header .arrow {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .section-header.expanded .arrow {
+            transform: rotate(180deg);
+        }
+
+        /* Badge de completado */
+        .section-header .completion-badge {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .section-header .completion-badge.completed {
+            background: var(--normal-color);
+        }
+        
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            background: var(--light-bg);
+        }
+        
+        .section-content.expanded {
+            padding: 20px;
+        }
+        
+        /* Contenedores de examen */
+        .exam-container {
+            background: var(--card-bg);
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .exam-container:hover {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .exam-header {
+            font-size: 18px;
+            font-weight: 600;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: -20px -20px 15px -20px;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .exam-section {
+            background: var(--light-bg);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .exam-section h4 {
+            color: var(--text-color-light);
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sub-header {
+            color: var(--info-color);
+            margin: 15px 0 8px 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .checkbox-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: var(--normal-color);
+        }
+        .checkbox-item input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: var(--normal-color);
+        }
+        
+        .checkbox-item label {
+            font-size: 13px;
+            color: var(--text-color-light);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .checkbox-item input:checked + label {
+            color: var(--normal-color);
+            font-weight: 500;
+        }
+        
+        .measurement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        
+        .measurement label {
+            font-size: 12px;
+            color: #5d6d7e;
+            flex-basis: 120px;
+            flex-shrink: 0;
+        }
+        
+        .input-field {
+            width: 80px;
+            padding: 6px 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--info-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--light-bg);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .score-value {
+            font-weight: 700;
+            color: var(--normal-color);
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color-light);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .mental-color { background: var(--info-color); }
+        .mood-color { background: var(--warning-color); }
+        .risk-color { background: var(--alert-color); }
+        .cognitive-color { background: var(--secondary-gradient); }
+
+        .mental-status {
+            background-color: rgba(102, 126, 234, 0.08);
+            border: 1px solid var(--info-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .mental-status h4 {
+            color: var(--info-color);
+            margin-bottom: 15px;
+        }
+
+        .mood-assessment {
+            background-color: rgba(249, 132, 74, 0.08);
+            border: 1px solid var(--warning-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .risk-assessment {
+            background-color: rgba(231, 76, 60, 0.08);
+            border: 1px solid var(--alert-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .severity-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .severity-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        .severity-item:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .severity-item input[type="radio"] {
+            accent-color: var(--normal-color);
+        }
+
+        .severity-item label {
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text-color-light);
+        }
+
+        /* Conclusión */
+        .conclusion {
+            margin-top: 30px;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .conclusion::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+        
+        .conclusion h3 {
+            color: var(--text-color-light);
+            margin-bottom: 15px;
+        }
+        
+        .conclusion-text {
+            padding: 20px;
+            background: var(--light-bg);
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Botones de control */
+        .control-buttons {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6fd8;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* TOGGLE DE TEMA */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* BOTÓN HOME */
+        .home-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--normal-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+        
+        .home-button:hover {
+            background-color: #059669;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Animaciones */
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sticky-panel {
+                width: 350px;
+            }
+            
+            body.split-view-active .main-container {
+                margin-right: 370px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body { padding-top: 120px; }
+            
+
+            
+            .control-bar {
+                position: relative;
+                top: auto;
+                right: auto;
+                justify-content: center;
+                margin: 10px 0;
+            }
+            
+            .nav-panel {
+                transform: translateX(-100%);
+                width: calc(100vw - 40px);
+            }
+            
+            .main-container {
+                margin: 0 10px;
+            }
+            
+            body.split-view .main-container {
+                margin-left: 10px;
+            }
+
+            .sticky-panel {
+                width: calc(100vw - 20px);
+                right: -100vw;
+                left: 10px;
+                border-radius: 12px;
+            }
+            
+            .sticky-panel.active {
+                right: auto;
+                left: 10px;
+            }
+            
+            body.split-view-active .main-container {
+                margin-right: 10px;
+            }
+            
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .severity-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🌙 TOGGLE DE TEMA -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+        <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+
+    <!-- 🏠 BOTÓN HOME -->
+    <a href="index.html" class="home-button" title="Inicio">
+        <i class="fas fa-home"></i>
+    </a>
+    
+    <!-- 🎪 DASHBOARD SUPERIOR FIJO -->
+    <div class="dashboard-fixed">
+        <div class="dashboard-content">
+            <div class="dashboard-grid">
+                <div class="dashboard-item">
+                    <i class="fas fa-brain"></i>
+                    <div>Evaluación</div>
+                    <div id="exam-progress">0%</div>
+                </div>
+                <div class="dashboard-item">
+                    <i class="fas fa-clipboard-list"></i>
+                    <div>Secciones</div>
+                    <div id="sections-completed">0/6</div>
+                </div>
+                <div class="dashboard-item dashboard-alert" id="alerts-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>Riesgo Alto</div>
+                    <div id="alert-count">0</div>
+                </div>
+                <div class="dashboard-item dashboard-warning" id="warnings-item">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>Síntomas</div>
+                    <div id="warning-count">0</div>
+                </div>
+                <div class="dashboard-item dashboard-normal" id="findings-item">
+                    <i class="fas fa-search"></i>
+                    <div>Hallazgos</div>
+                    <div id="findings-count">0</div>
+                </div>
+                <div class="dashboard-item" id="risk-status-item">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>Riesgo Suicida</div>
+                    <div id="suicide-risk">Bajo</div>
+                </div>
+            </div>
+            <div class="control-bar">
+                <button class="control-btn btn-primary" onclick="toggleNavPanel()">
+                    <i class="fas fa-bars"></i> Navegación
+                </button>
+                <button class="control-btn btn-primary" onclick="toggleStickyPanel()" id="sticky-toggle-btn">
+                    <i class="fas fa-columns"></i> Vista Dividida
+                </button>
+                <button class="control-btn btn-success" onclick="generateConclusion()">
+                    <i class="fas fa-file-medical"></i> Generar
+                </button>
+                <button class="control-btn btn-warning" onclick="expandAllSections()">
+                    <i class="fas fa-expand-alt"></i> Expandir
+                </button>
+                <button class="control-btn btn-danger" onclick="clearForm()">
+                    <i class="fas fa-trash"></i> Limpiar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎯 PANEL LATERAL DE NAVEGACIÓN -->
+    <div class="nav-panel" id="nav-panel">
+        <h3><i class="fas fa-map"></i> Navegación Rápida</h3>
+        <div class="nav-item" onclick="scrollToSection('anamnesis')">
+            <i class="fas fa-user-edit"></i>
+            <span>Anamnesis</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-anamnesis"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('mental-status')">
+            <i class="fas fa-brain"></i>
+            <span>Estado Mental</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-mental-status"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('mood-assessment')">
+            <i class="fas fa-heart"></i>
+            <span>Evaluación Afectiva</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-mood-assessment"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('risk-assessment')">
+            <i class="fas fa-shield-alt"></i>
+            <span>Evaluación de Riesgo</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-risk-assessment"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('cognitive-assessment')">
+            <i class="fas fa-memory"></i>
+            <span>Evaluación Cognitiva</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-cognitive-assessment"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('scales-assessment')">
+            <i class="fas fa-calculator"></i>
+            <span>Escalas Clínicas</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-scales-assessment"></i>
+        </div>
+    </div>
+
+    <!-- 📊 PANEL LATERAL STICKY -->
+    <div class="sticky-panel" id="stickyConclusion">
+        <div class="sticky-header">
+            <span><i class="fas fa-file-medical-alt"></i> Informe Psiquiátrico en Tiempo Real</span>
+            <div class="sticky-controls">
+                <button class="sticky-btn" onclick="copyStickyToClipboard()" title="Copiar informe">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="sticky-btn" onclick="printStickyConclusion()" title="Imprimir informe">
+                    <i class="fas fa-print"></i>
+                </button>
+                <button class="sticky-btn" onclick="generateStickyConclusion()" title="Actualizar informe">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+        <div class="sticky-content" id="stickyContent">
+            Seleccione los parámetros del examen para generar el informe psiquiátrico en tiempo real...
+        </div>
+        <div class="update-indicator" id="updateIndicator">
+            <div class="spinner"></div>
+            <span>Actualizando informe...</span>
+        </div>
+    </div>
+
+    <!-- Notificación de copia -->
+    <div class="copy-notification" id="copyNotification">
+        <i class="fas fa-check-circle"></i>
+        <span>¡Informe copiado al portapapeles!</span>
+    </div>
+
+    <div class="main-container">
+        <h1><i class="fas fa-brain"></i> Evaluación Psiquiátrica Integral - Sistema Premium</h1>
+        
+        <!-- Anamnesis y Motivo de Consulta -->
+        <div class="section" id="section-anamnesis">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-user-edit"></i> Anamnesis y Motivo de Consulta</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-anamnesis">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="anamnesis">
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-clipboard-list"></i> Síntomas Psiquiátricos Actuales</div>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item"><input type="checkbox" id="tristeza" onchange="updateDashboard()"><label for="tristeza">Tristeza/Anhedonia</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="ansiedad" onchange="updateDashboard()"><label for="ansiedad">Ansiedad</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="irritabilidad" onchange="updateDashboard()"><label for="irritabilidad">Irritabilidad</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="euforia" onchange="updateDashboard()"><label for="euforia">Euforia/Hiperactividad</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="alucinaciones" onchange="updateDashboard()"><label for="alucinaciones">Alucinaciones</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="delirios" onchange="updateDashboard()"><label for="delirios">Ideas delirantes</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="insomnio" onchange="updateDashboard()"><label for="insomnio">Alteraciones del sueño</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="apetito" onchange="updateDashboard()"><label for="apetito">Alteraciones del apetito</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="concentracion" onchange="updateDashboard()"><label for="concentracion">Problemas de concentración</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="memoria" onchange="updateDashboard()"><label for="memoria">Problemas de memoria</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="obsesiones" onchange="updateDashboard()"><label for="obsesiones">Obsesiones/Compulsiones</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="panico" onchange="updateDashboard()"><label for="panico">Crisis de pánico</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="fobias" onchange="updateDashboard()"><label for="fobias">Fobias específicas</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="agitacion" onchange="updateDashboard()"><label for="agitacion">Agitación psicomotora</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="lentitud" onchange="updateDashboard()"><label for="lentitud">Lentitud psicomotora</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="ideas-suicidas" onchange="updateDashboard()"><label for="ideas-suicidas">Ideas de muerte/suicidas</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="ideas-homicidas" onchange="updateDashboard()"><label for="ideas-homicidas">Ideas de daño a otros</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="consumo-sustancias" onchange="updateDashboard()"><label for="consumo-sustancias">Consumo de sustancias</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sin-sintomas" onchange="handleNoSymptoms()"><label for="sin-sintomas">Sin síntomas aparentes</label></div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-clock"></i> Cronología y Duración</div>
+                    <div class="exam-section">
+                        <h4>Inicio de Síntomas</h4>
+                        <div class="measurement">
+                            <label>Duración síntomas actuales:</label>
+                            <input type="number" class="input-field" id="duracion-sintomas" min="1" max="120" onchange="updateDashboard()">
+                            <select id="unidad-duracion" onchange="updateDashboard()">
+                                <option value="dias">Días</option>
+                                <option value="semanas">Semanas</option>
+                                <option value="meses">Meses</option>
+                                <option value="años">Años</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="inicio-gradual" onchange="updateDashboard()"><label for="inicio-gradual">Inicio gradual</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="inicio-subito" onchange="updateDashboard()"><label for="inicio-subito">Inicio súbito</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="episodios-previos" onchange="updateDashboard()"><label for="episodios-previos">Episodios previos similares</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="primer-episodio" onchange="updateDashboard()"><label for="primer-episodio">Primer episodio</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-history"></i> Antecedentes Psiquiátricos</div>
+                    <div class="exam-section">
+                        <h4>Historia Personal</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="depresion-previa" onchange="updateDashboard()"><label for="depresion-previa">Episodios depresivos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="mania-previa" onchange="updateDashboard()"><label for="mania-previa">Episodios maníacos/hipomaníacos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="psicosis-previa" onchange="updateDashboard()"><label for="psicosis-previa">Episodios psicóticos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ansiedad-previa" onchange="updateDashboard()"><label for="ansiedad-previa">Trastornos de ansiedad</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hospitalizaciones" onchange="updateDashboard()"><label for="hospitalizaciones">Hospitalizaciones psiquiátricas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="intentos-suicidas" onchange="updateDashboard()"><label for="intentos-suicidas">Intentos de suicidio</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="autolesiones" onchange="updateDashboard()"><label for="autolesiones">Autolesiones</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="terapia-previa" onchange="updateDashboard()"><label for="terapia-previa">Psicoterapia previa</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Historia Familiar</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="familia-depresion" onchange="updateDashboard()"><label for="familia-depresion">Depresión familiar</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="familia-bipolar" onchange="updateDashboard()"><label for="familia-bipolar">Trastorno bipolar familiar</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="familia-esquizofrenia" onchange="updateDashboard()"><label for="familia-esquizofrenia">Esquizofrenia familiar</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="familia-suicidio" onchange="updateDashboard()"><label for="familia-suicidio">Suicidio familiar</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="familia-adicciones" onchange="updateDashboard()"><label for="familia-adicciones">Adicciones familiares</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Medicación Psiquiátrica Actual</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="antidepresivos" onchange="updateDashboard()"><label for="antidepresivos">Antidepresivos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="antipsicoticos" onchange="updateDashboard()"><label for="antipsicoticos">Antipsicóticos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="estabilizadores" onchange="updateDashboard()"><label for="estabilizadores">Estabilizadores del ánimo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ansioliticos" onchange="updateDashboard()"><label for="ansioliticos">Ansiolíticos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="sin-medicacion" onchange="updateDashboard()"><label for="sin-medicacion">Sin medicación psiquiátrica</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Examen del Estado Mental -->
+        <div class="section" id="section-mental-status">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-brain"></i> Examen del Estado Mental</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-mental-status">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="mental-status">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color mental-color"></div>
+                        <span>Estado Mental</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-eye"></i> Apariencia y Conducta</div>
+                    <div class="mental-status">
+                        <h4>Presentación General</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="bien-vestido" onchange="updateDashboard()"><label for="bien-vestido">Bien vestido/aseado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="descuidado" onchange="updateDashboard()"><label for="descuidado">Aspecto descuidado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="extravagante" onchange="updateDashboard()"><label for="extravagante">Vestimenta extravagante</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="contacto-visual" onchange="updateDashboard()"><label for="contacto-visual">Contacto visual adecuado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="evita-mirada" onchange="updateDashboard()"><label for="evita-mirada">Evita el contacto visual</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hipervigilante" onchange="updateDashboard()"><label for="hipervigilante">Hipervigilante</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Actividad Psicomotora</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="actividad-normal" onchange="updateDashboard()"><label for="actividad-normal">Actividad normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="agitacion-psicomotora" onchange="updateDashboard()"><label for="agitacion-psicomotora">Agitación psicomotora</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="retardo-psicomotor" onchange="updateDashboard()"><label for="retardo-psicomotor">Retardo psicomotor</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="manierismos" onchange="updateDashboard()"><label for="manierismos">Manierismos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="estereotipias" onchange="updateDashboard()"><label for="estereotipias">Estereotipias</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="catatonia" onchange="updateDashboard()"><label for="catatonia">Signos catatónicos</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-comments"></i> Lenguaje y Habla</div>
+                    <div class="exam-section">
+                        <h4>Características del Habla</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="habla-normal" onchange="updateDashboard()"><label for="habla-normal">Habla normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="habla-rapida" onchange="updateDashboard()"><label for="habla-rapida">Habla rápida/presionada</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="habla-lenta" onchange="updateDashboard()"><label for="habla-lenta">Habla lenta</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="mutismo" onchange="updateDashboard()"><label for="mutismo">Mutismo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="volumen-alto" onchange="updateDashboard()"><label for="volumen-alto">Volumen elevado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="volumen-bajo" onchange="updateDashboard()"><label for="volumen-bajo">Volumen bajo</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Contenido del Lenguaje</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="lenguaje-coherente" onchange="updateDashboard()"><label for="lenguaje-coherente">Lenguaje coherente</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="circunstancial" onchange="updateDashboard()"><label for="circunstancial">Circunstancialidad</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="tangencial" onchange="updateDashboard()"><label for="tangencial">Tangencialidad</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fuga-ideas" onchange="updateDashboard()"><label for="fuga-ideas">Fuga de ideas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="incoherente" onchange="updateDashboard()"><label for="incoherente">Incoherente</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="neologismos" onchange="updateDashboard()"><label for="neologismos">Neologismos</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-heart"></i> Estado Afectivo y Emocional</div>
+                    <div class="exam-section">
+                        <h4>Ánimo (Estado Afectivo Basal)</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="animo-eutimico" onchange="updateDashboard()"><label for="animo-eutimico">Eutímico</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="animo-deprimido" onchange="updateDashboard()"><label for="animo-deprimido">Deprimido</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="animo-elevado" onchange="updateDashboard()"><label for="animo-elevado">Elevado/Eufórico</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="animo-irritable" onchange="updateDashboard()"><label for="animo-irritable">Irritable</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="animo-ansioso" onchange="updateDashboard()"><label for="animo-ansioso">Ansioso</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="animo-disfórico" onchange="updateDashboard()"><label for="animo-disfórico">Disfórico</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Afecto (Expresión Emocional Observada)</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="afecto-congruente" onchange="updateDashboard()"><label for="afecto-congruente">Congruente con el estado de ánimo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="afecto-incongruente" onchange="updateDashboard()"><label for="afecto-incongruente">Incongruente</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="afecto-embotado" onchange="updateDashboard()"><label for="afecto-embotado">Embotado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="afecto-plano" onchange="updateDashboard()"><label for="afecto-plano">Plano</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="afecto-labil" onchange="updateDashboard()"><label for="afecto-labil">Lábil</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="afecto-restringido" onchange="updateDashboard()"><label for="afecto-restringido">Restringido</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación del Pensamiento y Percepción -->
+        <div class="section" id="section-mood-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-lightbulb"></i> Pensamiento y Percepción</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-mood-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="mood-assessment">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color mood-color"></div>
+                        <span>Pensamiento y Percepción</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-cogs"></i> Proceso del Pensamiento</div>
+                    <div class="mood-assessment">
+                        <h4>Curso del Pensamiento</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="pensamiento-normal" onchange="updateDashboard()"><label for="pensamiento-normal">Curso normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="pensamiento-acelerado" onchange="updateDashboard()"><label for="pensamiento-acelerado">Acelerado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="pensamiento-lentificado" onchange="updateDashboard()"><label for="pensamiento-lentificado">Lentificado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="bloqueo-pensamiento" onchange="updateDashboard()"><label for="bloqueo-pensamiento">Bloqueo del pensamiento</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="perseveracion" onchange="updateDashboard()"><label for="perseveracion">Perseveración</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Contenido del Pensamiento</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="contenido-normal" onchange="updateDashboard()"><label for="contenido-normal">Contenido normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ideas-delirantes-persecucion" onchange="updateDashboard()"><label for="ideas-delirantes-persecucion">Ideas delirantes de persecución</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ideas-delirantes-grandeza" onchange="updateDashboard()"><label for="ideas-delirantes-grandeza">Ideas delirantes de grandeza</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ideas-delirantes-referencia" onchange="updateDashboard()"><label for="ideas-delirantes-referencia">Ideas de referencia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ideas-sobrevaloradas" onchange="updateDashboard()"><label for="ideas-sobrevaloradas">Ideas sobrevaloradas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="obsesiones-mentales" onchange="updateDashboard()"><label for="obsesiones-mentales">Obsesiones</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fobias-mentales" onchange="updateDashboard()"><label for="fobias-mentales">Fobias</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="preocupaciones-hipocondria" onchange="updateDashboard()"><label for="preocupaciones-hipocondria">Preocupaciones hipocondríacas</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-eye-slash"></i> Alteraciones Perceptuales</div>
+                    <div class="exam-section">
+                        <h4>Alucinaciones</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="sin-alucinaciones" onchange="updateDashboard()"><label for="sin-alucinaciones">Sin alucinaciones</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="alucinaciones-auditivas" onchange="updateDashboard()"><label for="alucinaciones-auditivas">Alucinaciones auditivas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="alucinaciones-visuales" onchange="updateDashboard()"><label for="alucinaciones-visuales">Alucinaciones visuales</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="alucinaciones-tactiles" onchange="updateDashboard()"><label for="alucinaciones-tactiles">Alucinaciones táctiles</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="alucinaciones-olfativas" onchange="updateDashboard()"><label for="alucinaciones-olfativas">Alucinaciones olfativas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="pseudoalucinaciones" onchange="updateDashboard()"><label for="pseudoalucinaciones">Pseudoalucinaciones</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Otras Alteraciones Perceptuales</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="ilusiones" onchange="updateDashboard()"><label for="ilusiones">Ilusiones</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="despersonalizacion" onchange="updateDashboard()"><label for="despersonalizacion">Despersonalización</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="desrealizacion" onchange="updateDashboard()"><label for="desrealizacion">Desrealización</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="distorsiones-perceptuales" onchange="updateDashboard()"><label for="distorsiones-perceptuales">Distorsiones perceptuales</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación de Riesgo -->
+        <div class="section" id="section-risk-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-shield-alt"></i> Evaluación de Riesgo</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-risk-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="risk-assessment">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color risk-color"></div>
+                        <span>Evaluación de Riesgo</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-skull-crossbones"></i> Riesgo Suicida</div>
+                    <div class="risk-assessment">
+                        <h4>Ideas de Muerte y Suicidio</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="sin-ideas-muerte" onchange="calculateSuicideRisk()"><label for="sin-ideas-muerte">Sin ideas de muerte</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ideas-muerte-pasivas" onchange="calculateSuicideRisk()"><label for="ideas-muerte-pasivas">Ideas de muerte pasivas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ideas-suicidas-sin-plan" onchange="calculateSuicideRisk()"><label for="ideas-suicidas-sin-plan">Ideas suicidas sin plan</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ideas-suicidas-con-plan" onchange="calculateSuicideRisk()"><label for="ideas-suicidas-con-plan">Ideas suicidas con plan</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="plan-detallado" onchange="calculateSuicideRisk()"><label for="plan-detallado">Plan detallado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="acceso-medios" onchange="calculateSuicideRisk()"><label for="acceso-medios">Acceso a medios letales</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="intento-reciente" onchange="calculateSuicideRisk()"><label for="intento-reciente">Intento reciente (&lt;6 meses)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="intentos-previos" onchange="calculateSuicideRisk()"><label for="intentos-previos">Intentos previos múltiples</label></div>
+                        </div>
+                        <div class="score-item">
+                            <span>Nivel de Riesgo Suicida:</span>
+                            <span class="score-value" id="suicide-risk-level">Bajo</span>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Factores de Riesgo Adicionales</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="desesperanza" onchange="calculateSuicideRisk()"><label for="desesperanza">Desesperanza</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="aislamiento-social" onchange="calculateSuicideRisk()"><label for="aislamiento-social">Aislamiento social</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="impulsividad" onchange="calculateSuicideRisk()"><label for="impulsividad">Impulsividad</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="abuso-sustancias-riesgo" onchange="calculateSuicideRisk()"><label for="abuso-sustancias-riesgo">Abuso de sustancias</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="perdidas-recientes" onchange="calculateSuicideRisk()"><label for="perdidas-recientes">Pérdidas recientes</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="problemas-legales" onchange="calculateSuicideRisk()"><label for="problemas-legales">Problemas legales/financieros</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Factores Protectores</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="apoyo-familiar" onchange="calculateSuicideRisk()"><label for="apoyo-familiar">Apoyo familiar</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="red-social" onchange="calculateSuicideRisk()"><label for="red-social">Red social sólida</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="razones-vivir" onchange="calculateSuicideRisk()"><label for="razones-vivir">Razones para vivir</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="adherencia-tratamiento" onchange="calculateSuicideRisk()"><label for="adherencia-tratamiento">Adherencia al tratamiento</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="creencias-religiosas" onchange="calculateSuicideRisk()"><label for="creencias-religiosas">Creencias religiosas</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-fist-raised"></i> Riesgo de Heteroagresividad</div>
+                    <div class="exam-section">
+                        <h4>Ideas y Planes de Daño a Otros</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="sin-ideas-violentas" onchange="updateDashboard()"><label for="sin-ideas-violentas">Sin ideas violentas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fantasias-violentas" onchange="updateDashboard()"><label for="fantasias-violentas">Fantasías violentas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ideas-homicidas" onchange="updateDashboard()"><label for="ideas-homicidas">Ideas homicidas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="amenazas-directas" onchange="updateDashboard()"><label for="amenazas-directas">Amenazas directas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="agresion-previa" onchange="updateDashboard()"><label for="agresion-previa">Historia de agresión</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="control-impulsos" onchange="updateDashboard()"><label for="control-impulsos">Pobre control de impulsos</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación Cognitiva -->
+        <div class="section" id="section-cognitive-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-memory"></i> Evaluación Cognitiva</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-cognitive-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="cognitive-assessment">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color cognitive-color"></div>
+                        <span>Evaluación Cognitiva</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-compass"></i> Orientación</div>
+                    <div class="exam-section">
+                        <h4>Orientación Temporoespacial</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="orientado-tiempo" onchange="calculateCognition()"><label for="orientado-tiempo">Orientado en tiempo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="orientado-espacio" onchange="calculateCognition()"><label for="orientado-espacio">Orientado en espacio</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="orientado-persona" onchange="calculateCognition()"><label for="orientado-persona">Orientado en persona</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="desorientado-tiempo" onchange="calculateCognition()"><label for="desorientado-tiempo">Desorientado en tiempo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="desorientado-espacio" onchange="calculateCognition()"><label for="desorientado-espacio">Desorientado en espacio</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="desorientado-persona" onchange="calculateCognition()"><label for="desorientado-persona">Desorientado en persona</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-brain"></i> Funciones Cognitivas</div>
+                    <div class="exam-section">
+                        <h4>Atención y Concentración</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="atencion-normal" onchange="calculateCognition()"><label for="atencion-normal">Atención normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="atencion-disminuida" onchange="calculateCognition()"><label for="atencion-disminuida">Atención disminuida</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="distractibilidad" onchange="calculateCognition()"><label for="distractibilidad">Distractibilidad</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hiperconcentracion" onchange="calculateCognition()"><label for="hiperconcentracion">Hiperconcentración</label></div>
+                        </div>
+                        <div class="measurement">
+                            <label>Repetición de dígitos (directo):</label>
+                            <input type="number" class="input-field" id="digitos-directo" min="0" max="9" onchange="calculateCognition()">
+                            <span>/9</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Repetición de dígitos (inverso):</label>
+                            <input type="number" class="input-field" id="digitos-inverso" min="0" max="8" onchange="calculateCognition()">
+                            <span>/8</span>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Memoria</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="memoria-normal" onchange="calculateCognition()"><label for="memoria-normal">Memoria normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="amnesia-anterograda" onchange="calculateCognition()"><label for="amnesia-anterograda">Amnesia anterógrada</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="amnesia-retrograda" onchange="calculateCognition()"><label for="amnesia-retrograda">Amnesia retrógrada</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="confabulaciones" onchange="calculateCognition()"><label for="confabulaciones">Confabulaciones</label></div>
+                        </div>
+                        <div class="measurement">
+                            <label>Recuerdo de 3 palabras (inmediato):</label>
+                            <input type="number" class="input-field" id="memoria-inmediata" min="0" max="3" onchange="calculateCognition()">
+                            <span>/3</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Recuerdo de 3 palabras (5 min):</label>
+                            <input type="number" class="input-field" id="memoria-diferida" min="0" max="3" onchange="calculateCognition()">
+                            <span>/3</span>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Funciones Ejecutivas</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="funciones-ejecutivas-normal" onchange="calculateCognition()"><label for="funciones-ejecutivas-normal">Funciones ejecutivas normales</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="planificacion-alterada" onchange="calculateCognition()"><label for="planificacion-alterada">Planificación alterada</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="flexibilidad-alterada" onchange="calculateCognition()"><label for="flexibilidad-alterada">Flexibilidad cognitiva alterada</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="juicio-alterado" onchange="calculateCognition()"><label for="juicio-alterado">Juicio alterado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="insight-alterado" onchange="calculateCognition()"><label for="insight-alterado">Insight alterado</label></div>
+                        </div>
+                    </div>
+                    <div class="score-item">
+                        <span>Estado Cognitivo Global:</span>
+                        <span class="score-value" id="cognitive-status">Normal</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Escalas de Evaluación -->
+        <div class="section" id="section-scales-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-calculator"></i> Escalas de Evaluación Clínica</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-scales-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="scales-assessment">
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-sad-tear"></i> Escala de Depresión de Hamilton (HAM-D)</div>
+                    <div class="exam-section">
+                        <h4>Evaluación de Síntomas Depresivos</h4>
+                        <div class="measurement">
+                            <label>Estado de ánimo deprimido:</label>
+                            <select id="hamilton-humor" onchange="calculateHamiltonDepression()">
+                                <option value="0">0 - Ausente</option>
+                                <option value="1">1 - Se siente triste y sin esperanza solo si se pregunta</option>
+                                <option value="2">2 - Refiere espontáneamente sentimientos de tristeza</option>
+                                <option value="3">3 - Comunica no verbalmente su tristeza</option>
+                                <option value="4">4 - Prácticamente solo se puede comunicar su tristeza</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Sentimientos de culpa:</label>
+                            <select id="hamilton-culpa" onchange="calculateHamiltonDepression()">
+                                <option value="0">0 - Ausente</option>
+                                <option value="1">1 - Se culpa a sí mismo, siente que ha decepcionado</option>
+                                <option value="2">2 - Ideas de culpa</option>
+                                <option value="3">3 - La enfermedad actual es un castigo</option>
+                                <option value="4">4 - Alucinaciones de culpa</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Suicidio:</label>
+                            <select id="hamilton-suicidio" onchange="calculateHamiltonDepression()">
+                                <option value="0">0 - Ausente</option>
+                                <option value="1">1 - Siente que la vida no vale la pena</option>
+                                <option value="2">2 - Desearía estar muerto</option>
+                                <option value="3">3 - Ideas suicidas o gestos</option>
+                                <option value="4">4 - Intentos de suicidio</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Insomnio precoz:</label>
+                            <select id="hamilton-insomnio-precoz" onchange="calculateHamiltonDepression()">
+                                <option value="0">0 - No hay dificultad</option>
+                                <option value="1">1 - Dificultad ocasional para dormirse</option>
+                                <option value="2">2 - Dificultad para dormirse cada noche</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Insomnio medio:</label>
+                            <select id="hamilton-insomnio-medio" onchange="calculateHamiltonDepression()">
+                                <option value="0">0 - No hay dificultad</option>
+                                <option value="1">1 - Inquieto durante la noche</option>
+                                <option value="2">2 - Se despierta durante la noche</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Insomnio tardío:</label>
+                            <select id="hamilton-insomnio-tardio" onchange="calculateHamiltonDepression()">
+                                <option value="0">0 - No hay dificultad</option>
+                                <option value="1">1 - Se despierta temprano pero vuelve a dormirse</option>
+                                <option value="2">2 - No puede volver a dormirse</option>
+                            </select>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación HAM-D (6 ítems):</span>
+                            <span class="score-value" id="hamilton-score">0</span>
+                            <span>/24</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Severidad de la depresión:</span>
+                            <span class="score-value" id="hamilton-severity">Normal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-anxiety"></i> Escala de Ansiedad de Hamilton (HAM-A)</div>
+                    <div class="exam-section">
+                        <h4>Síntomas de Ansiedad</h4>
+                        <div class="measurement">
+                            <label>Estado de ánimo ansioso:</label>
+                            <select id="hamilton-ansiedad-humor" onchange="calculateHamiltonAnxiety()">
+                                <option value="0">0 - Ausente</option>
+                                <option value="1">1 - Leve</option>
+                                <option value="2">2 - Moderado</option>
+                                <option value="3">3 - Severo</option>
+                                <option value="4">4 - Muy severo</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Tensión:</label>
+                            <select id="hamilton-tension" onchange="calculateHamiltonAnxiety()">
+                                <option value="0">0 - Ausente</option>
+                                <option value="1">1 - Leve</option>
+                                <option value="2">2 - Moderado</option>
+                                <option value="3">3 - Severo</option>
+                                <option value="4">4 - Muy severo</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Miedos:</label>
+                            <select id="hamilton-miedos" onchange="calculateHamiltonAnxiety()">
+                                <option value="0">0 - Ausente</option>
+                                <option value="1">1 - Leve</option>
+                                <option value="2">2 - Moderado</option>
+                                <option value="3">3 - Severo</option>
+                                <option value="4">4 - Muy severo</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Síntomas somáticos musculares:</label>
+                            <select id="hamilton-somaticos-musculares" onchange="calculateHamiltonAnxiety()">
+                                <option value="0">0 - Ausente</option>
+                                <option value="1">1 - Leve</option>
+                                <option value="2">2 - Moderado</option>
+                                <option value="3">3 - Severo</option>
+                                <option value="4">4 - Muy severo</option>
+                            </select>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación HAM-A (4 ítems):</span>
+                            <span class="score-value" id="hamilton-anxiety-score">0</span>
+                            <span>/16</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Severidad de la ansiedad:</span>
+                            <span class="score-value" id="hamilton-anxiety-severity">Normal</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-user-check"></i> Mini Mental State Examination (MMSE)</div>
+                    <div class="exam-section">
+                        <h4>Evaluación Cognitiva Breve</h4>
+                        <div class="measurement">
+                            <label>Orientación temporal:</label>
+                            <input type="number" class="input-field" id="mmse-tiempo" min="0" max="5" onchange="calculateMMSE()">
+                            <span>/5</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Orientación espacial:</label>
+                            <input type="number" class="input-field" id="mmse-espacio" min="0" max="5" onchange="calculateMMSE()">
+                            <span>/5</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Registro:</label>
+                            <input type="number" class="input-field" id="mmse-registro" min="0" max="3" onchange="calculateMMSE()">
+                            <span>/3</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Atención y cálculo:</label>
+                            <input type="number" class="input-field" id="mmse-atencion" min="0" max="5" onchange="calculateMMSE()">
+                            <span>/5</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Recuerdo:</label>
+                            <input type="number" class="input-field" id="mmse-recuerdo" min="0" max="3" onchange="calculateMMSE()">
+                            <span>/3</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Lenguaje:</label>
+                            <input type="number" class="input-field" id="mmse-lenguaje" min="0" max="9" onchange="calculateMMSE()">
+                            <span>/9</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación MMSE Total:</span>
+                            <span class="score-value" id="mmse-total">0</span>
+                            <span>/30</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Estado cognitivo:</span>
+                            <span class="score-value" id="mmse-interpretation">Normal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+        <!-- Conclusión Principal -->
+        <div class="conclusion" id="traditionalConclusion">
+            <h3><i class="fas fa-file-medical-alt"></i> Conclusión de la Evaluación Psiquiátrica</h3>
+            <div class="conclusion-text" id="conclusion-text-traditional">Seleccione los parámetros del examen para generar la conclusión psiquiátrica...</div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-primary" onclick="generateConclusion()">
+                <i class="fas fa-file-medical"></i> Generar Conclusión
+            </button>
+            <button class="btn btn-primary" onclick="copyToClipboard()">
+                <i class="fas fa-copy"></i> Copiar Texto
+            </button>
+            <button class="btn btn-primary" onclick="printConclusion()">
+                <i class="fas fa-print"></i> Imprimir Conclusión
+            </button>
+            <button class="btn btn-secondary" onclick="clearForm()">
+                <i class="fas fa-trash"></i> Limpiar Formulario
+            </button>
+            <button class="btn btn-secondary" onclick="expandAllSections()">
+                <i class="fas fa-expand-alt"></i> Expandir Todo
+            </button>
+            <button class="btn btn-secondary" onclick="collapseAllSections()">
+                <i class="fas fa-compress-alt"></i> Contraer Todo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ========== VARIABLES GLOBALES ==========
+        let examProgress = 0;
+        let sectionsCompleted = 0;
+        let alertCount = 0;
+        let warningCount = 0;
+        let findingsCount = 0;
+        let suicideRisk = 'Bajo';
+
+        // 🌙 Toggle de tema
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (body.hasAttribute('data-theme')) {
+                body.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // 🎯 Toggle panel de navegación
+        function toggleNavPanel() {
+            const navPanel = document.getElementById('nav-panel');
+            const body = document.body;
+            
+            navPanel.classList.toggle('open');
+            body.classList.toggle('split-view');
+        }
+
+        // 📊 FUNCIONES DEL PANEL STICKY
+        function toggleStickyPanel() {
+            const stickyPanel = document.getElementById('stickyConclusion');
+            const body = document.body;
+            const btn = document.getElementById('sticky-toggle-btn');
+            
+            stickyPanel.classList.toggle('active');
+            body.classList.toggle('split-view-active');
+            
+            if (stickyPanel.classList.contains('active')) {
+                btn.innerHTML = '<i class="fas fa-window-restore"></i> Vista Normal';
+                btn.classList.add('btn-warning');
+                btn.classList.remove('btn-primary');
+                generateStickyConclusion();
+            } else {
+                btn.innerHTML = '<i class="fas fa-columns"></i> Vista Dividida';
+                btn.classList.add('btn-primary');
+                btn.classList.remove('btn-warning');
+            }
+        }
+
+        function generateStickyConclusion() {
+            const stickyContent = document.getElementById('stickyContent');
+            const updateIndicator = document.getElementById('updateIndicator');
+            
+            updateIndicator.classList.add('active');
+            
+            setTimeout(() => {
+                const originalConclusionEl = document.getElementById('conclusion-text-traditional');
+                const originalContent = originalConclusionEl.textContent;
+                
+                stickyContent.textContent = originalContent;
+                
+                updateIndicator.classList.remove('active');
+            }, 300);
+        }
+
+        function copyStickyToClipboard() {
+            const stickyContent = document.getElementById('stickyContent').textContent;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(stickyContent).then(() => {
+                    showCopyNotification();
+                }).catch(err => {
+                    console.error('Error al copiar con la API del portapapeles: ', err);
+                    fallbackCopyToClipboard(stickyContent);
+                });
+            } else {
+                fallbackCopyToClipboard(stickyContent);
+            }
+        }
+
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showCopyNotification();
+            } catch (err) {
+                console.error('Error al usar el método de respaldo para copiar: ', err);
+                alert('No se pudo copiar el texto. Por favor, cópielo manualmente.');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyNotification() {
+            const notification = document.getElementById('copyNotification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2500);
+        }
+
+        function printStickyConclusion() {
+            const conclusion = document.getElementById('stickyContent').textContent;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Informe Psiquiátrico</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px; 
+                            line-height: 1.6;
+                        }
+                        pre { 
+                            white-space: pre-wrap; 
+                            font-family: 'Courier New', monospace; 
+                            font-size: 12px;
+                        }
+                        .header {
+                            text-align: center;
+                            border-bottom: 2px solid #667eea;
+                            padding-bottom: 10px;
+                            margin-bottom: 20px;
+                        }
+                        .footer {
+                            text-align: center;
+                            font-size: 10px;
+                            color: #666;
+                            margin-top: 20px;
+                            border-top: 1px solid #ddd;
+                            padding-top: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Informe de Evaluación Psiquiátrica</h1>
+                        <p>Fecha: ${new Date().toLocaleDateString()}</p>
+                        <p>Hora: ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                    <pre>${conclusion}</pre>
+                    <div class="footer">
+                        <p>Generado por Sistema de Evaluación Psiquiátrica Premium</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // 🧭 Navegación a secciones
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(`section-${sectionId}`);
+            if (section) {
+                section.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+                
+                const header = section.querySelector('.section-header');
+                if (header && !header.classList.contains('expanded')) {
+                    toggleSection(header);
+                }
+            }
+        }
+
+        function updateSectionHeight(contentElement) {
+            if (contentElement && contentElement.classList.contains('expanded')) {
+                setTimeout(() => {
+                    contentElement.style.maxHeight = contentElement.scrollHeight + 'px';
+                }, 50);
+            }
+        }
+
+        function toggleSection(headerElement) {
+            const content = headerElement.nextElementSibling;
+            const section = headerElement.parentElement;
+            
+            headerElement.classList.toggle('expanded');
+            section.classList.toggle('active');
+            
+            if (content.classList.toggle('expanded')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.classList.add('slide-in');
+            } else {
+                content.style.maxHeight = '0';
+                content.classList.remove('slide-in');
+            }
+        }
+
+        function expandAllSections() {
+            document.querySelectorAll('.section-header:not(.expanded)').forEach(header => {
+                toggleSection(header);
+            });
+        }
+
+        function collapseAllSections() {
+            document.querySelectorAll('.section-header.expanded').forEach(header => {
+                toggleSection(header);
+            });
+        }
+        
+        // 🚫 Manejo de "Sin síntomas"
+        function handleNoSymptoms() {
+            const noSymptomsCheckbox = document.getElementById('sin-sintomas');
+            const otherCheckboxes = document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-sintomas)');
+            
+            otherCheckboxes.forEach(checkbox => {
+                checkbox.disabled = noSymptomsCheckbox.checked;
+                if (noSymptomsCheckbox.checked) checkbox.checked = false;
+            });
+            updateDashboard();
+        }
+
+        // Funciones de cálculo de escalas
+        function calculateSuicideRisk() {
+            let riskScore = 0;
+            
+            // Ideas de muerte y suicidio (peso alto)
+            if (document.getElementById('ideas-muerte-pasivas')?.checked) riskScore += 1;
+            if (document.getElementById('ideas-suicidas-sin-plan')?.checked) riskScore += 2;
+            if (document.getElementById('ideas-suicidas-con-plan')?.checked) riskScore += 3;
+            if (document.getElementById('plan-detallado')?.checked) riskScore += 4;
+            if (document.getElementById('acceso-medios')?.checked) riskScore += 3;
+            if (document.getElementById('intento-reciente')?.checked) riskScore += 4;
+            if (document.getElementById('intentos-previos')?.checked) riskScore += 2;
+            
+            // Factores de riesgo adicionales
+            if (document.getElementById('desesperanza')?.checked) riskScore += 2;
+            if (document.getElementById('aislamiento-social')?.checked) riskScore += 1;
+            if (document.getElementById('impulsividad')?.checked) riskScore += 2;
+            if (document.getElementById('abuso-sustancias-riesgo')?.checked) riskScore += 1;
+            if (document.getElementById('perdidas-recientes')?.checked) riskScore += 1;
+            if (document.getElementById('problemas-legales')?.checked) riskScore += 1;
+            
+            // Factores protectores (restan puntos)
+            if (document.getElementById('apoyo-familiar')?.checked) riskScore -= 2;
+            if (document.getElementById('red-social')?.checked) riskScore -= 1;
+            if (document.getElementById('razones-vivir')?.checked) riskScore -= 2;
+            if (document.getElementById('adherencia-tratamiento')?.checked) riskScore -= 1;
+            if (document.getElementById('creencias-religiosas')?.checked) riskScore -= 1;
+            
+            let riskLevel = 'Bajo';
+            let color = 'var(--normal-color)';
+            
+            if (riskScore >= 8) {
+                riskLevel = 'Muy Alto';
+                color = 'var(--alert-color)';
+            } else if (riskScore >= 5) {
+                riskLevel = 'Alto';
+                color = 'var(--alert-color)';
+            } else if (riskScore >= 3) {
+                riskLevel = 'Moderado';
+                color = 'var(--warning-color)';
+            }
+            
+            document.getElementById('suicide-risk-level').textContent = riskLevel;
+            document.getElementById('suicide-risk-level').style.color = color;
+            document.getElementById('suicide-risk').textContent = riskLevel;
+            
+            suicideRisk = riskLevel;
+            updateDashboard();
+        }
+
+        function calculateCognition() {
+            let cognitiveImpairment = 0;
+            
+            // Orientación
+            if (document.getElementById('desorientado-tiempo')?.checked) cognitiveImpairment++;
+            if (document.getElementById('desorientado-espacio')?.checked) cognitiveImpairment++;
+            if (document.getElementById('desorientado-persona')?.checked) cognitiveImpairment++;
+            
+            // Atención
+            if (document.getElementById('atencion-disminuida')?.checked) cognitiveImpairment++;
+            if (document.getElementById('distractibilidad')?.checked) cognitiveImpairment++;
+            
+            // Memoria
+            if (document.getElementById('amnesia-anterograda')?.checked) cognitiveImpairment++;
+            if (document.getElementById('amnesia-retrograda')?.checked) cognitiveImpairment++;
+            
+            // Funciones ejecutivas
+            if (document.getElementById('planificacion-alterada')?.checked) cognitiveImpairment++;
+            if (document.getElementById('flexibilidad-alterada')?.checked) cognitiveImpairment++;
+            if (document.getElementById('juicio-alterado')?.checked) cognitiveImpairment++;
+            if (document.getElementById('insight-alterado')?.checked) cognitiveImpairment++;
+            
+            let cognitiveStatus = 'Normal';
+            let color = 'var(--normal-color)';
+            
+            if (cognitiveImpairment >= 5) {
+                cognitiveStatus = 'Deterioro Severo';
+                color = 'var(--alert-color)';
+            } else if (cognitiveImpairment >= 3) {
+                cognitiveStatus = 'Deterioro Moderado';
+                color = 'var(--warning-color)';
+            } else if (cognitiveImpairment >= 1) {
+                cognitiveStatus = 'Deterioro Leve';
+                color = 'var(--warning-color)';
+            }
+            
+            document.getElementById('cognitive-status').textContent = cognitiveStatus;
+            document.getElementById('cognitive-status').style.color = color;
+            updateDashboard();
+        }
+
+        function calculateHamiltonDepression() {
+            const humor = parseInt(document.getElementById('hamilton-humor').value) || 0;
+            const culpa = parseInt(document.getElementById('hamilton-culpa').value) || 0;
+            const suicidio = parseInt(document.getElementById('hamilton-suicidio').value) || 0;
+            const insomnioPrecoz = parseInt(document.getElementById('hamilton-insomnio-precoz').value) || 0;
+            const insomnioMedio = parseInt(document.getElementById('hamilton-insomnio-medio').value) || 0;
+            const insomnioTardio = parseInt(document.getElementById('hamilton-insomnio-tardio').value) || 0;
+            
+            const total = humor + culpa + suicidio + insomnioPrecoz + insomnioMedio + insomnioTardio;
+            
+            document.getElementById('hamilton-score').textContent = total;
+            
+            let severity = 'Normal';
+            let color = 'var(--normal-color)';
+            
+            if (total >= 18) {
+                severity = 'Depresión Severa';
+                color = 'var(--alert-color)';
+            } else if (total >= 14) {
+                severity = 'Depresión Moderada';
+                color = 'var(--warning-color)';
+            } else if (total >= 8) {
+                severity = 'Depresión Leve';
+                color = 'var(--warning-color)';
+            }
+            
+            document.getElementById('hamilton-severity').textContent = severity;
+            document.getElementById('hamilton-severity').style.color = color;
+            updateDashboard();
+        }
+
+        function calculateHamiltonAnxiety() {
+            const humor = parseInt(document.getElementById('hamilton-ansiedad-humor').value) || 0;
+            const tension = parseInt(document.getElementById('hamilton-tension').value) || 0;
+            const miedos = parseInt(document.getElementById('hamilton-miedos').value) || 0;
+            const somaticos = parseInt(document.getElementById('hamilton-somaticos-musculares').value) || 0;
+            
+            const total = humor + tension + miedos + somaticos;
+            
+            document.getElementById('hamilton-anxiety-score').textContent = total;
+            
+            let severity = 'Normal';
+            let color = 'var(--normal-color)';
+            
+            if (total >= 15) {
+                severity = 'Ansiedad Severa';
+                color = 'var(--alert-color)';
+            } else if (total >= 8) {
+                severity = 'Ansiedad Moderada';
+                color = 'var(--warning-color)';
+            } else if (total >= 6) {
+                severity = 'Ansiedad Leve';
+                color = 'var(--warning-color)';
+            }
+            
+            document.getElementById('hamilton-anxiety-severity').textContent = severity;
+            document.getElementById('hamilton-anxiety-severity').style.color = color;
+            updateDashboard();
+        }
+
+        function calculateMMSE() {
+            const tiempo = parseInt(document.getElementById('mmse-tiempo').value) || 0;
+            const espacio = parseInt(document.getElementById('mmse-espacio').value) || 0;
+            const registro = parseInt(document.getElementById('mmse-registro').value) || 0;
+            const atencion = parseInt(document.getElementById('mmse-atencion').value) || 0;
+            const recuerdo = parseInt(document.getElementById('mmse-recuerdo').value) || 0;
+            const lenguaje = parseInt(document.getElementById('mmse-lenguaje').value) || 0;
+            
+            const total = tiempo + espacio + registro + atencion + recuerdo + lenguaje;
+            
+            document.getElementById('mmse-total').textContent = total;
+            
+            let interpretation = 'Normal';
+            let color = 'var(--normal-color)';
+            
+            if (total < 10) {
+                interpretation = 'Deterioro Severo';
+                color = 'var(--alert-color)';
+            } else if (total < 20) {
+                interpretation = 'Deterioro Moderado';
+                color = 'var(--warning-color)';
+            } else if (total < 24) {
+                interpretation = 'Deterioro Leve';
+                color = 'var(--warning-color)';
+            }
+            
+            document.getElementById('mmse-interpretation').textContent = interpretation;
+            document.getElementById('mmse-interpretation').style.color = color;
+            updateDashboard();
+        }
+
+        // Función para generar conclusión
+        function generateConclusion() {
+            const conclusionEl = document.getElementById('stickyContent');
+            const conclusionTraditional = document.getElementById('conclusion-text-traditional');
+            let conclusion = 'EVALUACIÓN PSIQUIÁTRICA INTEGRAL\n\n';
+
+            // === 1. MOTIVO DE CONSULTA ===
+            const hasAnamnesisContent = document.querySelector('#anamnesis input:checked') || 
+                                       (document.getElementById('duracion-sintomas')?.value > 0);
+
+            if (document.getElementById('sin-sintomas')?.checked) {
+                conclusion += 'MOTIVO DE CONSULTA: Evaluación psiquiátrica de rutina, paciente asintomático.\n\n';
+            } else if (hasAnamnesisContent) {
+                const sintomasSeleccionados = [];
+                ['tristeza', 'ansiedad', 'irritabilidad', 'euforia', 'alucinaciones', 'delirios',
+                 'insomnio', 'apetito', 'concentracion', 'memoria', 'obsesiones', 'panico',
+                 'fobias', 'agitacion', 'lentitud', 'ideas-suicidas', 'ideas-homicidas', 
+                 'consumo-sustancias'].forEach(id => {
+                    if (document.getElementById(id)?.checked) {
+                        sintomasSeleccionados.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+                    }
+                });
+
+                if (sintomasSeleccionados.length > 0) {
+                    conclusion += `MOTIVO DE CONSULTA: Paciente consulta por ${sintomasSeleccionados.join(', ')}. `;
+                    
+                    const duracion = document.getElementById('duracion-sintomas')?.value;
+                    const unidad = document.getElementById('unidad-duracion')?.value;
+                    
+                    if (duracion && duracion > 0) {
+                        conclusion += `Evolución de ${duracion} ${unidad}. `;
+                    }
+                    
+                    if (document.getElementById('inicio-gradual')?.checked) conclusion += 'Inicio gradual. ';
+                    if (document.getElementById('inicio-subito')?.checked) conclusion += 'Inicio súbito. ';
+                    if (document.getElementById('episodios-previos')?.checked) conclusion += 'Episodios previos similares. ';
+                    if (document.getElementById('primer-episodio')?.checked) conclusion += 'Primer episodio. ';
+                    
+                    conclusion += '\n\n';
+                }
+            }
+
+            // === 2. ANTECEDENTES PSIQUIÁTRICOS ===
+            const antecedentesPersonales = [];
+            ['depresion-previa', 'mania-previa', 'psicosis-previa', 'ansiedad-previa', 
+             'hospitalizaciones', 'intentos-suicidas', 'autolesiones', 'terapia-previa'].forEach(id => {
+                if (document.getElementById(id)?.checked) {
+                    antecedentesPersonales.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+                }
+            });
+
+            const antecedentesFamiliares = [];
+            ['familia-depresion', 'familia-bipolar', 'familia-esquizofrenia', 
+             'familia-suicidio', 'familia-adicciones'].forEach(id => {
+                if (document.getElementById(id)?.checked) {
+                    antecedentesFamiliares.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+                }
+            });
+
+            const medicacionActual = [];
+            ['antidepresivos', 'antipsicoticos', 'estabilizadores', 'ansioliticos'].forEach(id => {
+                if (document.getElementById(id)?.checked) {
+                    medicacionActual.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+                }
+            });
+
+            if (antecedentesPersonales.length > 0 || antecedentesFamiliares.length > 0 || medicacionActual.length > 0) {
+                conclusion += 'ANTECEDENTES PSIQUIÁTRICOS:\n';
+                if (antecedentesPersonales.length > 0) conclusion += `• Personales: ${antecedentesPersonales.join(', ')}. `;
+                if (antecedentesFamiliares.length > 0) conclusion += `• Familiares: ${antecedentesFamiliares.join(', ')}. `;
+                if (medicacionActual.length > 0) conclusion += `• Medicación actual: ${medicacionActual.join(', ')}. `;
+                else if (document.getElementById('sin-medicacion')?.checked) conclusion += '• Sin medicación psiquiátrica actual. ';
+                conclusion += '\n\n';
+            }
+
+            // === 3. EXAMEN DEL ESTADO MENTAL ===
+            const hasMentalStatusContent = document.querySelector('#mental-status input:checked');
+
+            if (hasMentalStatusContent) {
+                conclusion += 'EXAMEN DEL ESTADO MENTAL:\n';
+                
+                // Apariencia y conducta
+                const apariencia = [];
+                if (document.getElementById('bien-vestido')?.checked) apariencia.push('bien vestido/aseado');
+                if (document.getElementById('descuidado')?.checked) apariencia.push('aspecto descuidado');
+                if (document.getElementById('extravagante')?.checked) apariencia.push('vestimenta extravagante');
+                
+                if (apariencia.length > 0) {
+                    conclusion += `• Apariencia: ${apariencia.join(', ')}. `;
+                }
+                
+                const contactoVisual = [];
+                if (document.getElementById('contacto-visual')?.checked) contactoVisual.push('contacto visual adecuado');
+                if (document.getElementById('evita-mirada')?.checked) contactoVisual.push('evita contacto visual');
+                if (document.getElementById('hipervigilante')?.checked) contactoVisual.push('hipervigilante');
+                
+                if (contactoVisual.length > 0) {
+                    conclusion += `${contactoVisual.join(', ')}. `;
+                }
+
+                // Actividad psicomotora
+                const actividadPsicomotora = [];
+                if (document.getElementById('actividad-normal')?.checked) actividadPsicomotora.push('actividad normal');
+                if (document.getElementById('agitacion-psicomotora')?.checked) actividadPsicomotora.push('agitación psicomotora');
+                if (document.getElementById('retardo-psicomotor')?.checked) actividadPsicomotora.push('retardo psicomotor');
+                if (document.getElementById('manierismos')?.checked) actividadPsicomotora.push('manierismos');
+                if (document.getElementById('estereotipias')?.checked) actividadPsicomotora.push('estereotipias');
+                if (document.getElementById('catatonia')?.checked) actividadPsicomotora.push('signos catatónicos');
+                
+                if (actividadPsicomotora.length > 0) {
+                    conclusion += `• Actividad psicomotora: ${actividadPsicomotora.join(', ')}. `;
+                }
+
+                // Lenguaje y habla
+                const habla = [];
+                if (document.getElementById('habla-normal')?.checked) habla.push('normal');
+                if (document.getElementById('habla-rapida')?.checked) habla.push('rápida/presionada');
+                if (document.getElementById('habla-lenta')?.checked) habla.push('lenta');
+                if (document.getElementById('mutismo')?.checked) habla.push('mutismo');
+                if (document.getElementById('volumen-alto')?.checked) habla.push('volumen elevado');
+                if (document.getElementById('volumen-bajo')?.checked) habla.push('volumen bajo');
+                
+                if (habla.length > 0) {
+                    conclusion += `• Habla: ${habla.join(', ')}. `;
+                }
+
+                const contenidoLenguaje = [];
+                if (document.getElementById('lenguaje-coherente')?.checked) contenidoLenguaje.push('coherente');
+                if (document.getElementById('circunstancial')?.checked) contenidoLenguaje.push('circunstancial');
+                if (document.getElementById('tangencial')?.checked) contenidoLenguaje.push('tangencial');
+                if (document.getElementById('fuga-ideas')?.checked) contenidoLenguaje.push('fuga de ideas');
+                if (document.getElementById('incoherente')?.checked) contenidoLenguaje.push('incoherente');
+                if (document.getElementById('neologismos')?.checked) contenidoLenguaje.push('neologismos');
+                
+                if (contenidoLenguaje.length > 0) {
+                    conclusion += `• Contenido del lenguaje: ${contenidoLenguaje.join(', ')}. `;
+                }
+
+                // Estado afectivo
+                const animo = [];
+                if (document.getElementById('animo-eutimico')?.checked) animo.push('eutímico');
+                if (document.getElementById('animo-deprimido')?.checked) animo.push('deprimido');
+                if (document.getElementById('animo-elevado')?.checked) animo.push('elevado/eufórico');
+                if (document.getElementById('animo-irritable')?.checked) animo.push('irritable');
+                if (document.getElementById('animo-ansioso')?.checked) animo.push('ansioso');
+                if (document.getElementById('animo-disfórico')?.checked) animo.push('disfórico');
+                
+                if (animo.length > 0) {
+                    conclusion += `• Estado de ánimo: ${animo.join(', ')}. `;
+                }
+
+                const afecto = [];
+                if (document.getElementById('afecto-congruente')?.checked) afecto.push('congruente');
+                if (document.getElementById('afecto-incongruente')?.checked) afecto.push('incongruente');
+                if (document.getElementById('afecto-embotado')?.checked) afecto.push('embotado');
+                if (document.getElementById('afecto-plano')?.checked) afecto.push('plano');
+                if (document.getElementById('afecto-labil')?.checked) afecto.push('lábil');
+                if (document.getElementById('afecto-restringido')?.checked) afecto.push('restringido');
+                
+                if (afecto.length > 0) {
+                    conclusion += `• Afecto: ${afecto.join(', ')}. `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === 4. PENSAMIENTO Y PERCEPCIÓN ===
+            const hasThoughtContent = document.querySelector('#mood-assessment input:checked');
+
+            if (hasThoughtContent) {
+                conclusion += 'PENSAMIENTO Y PERCEPCIÓN:\n';
+                
+                // Curso del pensamiento
+                const cursoPensamiento = [];
+                if (document.getElementById('pensamiento-normal')?.checked) cursoPensamiento.push('curso normal');
+                if (document.getElementById('pensamiento-acelerado')?.checked) cursoPensamiento.push('acelerado');
+                if (document.getElementById('pensamiento-lentificado')?.checked) cursoPensamiento.push('lentificado');
+                if (document.getElementById('bloqueo-pensamiento')?.checked) cursoPensamiento.push('bloqueo');
+                if (document.getElementById('perseveracion')?.checked) cursoPensamiento.push('perseveración');
+                
+                if (cursoPensamiento.length > 0) {
+                    conclusion += `• Curso del pensamiento: ${cursoPensamiento.join(', ')}. `;
+                }
+
+                // Contenido del pensamiento
+                const contenidoPensamiento = [];
+                if (document.getElementById('contenido-normal')?.checked) contenidoPensamiento.push('normal');
+                if (document.getElementById('ideas-delirantes-persecucion')?.checked) contenidoPensamiento.push('ideas delirantes de persecución');
+                if (document.getElementById('ideas-delirantes-grandeza')?.checked) contenidoPensamiento.push('ideas delirantes de grandeza');
+                if (document.getElementById('ideas-delirantes-referencia')?.checked) contenidoPensamiento.push('ideas de referencia');
+                if (document.getElementById('ideas-sobrevaloradas')?.checked) contenidoPensamiento.push('ideas sobrevaloradas');
+                if (document.getElementById('obsesiones-mentales')?.checked) contenidoPensamiento.push('obsesiones');
+                if (document.getElementById('fobias-mentales')?.checked) contenidoPensamiento.push('fobias');
+                if (document.getElementById('preocupaciones-hipocondria')?.checked) contenidoPensamiento.push('preocupaciones hipocondríacas');
+                
+                if (contenidoPensamiento.length > 0) {
+                    conclusion += `• Contenido del pensamiento: ${contenidoPensamiento.join(', ')}. `;
+                }
+
+                // Alteraciones perceptuales
+                const alucinaciones = [];
+                if (document.getElementById('sin-alucinaciones')?.checked) alucinaciones.push('sin alucinaciones');
+                if (document.getElementById('alucinaciones-auditivas')?.checked) alucinaciones.push('alucinaciones auditivas');
+                if (document.getElementById('alucinaciones-visuales')?.checked) alucinaciones.push('alucinaciones visuales');
+                if (document.getElementById('alucinaciones-tactiles')?.checked) alucinaciones.push('alucinaciones táctiles');
+                if (document.getElementById('alucinaciones-olfativas')?.checked) alucinaciones.push('alucinaciones olfativas');
+                if (document.getElementById('pseudoalucinaciones')?.checked) alucinaciones.push('pseudoalucinaciones');
+                
+                if (alucinaciones.length > 0) {
+                    conclusion += `• Percepción: ${alucinaciones.join(', ')}. `;
+                }
+
+                const otrasAlteraciones = [];
+                if (document.getElementById('ilusiones')?.checked) otrasAlteraciones.push('ilusiones');
+                if (document.getElementById('despersonalizacion')?.checked) otrasAlteraciones.push('despersonalización');
+                if (document.getElementById('desrealizacion')?.checked) otrasAlteraciones.push('desrealización');
+                if (document.getElementById('distorsiones-perceptuales')?.checked) otrasAlteraciones.push('distorsiones perceptuales');
+                
+                if (otrasAlteraciones.length > 0) {
+                    conclusion += `${otrasAlteraciones.join(', ')}. `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === 5. EVALUACIÓN DE RIESGO ===
+            const suicideRiskLevel = document.getElementById('suicide-risk-level')?.textContent;
+            if (suicideRiskLevel && suicideRiskLevel !== 'Bajo') {
+                conclusion += 'EVALUACIÓN DE RIESGO:\n';
+                conclusion += `• Riesgo suicida: ${suicideRiskLevel}. `;
+                
+                const factoresRiesgo = [];
+                if (document.getElementById('ideas-suicidas-con-plan')?.checked) factoresRiesgo.push('ideas suicidas con plan');
+                if (document.getElementById('plan-detallado')?.checked) factoresRiesgo.push('plan detallado');
+                if (document.getElementById('acceso-medios')?.checked) factoresRiesgo.push('acceso a medios letales');
+                if (document.getElementById('intento-reciente')?.checked) factoresRiesgo.push('intento reciente');
+                if (document.getElementById('desesperanza')?.checked) factoresRiesgo.push('desesperanza');
+                if (document.getElementById('aislamiento-social')?.checked) factoresRiesgo.push('aislamiento social');
+                
+                if (factoresRiesgo.length > 0) {
+                    conclusion += `Factores de riesgo: ${factoresRiesgo.join(', ')}. `;
+                }
+
+                const factoresProtectores = [];
+                if (document.getElementById('apoyo-familiar')?.checked) factoresProtectores.push('apoyo familiar');
+                if (document.getElementById('red-social')?.checked) factoresProtectores.push('red social');
+                if (document.getElementById('razones-vivir')?.checked) factoresProtectores.push('razones para vivir');
+                if (document.getElementById('adherencia-tratamiento')?.checked) factoresProtectores.push('adherencia al tratamiento');
+                
+                if (factoresProtectores.length > 0) {
+                    conclusion += `Factores protectores: ${factoresProtectores.join(', ')}. `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === 6. EVALUACIÓN COGNITIVA ===
+            const cognitiveStatus = document.getElementById('cognitive-status')?.textContent;
+            const mmseTotal = document.getElementById('mmse-total')?.textContent;
+            const mmseInterpretation = document.getElementById('mmse-interpretation')?.textContent;
+            
+            if (cognitiveStatus !== 'Normal' || (mmseTotal && mmseTotal !== '0')) {
+                conclusion += 'EVALUACIÓN COGNITIVA:\n';
+                if (cognitiveStatus !== 'Normal') {
+                    conclusion += `• Estado cognitivo: ${cognitiveStatus}. `;
+                }
+                if (mmseTotal && mmseTotal !== '0') {
+                    conclusion += `• MMSE: ${mmseTotal}/30 (${mmseInterpretation}). `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === 7. ESCALAS DE EVALUACIÓN ===
+            const hamiltonDepScore = document.getElementById('hamilton-score')?.textContent;
+            const hamiltonDepSeverity = document.getElementById('hamilton-severity')?.textContent;
+            const hamiltonAnxScore = document.getElementById('hamilton-anxiety-score')?.textContent;
+            const hamiltonAnxSeverity = document.getElementById('hamilton-anxiety-severity')?.textContent;
+            
+            if ((hamiltonDepScore && hamiltonDepScore !== '0') || (hamiltonAnxScore && hamiltonAnxScore !== '0')) {
+                conclusion += 'ESCALAS DE EVALUACIÓN:\n';
+                if (hamiltonDepScore && hamiltonDepScore !== '0') {
+                    conclusion += `• Escala de Depresión de Hamilton: ${hamiltonDepScore}/24 (${hamiltonDepSeverity}). `;
+                }
+                if (hamiltonAnxScore && hamiltonAnxScore !== '0') {
+                    conclusion += `• Escala de Ansiedad de Hamilton: ${hamiltonAnxScore}/16 (${hamiltonAnxSeverity}). `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === CONCLUSIÓN FINAL ===
+            if (conclusion.trim() === 'EVALUACIÓN PSIQUIÁTRICA INTEGRAL') {
+                conclusion = 'Seleccione los parámetros del examen para generar la conclusión psiquiátrica...';
+            } else {
+                if (alertCount > 0 || warningCount > 0 || findingsCount > 0) {
+                    conclusion += '⚠️ RESUMEN DE HALLAZGOS:\n';
+                    if (alertCount > 0) {
+                        conclusion += `• SIGNOS DE ALERTA: ${alertCount}\n`;
+                    }
+                    if (warningCount > 0) {
+                        conclusion += `• SÍNTOMAS RELEVANTES: ${warningCount}\n`;
+                    }
+                    conclusion += `• TOTAL DE HALLAZGOS: ${findingsCount}\n\n`;
+                }
+
+                conclusion += '🎯 IMPRESIÓN DIAGNÓSTICA:\n';
+                conclusion += '[Pendiente de correlación clínica y estudios complementarios]\n\n';
+                conclusion += '📋 PLAN TERAPÉUTICO:\n';
+                conclusion += '[A determinar según patología psiquiátrica sospechada y severidad]\n\n';
+                conclusion += `📊 COMPLETITUD DE LA EVALUACIÓN: ${examProgress}%`;
+            }
+
+            conclusionEl.textContent = conclusion;
+            conclusionTraditional.textContent = conclusion;
+        }
+
+        // 📊 ACTUALIZAR DASHBOARD
+        function updateDashboard() {
+            const sections = [
+                'anamnesis', 'mental-status', 'mood-assessment', 'risk-assessment', 
+                'cognitive-assessment', 'scales-assessment'
+            ];
+            
+            let currentCompletedSections = 0;
+            let currentAlertCount = 0;
+            let currentWarningCount = 0;
+            let currentFindingsCount = 0;
+            
+            sections.forEach(sectionId => {
+                const sectionElement = document.getElementById(sectionId);
+                if (sectionElement) {
+                    const checkboxes = sectionElement.querySelectorAll('input[type="checkbox"]:checked');
+                    const radios = sectionElement.querySelectorAll('input[type="radio"]:checked');
+                    const numbers = sectionElement.querySelectorAll('input[type="number"]');
+                    const selects = sectionElement.querySelectorAll('select');
+                    
+                    let hasContent = false;
+                    if (checkboxes.length > 0 || radios.length > 0) hasContent = true;
+                    numbers.forEach(input => {
+                        if (input.value && input.value !== '0') hasContent = true;
+                    });
+                    selects.forEach(select => {
+                        if (select.value && select.value !== '0') hasContent = true;
+                    });
+                    
+                    if (hasContent) {
+                        currentCompletedSections++;
+                        currentFindingsCount += (checkboxes.length + radios.length);
+                        
+                        const badge = document.getElementById(`badge-${sectionId}`);
+                        const navItem = document.getElementById(`nav-${sectionId}`);
+                        
+                        if (badge) {
+                            badge.classList.add('completed');
+                            badge.innerHTML = '<i class="fas fa-check"></i>';
+                        }
+                        if (navItem) {
+                            navItem.style.opacity = '1';
+                            navItem.parentElement.classList.add('completed');
+                        }
+                        
+                        // Criterios de alerta específicos para psiquiatría
+                        
+                        // ALERTAS (requieren atención inmediata)
+                        const alertSymptoms = ['ideas-suicidas', 'ideas-homicidas', 'alucinaciones', 'delirios', 
+                                             'agitacion-psicomotora', 'catatonia', 'ideas-suicidas-con-plan', 
+                                             'plan-detallado', 'acceso-medios', 'intento-reciente'];
+                        alertSymptoms.forEach(id => {
+                            if (document.getElementById(id)?.checked) currentAlertCount++;
+                        });
+
+                        // Evaluación de riesgo suicida
+                        const suicideRiskLevel = document.getElementById('suicide-risk-level')?.textContent;
+                        if (suicideRiskLevel === 'Alto' || suicideRiskLevel === 'Muy Alto') currentAlertCount += 2;
+                        
+                        // Síntomas psicóticos
+                        if (document.getElementById('alucinaciones-auditivas')?.checked) currentAlertCount++;
+                        if (document.getElementById('alucinaciones-visuales')?.checked) currentAlertCount++;
+                        if (document.getElementById('ideas-delirantes-persecucion')?.checked) currentAlertCount++;
+                        if (document.getElementById('ideas-delirantes-grandeza')?.checked) currentAlertCount++;
+
+                        // Deterioro cognitivo severo
+                        const cognitiveStatus = document.getElementById('cognitive-status')?.textContent;
+                        if (cognitiveStatus === 'Deterioro Severo') currentAlertCount++;
+                        
+                        // Escalas severas
+                        const hamiltonDepSeverity = document.getElementById('hamilton-severity')?.textContent;
+                        const hamiltonAnxSeverity = document.getElementById('hamilton-anxiety-severity')?.textContent;
+                        if (hamiltonDepSeverity === 'Depresión Severa') currentAlertCount++;
+                        if (hamiltonAnxSeverity === 'Ansiedad Severa') currentAlertCount++;
+
+                        // WARNINGS (síntomas relevantes pero no críticos)
+                        const warningSymptoms = ['tristeza', 'ansiedad', 'irritabilidad', 'insomnio', 
+                                               'concentracion', 'memoria', 'obsesiones', 'panico', 'fobias'];
+                        warningSymptoms.forEach(id => {
+                            if (document.getElementById(id)?.checked) currentWarningCount++;
+                        });
+
+                        // Síntomas moderados
+                        if (suicideRiskLevel === 'Moderado') currentWarningCount++;
+                        if (cognitiveStatus === 'Deterioro Moderado' || cognitiveStatus === 'Deterioro Leve') currentWarningCount++;
+                        if (hamiltonDepSeverity === 'Depresión Moderada' || hamiltonDepSeverity === 'Depresión Leve') currentWarningCount++;
+                        if (hamiltonAnxSeverity === 'Ansiedad Moderada' || hamiltonAnxSeverity === 'Ansiedad Leve') currentWarningCount++;
+
+                        // Antecedentes relevantes
+                        if (document.getElementById('hospitalizaciones')?.checked) currentWarningCount++;
+                        if (document.getElementById('intentos-suicidas')?.checked) currentWarningCount++;
+                        if (document.getElementById('autolesiones')?.checked) currentWarningCount++;
+
+                    } else {
+                        const badge = document.getElementById(`badge-${sectionId}`);
+                        const navItem = document.getElementById(`nav-${sectionId}`);
+                        
+                        if (badge) {
+                            badge.classList.remove('completed');
+                            badge.innerHTML = '<i class="fas fa-circle"></i>';
+                        }
+                        if (navItem) {
+                            navItem.style.opacity = '0';
+                            navItem.parentElement.classList.remove('completed');
+                        }
+                    }
+                }
+            });
+            
+            const totalSections = sections.length;
+            const progress = Math.round((currentCompletedSections / totalSections) * 100);
+            document.getElementById('exam-progress').textContent = `${progress}%`;
+            document.getElementById('sections-completed').textContent = `${currentCompletedSections}/${totalSections}`;
+            document.getElementById('alert-count').textContent = currentAlertCount;
+            document.getElementById('warning-count').textContent = currentWarningCount;
+            document.getElementById('findings-count').textContent = currentFindingsCount;
+            
+            const alertsItem = document.getElementById('alerts-item');
+            const warningsItem = document.getElementById('warnings-item');
+            const findingsItem = document.getElementById('findings-item');
+            const riskStatusItem = document.getElementById('risk-status-item');
+
+            alertsItem.style.display = 'flex'; 
+            warningsItem.style.display = 'flex';
+            findingsItem.style.display = 'flex';
+            riskStatusItem.style.display = 'flex';
+            
+            alertsItem.classList.toggle('dashboard-alert', currentAlertCount > 0);
+            warningsItem.classList.toggle('dashboard-warning', currentWarningCount > 0);
+            findingsItem.classList.toggle('dashboard-normal', currentFindingsCount > 0);
+            
+            // Actualizar el estado de riesgo del dashboard
+            const currentSuicideRisk = document.getElementById('suicide-risk-level')?.textContent || 'Bajo';
+            document.getElementById('suicide-risk').textContent = currentSuicideRisk;
+            
+            let riskColorClass = 'dashboard-normal';
+            if (currentSuicideRisk === 'Alto' || currentSuicideRisk === 'Muy Alto') {
+                riskColorClass = 'dashboard-alert';
+            } else if (currentSuicideRisk === 'Moderado') {
+                riskColorClass = 'dashboard-warning';
+            }
+            riskStatusItem.className = `dashboard-item ${riskColorClass}`;
+
+            // Guardar valores globales
+            examProgress = progress;
+            sectionsCompleted = currentCompletedSections;
+            alertCount = currentAlertCount;
+            warningCount = currentWarningCount;
+            findingsCount = currentFindingsCount;
+
+            generateConclusion();
+        }
+
+        // 🗑️ Limpiar formulario
+        function clearForm() {
+            if (confirm('¿Está seguro de que desea limpiar todos los datos del formulario?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.disabled = false;
+                });
+                document.querySelectorAll('input[type="radio"]').forEach(rb => rb.checked = false);
+                document.querySelectorAll('input[type="number"]').forEach(nb => nb.value = '');
+                document.querySelectorAll('input[type="text"]').forEach(tb => tb.value = '');
+                document.querySelectorAll('input[type="range"]').forEach(rb => rb.value = 0);
+                document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+                
+                // Resetear valores específicos
+                document.getElementById('suicide-risk-level').textContent = 'Bajo';
+                document.getElementById('suicide-risk-level').style.color = '';
+                document.getElementById('cognitive-status').textContent = 'Normal';
+                document.getElementById('cognitive-status').style.color = '';
+                document.getElementById('hamilton-score').textContent = '0';
+                document.getElementById('hamilton-severity').textContent = 'Normal';
+                document.getElementById('hamilton-severity').style.color = '';
+                document.getElementById('hamilton-anxiety-score').textContent = '0';
+                document.getElementById('hamilton-anxiety-severity').textContent = 'Normal';
+                document.getElementById('hamilton-anxiety-severity').style.color = '';
+                document.getElementById('mmse-total').textContent = '0';
+                document.getElementById('mmse-interpretation').textContent = 'Normal';
+                document.getElementById('mmse-interpretation').style.color = '';
+
+                // Resetear dashboard
+                examProgress = 0;
+                sectionsCompleted = 0;
+                alertCount = 0;
+                warningCount = 0;
+                findingsCount = 0;
+                suicideRisk = 'Bajo';
+
+                document.getElementById('exam-progress').textContent = '0%';
+                document.getElementById('sections-completed').textContent = '0/6';
+                document.getElementById('alert-count').textContent = '0';
+                document.getElementById('warning-count').textContent = '0';
+                document.getElementById('findings-count').textContent = '0';
+                document.getElementById('suicide-risk').textContent = 'Bajo';
+                
+                document.getElementById('alerts-item').classList.remove('dashboard-alert');
+                document.getElementById('warnings-item').classList.remove('dashboard-warning');
+                document.getElementById('findings-item').classList.remove('dashboard-normal');
+                document.getElementById('risk-status-item').classList.remove('dashboard-normal', 'dashboard-warning', 'dashboard-alert');
+
+                updateDashboard();
+            }
+        }
+
+        // Funciones de copia e impresión
+        function copyToClipboard() {
+            const conclusionText = document.getElementById('conclusion-text-traditional').textContent;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(conclusionText).then(() => {
+                    showCopyNotification();
+                }).catch(err => {
+                    console.error('Error al copiar: ', err);
+                    fallbackCopyToClipboard(conclusionText);
+                });
+            } else {
+                fallbackCopyToClipboard(conclusionText);
+            }
+        }
+
+        function printConclusion() {
+            const conclusion = document.getElementById('conclusion-text-traditional').textContent;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Evaluación Psiquiátrica</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px; 
+                            line-height: 1.6;
+                        }
+                        pre { 
+                            white-space: pre-wrap; 
+                            font-family: 'Courier New', monospace; 
+                            font-size: 12px;
+                        }
+                        .header {
+                            text-align: center;
+                            border-bottom: 2px solid #667eea;
+                            padding-bottom: 10px;
+                            margin-bottom: 20px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Evaluación Psiquiátrica Integral</h1>
+                        <p>Fecha: ${new Date().toLocaleDateString()}</p>
+                    </div>
+                    <pre>${conclusion}</pre>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar tema guardado
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-icon').className = 'fas fa-sun';
+            }
+
+            // Event listeners para actualizar dashboard
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                el.addEventListener('change', updateDashboard);
+                el.addEventListener('input', updateDashboard);
+            });
+             
+            // Ajustar altura de secciones
+            document.querySelector('.main-container').addEventListener('change', (event) => {
+                const sectionContent = event.target.closest('.section-content.expanded');
+                if (sectionContent) {
+                    updateSectionHeight(sectionContent);
+                }
+            });
+
+            // Expandir la primera sección por defecto
+            toggleSection(document.querySelector('.section-header'));
+            
+            // Inicializar todas las evaluaciones
+            calculateSuicideRisk();
+            calculateCognition();
+            calculateHamiltonDepression();
+            calculateHamiltonAnxiety();
+            calculateMMSE();
+            
+            updateDashboard();
+
+            setTimeout(() => {
+                console.log('🎉 Sistema de Evaluación Psiquiátrica Premium cargado exitosamente!');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

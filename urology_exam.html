@@ -1,0 +1,1855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Urológico - Algoritmo de Evaluación</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        
+        .main-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .section.active {
+            border-color: #3498db;
+            box-shadow: 0 2px 8px rgba(52, 152, 219, 0.2);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        
+        .section-header:hover {
+            background: linear-gradient(135deg, #2980b9, #21618c);
+        }
+        
+        .section-header .arrow {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .section-header.expanded .arrow {
+            transform: rotate(180deg);
+        }
+        
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            background: #fafbfc;
+        }
+        
+        .section-content.expanded {
+            padding: 20px;
+        }
+        
+        .exam-container {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .exam-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #3498db;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f3f4;
+        }
+        
+        .exam-section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .exam-section h4 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sub-header {
+            color: #2980b9;
+            margin: 15px 0 8px 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+        }
+        
+        .checkbox-item label {
+            font-size: 13px;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+        
+        .measurement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        
+        .measurement label {
+            font-size: 12px;
+            color: #5d6d7e;
+            flex-basis: 120px;
+            flex-shrink: 0;
+        }
+        
+        .input-field {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+        }
+
+        .bilateral-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .side-container {
+            padding: 15px;
+            background: #ffffff;
+            border: 1px solid #e8ecef;
+            border-radius: 6px;
+        }
+        
+        .side-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #34495e;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 1px solid #f0f3f4;
+            padding-bottom: 8px;
+        }
+
+        .pain-assessment {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .pain-assessment h4 {
+            color: #e65100;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .severity-section {
+            background: #fdf2f2;
+            border: 1px solid #e74c3c;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .severity-section h4 {
+            color: #c53030;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .severity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+        }
+
+        .severity-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px;
+        }
+
+        .severity-item input[type="radio"] {
+            width: 14px;
+            height: 14px;
+        }
+
+        .severity-item label {
+            font-size: 12px;
+            color: #c53030;
+            cursor: pointer;
+        }
+        
+        .test-results {
+            margin-top: 10px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding: 6px 10px;
+            margin: 4px 0;
+            background: white;
+            border: 1px solid #e8ecef;
+            border-radius: 4px;
+        }
+        
+        .test-item label {
+            font-size: 12px;
+            color: #2c3e50;
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .test-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .test-checkbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .test-checkbox span {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        
+        .positive { color: #e74c3c !important; }
+        .negative { color: #27ae60 !important; }
+        
+        .urinary-assessment {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .urinary-assessment h4 {
+            color: #1565c0;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .genital-exam {
+            background: #f3e5f5;
+            border: 1px solid #9c27b0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .genital-exam h4 {
+            color: #7b1fa2;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .prostate-exam {
+            background: #fff8e1;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .prostate-exam h4 {
+            color: #f57c00;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .score-calculation {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .score-value {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        .frequency-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .frequency-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: white;
+        }
+
+        .frequency-label {
+            font-size: 12px;
+            color: #2c3e50;
+        }
+
+        .renal-exam {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .renal-exam h4 {
+            color: #2e7d32;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .conclusion {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .conclusion h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .conclusion-text {
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .control-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .urinary-color { background-color: #1565c0; }
+        .genital-color { background-color: #7b1fa2; }
+        .prostate-color { background-color: #f57c00; }
+        .renal-color { background-color: #2e7d32; }
+
+        .description-area {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        .gender-selection {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .gender-selection h4 {
+            color: #1565c0;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .incontinence-assessment {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .incontinence-assessment h4 {
+            color: #e65100;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>Examen Urológico - Algoritmo de Evaluación</h1>
+        
+        <!-- Selección de Género -->
+        <div class="gender-selection">
+            <h4>Seleccionar Género del Paciente</h4>
+            <div class="severity-grid">
+                <div class="severity-item">
+                    <input type="radio" name="patient-gender" id="gender-male" value="male" onchange="handleGenderSelection()">
+                    <label for="gender-male">Masculino</label>
+                </div>
+                <div class="severity-item">
+                    <input type="radio" name="patient-gender" id="gender-female" value="female" onchange="handleGenderSelection()">
+                    <label for="gender-female">Femenino</label>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Anamnesis y Quejas -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Anamnesis y Quejas Principales</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="anamnesis">
+                <div class="exam-container">
+                    <div class="exam-header">Quejas Urológicas Principales</div>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item"><input type="checkbox" id="disuria"><label for="disuria">Disuria</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="polaquiuria"><label for="polaquiuria">Polaquiuria</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="urgencia-miccional"><label for="urgencia-miccional">Urgencia miccional</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="nicturia"><label for="nicturia">Nicturia</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="incontinencia-urinaria"><label for="incontinencia-urinaria">Incontinencia urinaria</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="retencion-urinaria"><label for="retencion-urinaria">Retención urinaria</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="hematuria"><label for="hematuria">Hematuria</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-lumbar"><label for="dolor-lumbar">Dolor lumbar</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="colico-renal"><label for="colico-renal">Cólico renal</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-suprapubico"><label for="dolor-suprapubico">Dolor suprapúbico</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="secrecion-uretral"><label for="secrecion-uretral">Secreción uretral</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-testicular" class="male-only"><label for="dolor-testicular">Dolor testicular</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-perineal" class="male-only"><label for="dolor-perineal">Dolor perineal</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="disfuncion-erectil" class="male-only"><label for="disfuncion-erectil">Disfunción eréctil</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-pelvico" class="female-only"><label for="dolor-pelvico">Dolor pélvico</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sin-quejas-uro" onchange="handleNoComplaints()"><label for="sin-quejas-uro">Sin quejas</label></div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Características del Dolor</div>
+                    <div class="pain-assessment">
+                        <h4>Intensidad del Dolor (EVA)</h4>
+                        <div class="measurement">
+                            <label>Dolor general:</label>
+                            <input type="range" id="dolor-general-intensidad" min="0" max="10" value="0" oninput="updateDolorValue('general', this.value)">
+                            <span id="dolor-general-value">0</span><span>/10</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Dolor al orinar:</label>
+                            <input type="range" id="dolor-orinar-intensidad" min="0" max="10" value="0" oninput="updateDolorValue('orinar', this.value)">
+                            <span id="dolor-orinar-value">0</span><span>/10</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Dolor lumbar:</label>
+                            <input type="range" id="dolor-lumbar-intensidad" min="0" max="10" value="0" oninput="updateDolorValue('lumbar', this.value)">
+                            <span id="dolor-lumbar-value">0</span><span>/10</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exam-section">
+                        <h4>Tipo de Dolor</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="tipo-dolor-uro" id="dolor-tipo-colico"><label for="dolor-tipo-colico">Cólico (intermitente)</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tipo-dolor-uro" id="dolor-tipo-continuo"><label for="dolor-tipo-continuo">Continuo</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tipo-dolor-uro" id="dolor-tipo-urente"><label for="dolor-tipo-urente">Urente</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tipo-dolor-uro" id="dolor-tipo-sordo"><label for="dolor-tipo-sordo">Sordo</label></div>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Localización del Dolor</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-flanco-derecho"><label for="dolor-flanco-derecho">Flanco derecho</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-flanco-izquierdo"><label for="dolor-flanco-izquierdo">Flanco izquierdo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-region-suprapubica"><label for="dolor-region-suprapubica">Región suprapúbica</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-region-perineal"><label for="dolor-region-perineal">Región perineal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-irradiado-ingle"><label for="dolor-irradiado-ingle">Irradiado a ingle</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-irradiado-genitales"><label for="dolor-irradiado-genitales">Irradiado a genitales</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Síntomas Miccionales</div>
+                    <div class="urinary-assessment">
+                        <h4>Síntomas de Llenado</h4>
+                        <div class="measurement">
+                            <label>Frecuencia diurna:</label>
+                            <input type="number" class="input-field" id="frecuencia-diurna" min="0" max="20" onchange="evaluateUrinarySymptoms()">
+                            <span>veces/día (normal 4-7)</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Nicturia:</label>
+                            <input type="number" class="input-field" id="nicturia-frecuencia" min="0" max="10" onchange="evaluateUrinarySymptoms()">
+                            <span>veces/noche (normal 0-1)</span>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="urgencia-severa"><label for="urgencia-severa">Urgencia severa</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="incontinencia-urgencia"><label for="incontinencia-urgencia">Incontinencia de urgencia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vejiga-hiperactiva"><label for="vejiga-hiperactiva">Síndrome vejiga hiperactiva</label></div>
+                        </div>
+                    </div>
+
+                    <div class="urinary-assessment">
+                        <h4>Síntomas de Vaciado</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="chorro-debil"><label for="chorro-debil">Chorro débil</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="chorro-intermitente"><label for="chorro-intermitente">Chorro intermitente</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="goteo-postmiccional"><label for="goteo-postmiccional">Goteo postmiccional</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vaciado-incompleto"><label for="vaciado-incompleto">Sensación de vaciado incompleto</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="esfuerzo-para-orinar"><label for="esfuerzo-para-orinar">Esfuerzo para orinar</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="retraso-inicio-miccion"><label for="retraso-inicio-miccion">Retraso inicio de micción</label></div>
+                        </div>
+                    </div>
+
+                    <div class="urinary-assessment">
+                        <h4>Síntomas Post-miccionales</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="goteo-terminal"><label for="goteo-terminal">Goteo terminal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="sensacion-vaciado-incompleto"><label for="sensacion-vaciado-incompleto">Sensación de vaciado incompleto</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Antecedentes Relevantes</div>
+                    <div class="exam-section">
+                        <h4>Historia Médica</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="infecciones-urinarias-recurrentes"><label for="infecciones-urinarias-recurrentes">ITU recurrentes</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="litiasis-renal"><label for="litiasis-renal">Litiasis renal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="diabetes-mellitus"><label for="diabetes-mellitus">Diabetes mellitus</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hipertension-arterial"><label for="hipertension-arterial">Hipertensión arterial</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="enfermedad-neurologica"><label for="enfermedad-neurologica">Enfermedad neurológica</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cirugia-urologica-previa"><label for="cirugia-urologica-previa">Cirugía urológica previa</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="trauma-pelvico"><label for="trauma-pelvico">Trauma pélvico</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cancer-urologico"><label for="cancer-urologico">Cáncer urológico</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Medicamentos</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="alfabloqueadores"><label for="alfabloqueadores">Alfabloqueadores</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="anticolinergicos"><label for="anticolinergicos">Anticolinérgicos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="diureticos"><label for="diureticos">Diuréticos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="inhibidores-5alfa-reductasa"><label for="inhibidores-5alfa-reductasa">Inhibidores 5α-reductasa</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="antidepresivos"><label for="antidepresivos">Antidepresivos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="antihistaminicos"><label for="antihistaminicos">Antihistamínicos</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Examen Físico General -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Examen Físico General</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="general-exam">
+                <div class="exam-container">
+                    <div class="exam-header">Inspección General</div>
+                    <div class="exam-section">
+                        <h4>Estado General</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="aspecto-general-normal"><label for="aspecto-general-normal">Aspecto general normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-evidente"><label for="dolor-evidente">Dolor evidente</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="palidez"><label for="palidez">Palidez</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="diaforesis"><label for="diaforesis">Diaforesis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="febril"><label for="febril">Febril</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="agitacion"><label for="agitacion">Agitación</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Examen Abdominal</div>
+                    <div class="renal-exam">
+                        <h4>Región Renal y Flancos</h4>
+                        <div class="bilateral-container">
+                            <div class="side-container">
+                                <div class="side-header">Flanco Derecho</div>
+                                <div class="test-results">
+                                    <div class="test-item">
+                                        <label>Puñopercusión</label>
+                                        <div class="test-controls">
+                                            <div class="test-checkbox"><input type="checkbox" id="punopercusion-der-pos" onchange="handleMutuallyExclusive('punopercusion-der-pos', 'punopercusion-der-neg', this)"><span class="positive">Positiva</span></div>
+                                            <div class="test-checkbox"><input type="checkbox" id="punopercusion-der-neg" onchange="handleMutuallyExclusive('punopercusion-der-pos', 'punopercusion-der-neg', this)"><span class="negative">Negativa</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="test-item">
+                                        <label>Masa palpable</label>
+                                        <div class="test-controls">
+                                            <div class="test-checkbox"><input type="checkbox" id="masa-renal-der-pos" onchange="handleMutuallyExclusive('masa-renal-der-pos', 'masa-renal-der-neg', this)"><span class="positive">Presente</span></div>
+                                            <div class="test-checkbox"><input type="checkbox" id="masa-renal-der-neg" onchange="handleMutuallyExclusive('masa-renal-der-pos', 'masa-renal-der-neg', this)"><span class="negative">Ausente</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="test-item">
+                                        <label>Dolor a la palpación</label>
+                                        <div class="test-controls">
+                                            <div class="test-checkbox"><input type="checkbox" id="dolor-palpacion-der-pos" onchange="handleMutuallyExclusive('dolor-palpacion-der-pos', 'dolor-palpacion-der-neg', this)"><span class="positive">Presente</span></div>
+                                            <div class="test-checkbox"><input type="checkbox" id="dolor-palpacion-der-neg" onchange="handleMutuallyExclusive('dolor-palpacion-der-pos', 'dolor-palpacion-der-neg', this)"><span class="negative">Ausente</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="side-container">
+                                <div class="side-header">Flanco Izquierdo</div>
+                                <div class="test-results">
+                                    <div class="test-item">
+                                        <label>Puñopercusión</label>
+                                        <div class="test-controls">
+                                            <div class="test-checkbox"><input type="checkbox" id="punopercusion-izq-pos" onchange="handleMutuallyExclusive('punopercusion-izq-pos', 'punopercusion-izq-neg', this)"><span class="positive">Positiva</span></div>
+                                            <div class="test-checkbox"><input type="checkbox" id="punopercusion-izq-neg" onchange="handleMutuallyExclusive('punopercusion-izq-pos', 'punopercusion-izq-neg', this)"><span class="negative">Negativa</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="test-item">
+                                        <label>Masa palpable</label>
+                                        <div class="test-controls">
+                                            <div class="test-checkbox"><input type="checkbox" id="masa-renal-izq-pos" onchange="handleMutuallyExclusive('masa-renal-izq-pos', 'masa-renal-izq-neg', this)"><span class="positive">Presente</span></div>
+                                            <div class="test-checkbox"><input type="checkbox" id="masa-renal-izq-neg" onchange="handleMutuallyExclusive('masa-renal-izq-pos', 'masa-renal-izq-neg', this)"><span class="negative">Ausente</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="test-item">
+                                        <label>Dolor a la palpación</label>
+                                        <div class="test-controls">
+                                            <div class="test-checkbox"><input type="checkbox" id="dolor-palpacion-izq-pos" onchange="handleMutuallyExclusive('dolor-palpacion-izq-pos', 'dolor-palpacion-izq-neg', this)"><span class="positive">Presente</span></div>
+                                            <div class="test-checkbox"><input type="checkbox" id="dolor-palpacion-izq-neg" onchange="handleMutuallyExclusive('dolor-palpacion-izq-pos', 'dolor-palpacion-izq-neg', this)"><span class="negative">Ausente</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Región Suprapúbica</h4>
+                        <div class="test-results">
+                            <div class="test-item">
+                                <label>Globo vesical</label>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="checkbox" id="globo-vesical-pos" onchange="handleMutuallyExclusive('globo-vesical-pos', 'globo-vesical-neg', this)"><span class="positive">Presente</span></div>
+                                    <div class="test-checkbox"><input type="checkbox" id="globo-vesical-neg" onchange="handleMutuallyExclusive('globo-vesical-pos', 'globo-vesical-neg', this)"><span class="negative">Ausente</span></div>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Dolor suprapúbico</label>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="checkbox" id="dolor-suprapubico-pos" onchange="handleMutuallyExclusive('dolor-suprapubico-pos', 'dolor-suprapubico-neg', this)"><span class="positive">Presente</span></div>
+                                    <div class="test-checkbox"><input type="checkbox" id="dolor-suprapubico-neg" onchange="handleMutuallyExclusive('dolor-suprapubico-pos', 'dolor-suprapubico-neg', this)"><span class="negative">Ausente</span></div>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Masa suprapúbica</label>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="checkbox" id="masa-suprapubica-pos" onchange="handleMutuallyExclusive('masa-suprapubica-pos', 'masa-suprapubica-neg', this)"><span class="positive">Presente</span></div>
+                                    <div class="test-checkbox"><input type="checkbox" id="masa-suprapubica-neg" onchange="handleMutuallyExclusive('masa-suprapubica-pos', 'masa-suprapubica-neg', this)"><span class="negative">Ausente</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examen Genital Masculino -->
+        <div class="section male-section" style="display: none;">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Examen Genital Masculino</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="male-genital-exam">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color genital-color"></div>
+                        <span>Examen Genital</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Examen del Pene</div>
+                    <div class="genital-exam">
+                        <h4>Inspección</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="pene-normal"><label for="pene-normal">Aspecto normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fimosis"><label for="fimosis">Fimosis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="parafimosis"><label for="parafimosis">Parafimosis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="balanitis"><label for="balanitis">Balanitis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="curvatura-peneana"><label for="curvatura-peneana">Curvatura peneana</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="lesiones-peneanas"><label for="lesiones-peneanas">Lesiones cutáneas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="secrecion-uretral-vis"><label for="secrecion-uretral-vis">Secreción uretral</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="priapismo"><label for="priapismo">Priapismo</label></div>
+                        </div>
+                    </div>
+
+                    <div class="genital-exam">
+                        <h4>Meato Uretral</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="meato-normal"><label for="meato-normal">Normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hipospadias"><label for="hipospadias">Hipospadias</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="epispadias"><label for="epispadias">Epispadias</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="estenosis-meatal"><label for="estenosis-meatal">Estenosis meatal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="secrecion-purulenta"><label for="secrecion-purulenta">Secreción purulenta</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="secrecion-clara"><label for="secrecion-clara">Secreción clara</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Examen Testicular</div>
+                    <div class="bilateral-container">
+                        <div class="side-container">
+                            <div class="side-header">Testículo Derecho</div>
+                            <div class="genital-exam">
+                                <h4>Características</h4>
+                                <div class="measurement">
+                                    <label>Tamaño (longitud):</label>
+                                    <input type="number" class="input-field" id="testiculo-der-tamaño" min="0" max="8" step="0.5">
+                                    <span>cm (normal 4-5.5 cm)</span>
+                                </div>
+                                <div class="checkbox-grid">
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-der-normal"><label for="testiculo-der-normal">Normal</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-der-aumentado"><label for="testiculo-der-aumentado">Aumentado de tamaño</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-der-disminuido"><label for="testiculo-der-disminuido">Disminuido de tamaño</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-der-duro"><label for="testiculo-der-duro">Consistencia dura</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-der-doloroso"><label for="testiculo-der-doloroso">Doloroso</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-der-masa"><label for="testiculo-der-masa">Masa palpable</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="criptorquidia-der"><label for="criptorquidia-der">Criptorquidia</label></div>
+                                </div>
+                            </div>
+                            <div class="genital-exam">
+                                <h4>Epidídimo</h4>
+                                <div class="checkbox-grid">
+                                    <div class="checkbox-item"><input type="checkbox" id="epididimo-der-normal"><label for="epididimo-der-normal">Normal</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="epididimitis-der"><label for="epididimitis-der">Epididimitis</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="quiste-epididimo-der"><label for="quiste-epididimo-der">Quiste de epidídimo</label></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="side-container">
+                            <div class="side-header">Testículo Izquierdo</div>
+                            <div class="genital-exam">
+                                <h4>Características</h4>
+                                <div class="measurement">
+                                    <label>Tamaño (longitud):</label>
+                                    <input type="number" class="input-field" id="testiculo-izq-tamaño" min="0" max="8" step="0.5">
+                                    <span>cm (normal 4-5.5 cm)</span>
+                                </div>
+                                <div class="checkbox-grid">
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-izq-normal"><label for="testiculo-izq-normal">Normal</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-izq-aumentado"><label for="testiculo-izq-aumentado">Aumentado de tamaño</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-izq-disminuido"><label for="testiculo-izq-disminuido">Disminuido de tamaño</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-izq-duro"><label for="testiculo-izq-duro">Consistencia dura</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-izq-doloroso"><label for="testiculo-izq-doloroso">Doloroso</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="testiculo-izq-masa"><label for="testiculo-izq-masa">Masa palpable</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="criptorquidia-izq"><label for="criptorquidia-izq">Criptorquidia</label></div>
+                                </div>
+                            </div>
+                            <div class="genital-exam">
+                                <h4>Epidídimo</h4>
+                                <div class="checkbox-grid">
+                                    <div class="checkbox-item"><input type="checkbox" id="epididimo-izq-normal"><label for="epididimo-izq-normal">Normal</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="epididimitis-izq"><label for="epididimitis-izq">Epididimitis</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="quiste-epididimo-izq"><label for="quiste-epididimo-izq">Quiste de epidídimo</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Examen del Escroto y Cordón Espermático</div>
+                    <div class="genital-exam">
+                        <h4>Características Generales</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="escroto-normal"><label for="escroto-normal">Escroto normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hidrocele"><label for="hidrocele">Hidrocele</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="varicocele"><label for="varicocele">Varicocele</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hernia-inguinal"><label for="hernia-inguinal">Hernia inguinal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="escroto-edema"><label for="escroto-edema">Edema escrotal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="escroto-eritema"><label for="escroto-eritema">Eritema escrotal</label></div>
+                        </div>
+                    </div>
+
+                    <div class="test-results">
+                        <div class="test-item">
+                            <label>Reflejo cremastérico derecho</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="cremasterico-der-pos" onchange="handleMutuallyExclusive('cremasterico-der-pos', 'cremasterico-der-neg', this)"><span class="negative">Presente</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="cremasterico-der-neg" onchange="handleMutuallyExclusive('cremasterico-der-pos', 'cremasterico-der-neg', this)"><span class="positive">Ausente</span></div>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Reflejo cremastérico izquierdo</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="cremasterico-izq-pos" onchange="handleMutuallyExclusive('cremasterico-izq-pos', 'cremasterico-izq-neg', this)"><span class="negative">Presente</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="cremasterico-izq-neg" onchange="handleMutuallyExclusive('cremasterico-izq-pos', 'cremasterico-izq-neg', this)"><span class="positive">Ausente</span></div>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Transiluminación</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="transiluminacion-pos" onchange="handleMutuallyExclusive('transiluminacion-pos', 'transiluminacion-neg', this)"><span class="positive">Positiva</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="transiluminacion-neg" onchange="handleMutuallyExclusive('transiluminacion-pos', 'transiluminacion-neg', this)"><span class="negative">Negativa</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Examen de Próstata (Tacto Rectal)</div>
+                    <div class="prostate-exam">
+                        <h4>Características de la Próstata</h4>
+                        <div class="measurement">
+                            <label>Tamaño estimado:</label>
+                            <select id="prostata-tamaño" onchange="evaluateProstate()">
+                                <option value="">Seleccionar</option>
+                                <option value="normal">Normal (20-25g)</option>
+                                <option value="aumentada-leve">Aumentada leve (30-40g)</option>
+                                <option value="aumentada-moderada">Aumentada moderada (50-80g)</option>
+                                <option value="aumentada-severa">Aumentada severa (&gt;80g)</option>
+                            </select>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="prostata-blanda"><label for="prostata-blanda">Consistencia blanda</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prostata-firme"><label for="prostata-firme">Consistencia firme</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prostata-dura"><label for="prostata-dura">Consistencia dura</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prostata-nodular"><label for="prostata-nodular">Superficie nodular</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prostata-lisa"><label for="prostata-lisa">Superficie lisa</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prostata-dolorosa"><label for="prostata-dolorosa">Dolorosa a la palpación</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prostata-asimetrica"><label for="prostata-asimetrica">Asimétrica</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prostata-fija"><label for="prostata-fija">Fija</label></div>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="prostata-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Examen Genital Femenino -->
+        <div class="section female-section" style="display: none;">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Examen Genital Femenino</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="female-genital-exam">
+                <div class="exam-container">
+                    <div class="exam-header">Examen Vulvar</div>
+                    <div class="genital-exam">
+                        <h4>Inspección</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="vulva-normal"><label for="vulva-normal">Aspecto normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vulva-eritema"><label for="vulva-eritema">Eritema</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vulva-edema"><label for="vulva-edema">Edema</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vulva-lesiones"><label for="vulva-lesiones">Lesiones</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vulva-secrecion"><label for="vulva-secrecion">Secreción</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vulva-atrofia"><label for="vulva-atrofia">Atrofia</label></div>
+                        </div>
+                    </div>
+
+                    <div class="genital-exam">
+                        <h4>Meato Uretral</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="meato-fem-normal"><label for="meato-fem-normal">Normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="meato-fem-eritema"><label for="meato-fem-eritema">Eritema</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="meato-fem-secrecion"><label for="meato-fem-secrecion">Secreción</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="carúncula-uretral"><label for="carúncula-uretral">Carúncula uretral</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prolapso-uretral"><label for="prolapso-uretral">Prolapso uretral</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Examen Pélvico</div>
+                    <div class="genital-exam">
+                        <h4>Prolapso de Órganos Pélvicos</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="prolapso-ausente"><label for="prolapso-ausente">Sin prolapso</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cistocele"><label for="cistocele">Cistocele</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="rectocele"><label for="rectocele">Rectocele</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="prolapso-uterino"><label for="prolapso-uterino">Prolapso uterino</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="enterocele"><label for="enterocele">Enterocele</label></div>
+                        </div>
+                    </div>
+
+                    <div class="test-results">
+                        <div class="test-item">
+                            <label>Prueba de esfuerzo (tos)</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="prueba-esfuerzo-pos" onchange="handleMutuallyExclusive('prueba-esfuerzo-pos', 'prueba-esfuerzo-neg', this)"><span class="positive">Positiva</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="prueba-esfuerzo-neg" onchange="handleMutuallyExclusive('prueba-esfuerzo-pos', 'prueba-esfuerzo-neg', this)"><span class="negative">Negativa</span></div>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Q-tip test (movilidad uretral)</label>
+                            <div class="test-controls">
+                                <input type="number" id="qtip-angle" placeholder="°" class="input-field" style="width: 50px;">
+                                <span>° (normal &lt;30°)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Escalas de Evaluación -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Escalas de Evaluación Urológica</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="urological-scales">
+                <div class="exam-container">
+                    <div class="exam-header">Escala IPSS (International Prostate Symptom Score)</div>
+                    <div class="score-calculation">
+                        <h4>Síntomas Prostáticos (últimas 4 semanas)</h4>
+                        <div class="test-results">
+                            <div class="test-item">
+                                <label>Sensación de vaciado incompleto</label>
+                                <div class="test-controls">
+                                    <select id="ipss-vaciado" onchange="calculateIPSS()">
+                                        <option value="">Seleccionar</option>
+                                        <option value="0">Nunca (0)</option>
+                                        <option value="1">Menos de 1/5 veces (1)</option>
+                                        <option value="2">Menos de la mitad (2)</option>
+                                        <option value="3">Aproximadamente la mitad (3)</option>
+                                        <option value="4">Más de la mitad (4)</option>
+                                        <option value="5">Casi siempre (5)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Frecuencia urinaria (&lt;2 horas)</label>
+                                <div class="test-controls">
+                                    <select id="ipss-frecuencia" onchange="calculateIPSS()">
+                                        <option value="">Seleccionar</option>
+                                        <option value="0">Nunca (0)</option>
+                                        <option value="1">Menos de 1/5 veces (1)</option>
+                                        <option value="2">Menos de la mitad (2)</option>
+                                        <option value="3">Aproximadamente la mitad (3)</option>
+                                        <option value="4">Más de la mitad (4)</option>
+                                        <option value="5">Casi siempre (5)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Intermitencia (parar y empezar)</label>
+                                <div class="test-controls">
+                                    <select id="ipss-intermitencia" onchange="calculateIPSS()">
+                                        <option value="">Seleccionar</option>
+                                        <option value="0">Nunca (0)</option>
+                                        <option value="1">Menos de 1/5 veces (1)</option>
+                                        <option value="2">Menos de la mitad (2)</option>
+                                        <option value="3">Aproximadamente la mitad (3)</option>
+                                        <option value="4">Más de la mitad (4)</option>
+                                        <option value="5">Casi siempre (5)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Urgencia (dificultad para esperar)</label>
+                                <div class="test-controls">
+                                    <select id="ipss-urgencia" onchange="calculateIPSS()">
+                                        <option value="">Seleccionar</option>
+                                        <option value="0">Nunca (0)</option>
+                                        <option value="1">Menos de 1/5 veces (1)</option>
+                                        <option value="2">Menos de la mitad (2)</option>
+                                        <option value="3">Aproximadamente la mitad (3)</option>
+                                        <option value="4">Más de la mitad (4)</option>
+                                        <option value="5">Casi siempre (5)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Chorro débil</label>
+                                <div class="test-controls">
+                                    <select id="ipss-chorro" onchange="calculateIPSS()">
+                                        <option value="">Seleccionar</option>
+                                        <option value="0">Nunca (0)</option>
+                                        <option value="1">Menos de 1/5 veces (1)</option>
+                                        <option value="2">Menos de la mitad (2)</option>
+                                        <option value="3">Aproximadamente la mitad (3)</option>
+                                        <option value="4">Más de la mitad (4)</option>
+                                        <option value="5">Casi siempre (5)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Esfuerzo para iniciar micción</label>
+                                <div class="test-controls">
+                                    <select id="ipss-esfuerzo" onchange="calculateIPSS()">
+                                        <option value="">Seleccionar</option>
+                                        <option value="0">Nunca (0)</option>
+                                        <option value="1">Menos de 1/5 veces (1)</option>
+                                        <option value="2">Menos de la mitad (2)</option>
+                                        <option value="3">Aproximadamente la mitad (3)</option>
+                                        <option value="4">Más de la mitad (4)</option>
+                                        <option value="5">Casi siempre (5)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Nicturia (levantarse por la noche)</label>
+                                <div class="test-controls">
+                                    <select id="ipss-nicturia" onchange="calculateIPSS()">
+                                        <option value="">Seleccionar</option>
+                                        <option value="0">Nunca (0)</option>
+                                        <option value="1">1 vez (1)</option>
+                                        <option value="2">2 veces (2)</option>
+                                        <option value="3">3 veces (3)</option>
+                                        <option value="4">4 veces (4)</option>
+                                        <option value="5">5 o más veces (5)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>IPSS Total:</span>
+                            <span class="score-value" id="ipss-score">0</span>
+                            <span>/35 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="ipss-interpretation">--</span>
+                        </div>
+                        <div class="test-item">
+                            <label>Calidad de vida (por síntomas urinarios)</label>
+                            <div class="test-controls">
+                                <select id="ipss-qol" onchange="calculateIPSS()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Encantado (0)</option>
+                                    <option value="1">Complacido (1)</option>
+                                    <option value="2">Mayormente satisfecho (2)</option>
+                                    <option value="3">Mixto (3)</option>
+                                    <option value="4">Mayormente insatisfecho (4)</option>
+                                    <option value="5">Infeliz (5)</option>
+                                    <option value="6">Terrible (6)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Calidad de Vida:</span>
+                            <span class="score-value" id="ipss-qol-score">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Escala de Incontinencia (ICIQ-SF)</div>
+                    <div class="incontinence-assessment">
+                        <h4>Cuestionario de Incontinencia Urinaria</h4>
+                        <div class="test-item">
+                            <label>Frecuencia de pérdidas</label>
+                            <div class="test-controls">
+                                <select id="iciq-frecuencia" onchange="calculateICIQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Nunca (0)</option>
+                                    <option value="1">Una vez por semana o menos (1)</option>
+                                    <option value="2">2-3 veces por semana (2)</option>
+                                    <option value="3">Una vez al día (3)</option>
+                                    <option value="4">Varias veces al día (4)</option>
+                                    <option value="5">Continuamente (5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Cantidad de orina que pierde</label>
+                            <div class="test-controls">
+                                <select id="iciq-cantidad" onchange="calculateICIQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Ninguna (0)</option>
+                                    <option value="2">Pequeña cantidad (2)</option>
+                                    <option value="4">Cantidad moderada (4)</option>
+                                    <option value="6">Gran cantidad (6)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Interferencia en vida diaria</label>
+                            <div class="test-controls">
+                                <select id="iciq-interferencia" onchange="calculateICIQ()">
+                                    <option value="">Seleccionar (0-10)</option>
+                                    <option value="0">No interfiere (0)</option>
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                    <option value="10">Interfiere mucho (10)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>ICIQ-SF Score:</span>
+                            <span class="score-value" id="iciq-score">0</span>
+                            <span>/21 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="iciq-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container male-scale" style="display: none;">
+                    <div class="exam-header">Índice Internacional de Función Eréctil (IIEF-5)</div>
+                    <div class="score-calculation">
+                        <h4>Función Sexual (últimas 4 semanas)</h4>
+                        <div class="test-item">
+                            <label>Confianza en lograr erección</label>
+                            <div class="test-controls">
+                                <select id="iief-confianza" onchange="calculateIIEF()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="1">Muy baja (1)</option>
+                                    <option value="2">Baja (2)</option>
+                                    <option value="3">Moderada (3)</option>
+                                    <option value="4">Alta (4)</option>
+                                    <option value="5">Muy alta (5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Firmeza suficiente para penetración</label>
+                            <div class="test-controls">
+                                <select id="iief-firmeza" onchange="calculateIIEF()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">No tuve actividad sexual (0)</option>
+                                    <option value="1">Casi nunca o nunca (1)</option>
+                                    <option value="2">Pocas veces (2)</option>
+                                    <option value="3">Algunas veces (3)</option>
+                                    <option value="4">La mayoría de las veces (4)</option>
+                                    <option value="5">Casi siempre o siempre (5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Mantenimiento de la erección</label>
+                            <div class="test-controls">
+                                <select id="iief-mantenimiento" onchange="calculateIIEF()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">No tuve actividad sexual (0)</option>
+                                    <option value="1">Casi nunca o nunca (1)</option>
+                                    <option value="2">Pocas veces (2)</option>
+                                    <option value="3">Algunas veces (3)</option>
+                                    <option value="4">La mayoría de las veces (4)</option>
+                                    <option value="5">Casi siempre o siempre (5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Dificultad para mantener erección</label>
+                            <div class="test-controls">
+                                <select id="iief-dificultad" onchange="calculateIIEF()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">No tuve actividad sexual (0)</option>
+                                    <option value="1">Extremadamente difícil (1)</option>
+                                    <option value="2">Muy difícil (2)</option>
+                                    <option value="3">Difícil (3)</option>
+                                    <option value="4">Ligeramente difícil (4)</option>
+                                    <option value="5">Sin dificultad (5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Satisfacción con relaciones sexuales</label>
+                            <div class="test-controls">
+                                <select id="iief-satisfaccion" onchange="calculateIIEF()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">No tuve actividad sexual (0)</option>
+                                    <option value="1">Muy insatisfactorio (1)</option>
+                                    <option value="2">Insatisfactorio (2)</option>
+                                    <option value="3">Ligeramente satisfactorio (3)</option>
+                                    <option value="4">Satisfactorio (4)</option>
+                                    <option value="5">Muy satisfactorio (5)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>IIEF-5 Score:</span>
+                            <span class="score-value" id="iief-score">0</span>
+                            <span>/25 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="iief-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="conclusion">
+            <h3>Conclusión del Examen Urológico</h3>
+            <div class="conclusion-text" id="conclusion-text">Seleccione los parámetros del examen para generar la conclusión urológica...</div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-primary" onclick="generateConclusion()">Generar Conclusión</button>
+            <button class="btn btn-primary" onclick="printConclusion()">Imprimir Conclusión</button>
+            <button class="btn btn-secondary" onclick="clearForm()">Limpiar Formulario</button>
+            <button class="btn btn-secondary" onclick="expandAllSections()">Expandir Todo</button>
+            <button class="btn btn-secondary" onclick="collapseAllSections()">Contraer Todo</button>
+        </div>
+    </div>
+
+    <script>
+        function updateSectionHeight(contentElement) {
+            if (contentElement && contentElement.classList.contains('expanded')) {
+                setTimeout(() => {
+                    contentElement.style.maxHeight = contentElement.scrollHeight + 'px';
+                }, 50);
+            }
+        }
+
+        function toggleSection(headerElement) {
+            const content = headerElement.nextElementSibling;
+            const section = headerElement.parentElement;
+            
+            headerElement.classList.toggle('expanded');
+            section.classList.toggle('active');
+            
+            if (content.classList.toggle('expanded')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            } else {
+                content.style.maxHeight = '0';
+            }
+        }
+
+        function expandAllSections() {
+            document.querySelectorAll('.section-header:not(.expanded)').forEach(header => toggleSection(header));
+        }
+
+        function collapseAllSections() {
+            document.querySelectorAll('.section-header.expanded').forEach(header => toggleSection(header));
+        }
+
+        function handleGenderSelection() {
+            const isMale = document.getElementById('gender-male').checked;
+            const isFemale = document.getElementById('gender-female').checked;
+            
+            // Mostrar/ocultar secciones específicas de género
+            const maleSections = document.querySelectorAll('.male-section, .male-scale');
+            const femaleSections = document.querySelectorAll('.female-section');
+            
+            maleSections.forEach(section => {
+                section.style.display = isMale ? 'block' : 'none';
+            });
+            
+            femaleSections.forEach(section => {
+                section.style.display = isFemale ? 'block' : 'none';
+            });
+            
+            // Mostrar/ocultar campos específicos de género en anamnesis
+            const maleFields = document.querySelectorAll('.male-only');
+            const femaleFields = document.querySelectorAll('.female-only');
+            
+            maleFields.forEach(field => {
+                field.style.display = isMale ? 'flex' : 'none';
+                if (!isMale) field.querySelector('input').checked = false;
+            });
+            
+            femaleFields.forEach(field => {
+                field.style.display = isFemale ? 'flex' : 'none';
+                if (!isFemale) field.querySelector('input').checked = false;
+            });
+            
+            generateConclusion();
+        }
+        
+        function handleNoComplaints() {
+            const noComplaintsCheckbox = document.getElementById('sin-quejas-uro');
+            const otherCheckboxes = document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-uro)');
+            
+            otherCheckboxes.forEach(checkbox => {
+                checkbox.disabled = noComplaintsCheckbox.checked;
+                if (noComplaintsCheckbox.checked) checkbox.checked = false;
+            });
+            generateConclusion();
+        }
+        
+        function handleMutuallyExclusive(positiveId, negativeId, checkbox) {
+            if (checkbox.checked) {
+                const oppositeId = checkbox.id === positiveId ? negativeId : positiveId;
+                const oppositeCheckbox = document.getElementById(oppositeId);
+                if (oppositeCheckbox) oppositeCheckbox.checked = false;
+            }
+            generateConclusion();
+        }
+
+        function updateDolorValue(type, value) {
+            document.getElementById(`dolor-${type}-value`).textContent = value;
+            generateConclusion();
+        }
+
+        function evaluateUrinarySymptoms() {
+            const frecuenciaDiurna = parseFloat(document.getElementById('frecuencia-diurna').value);
+            const nicturia = parseFloat(document.getElementById('nicturia-frecuencia').value);
+            
+            // Evaluar normalidad basada en valores de referencia
+            let interpretation = '';
+            if (frecuenciaDiurna > 8) interpretation += 'Polaquiuria ';
+            if (nicturia > 2) interpretation += 'Nicturia significativa ';
+            
+            generateConclusion();
+        }
+
+        function evaluateProstate() {
+            const size = document.getElementById('prostata-tamaño').value;
+            const interpretEl = document.getElementById('prostata-interpretation');
+            
+            switch(size) {
+                case 'normal':
+                    interpretEl.textContent = 'Próstata de tamaño normal';
+                    interpretEl.style.color = '#27ae60';
+                    break;
+                case 'aumentada-leve':
+                    interpretEl.textContent = 'Hiperplasia prostática leve';
+                    interpretEl.style.color = '#f39c12';
+                    break;
+                case 'aumentada-moderada':
+                    interpretEl.textContent = 'Hiperplasia prostática moderada';
+                    interpretEl.style.color = '#e67e22';
+                    break;
+                case 'aumentada-severa':
+                    interpretEl.textContent = 'Hiperplasia prostática severa';
+                    interpretEl.style.color = '#e74c3c';
+                    break;
+                default:
+                    interpretEl.textContent = '--';
+                    break;
+            }
+            generateConclusion();
+        }
+
+        function calculateIPSS() {
+            const questions = ['vaciado', 'frecuencia', 'intermitencia', 'urgencia', 'chorro', 'esfuerzo', 'nicturia'];
+            let total = 0;
+            let answered = 0;
+            
+            questions.forEach(q => {
+                const value = parseFloat(document.getElementById(`ipss-${q}`).value);
+                if (!isNaN(value)) {
+                    total += value;
+                    answered++;
+                }
+            });
+            
+            document.getElementById('ipss-score').textContent = answered === questions.length ? total : '--';
+            
+            let interpretation = '';
+            if (answered === questions.length) {
+                if (total <= 7) {
+                    interpretation = 'Síntomas leves';
+                } else if (total <= 19) {
+                    interpretation = 'Síntomas moderados';
+                } else {
+                    interpretation = 'Síntomas severos';
+                }
+            }
+            
+            document.getElementById('ipss-interpretation').textContent = interpretation;
+            
+            // Calidad de vida
+            const qol = document.getElementById('ipss-qol').value;
+            if (qol !== '') {
+                let qolText = '';
+                const qolNum = parseInt(qol);
+                if (qolNum <= 1) qolText = 'Satisfecho';
+                else if (qolNum <= 3) qolText = 'Mayormente satisfecho';
+                else if (qolNum <= 5) qolText = 'Insatisfecho';
+                else qolText = 'Terrible';
+                
+                document.getElementById('ipss-qol-score').textContent = qolText;
+            }
+            
+            generateConclusion();
+        }
+
+        function calculateICIQ() {
+            const frecuencia = parseFloat(document.getElementById('iciq-frecuencia').value) || 0;
+            const cantidad = parseFloat(document.getElementById('iciq-cantidad').value) || 0;
+            const interferencia = parseFloat(document.getElementById('iciq-interferencia').value) || 0;
+            
+            const total = frecuencia + cantidad + interferencia;
+            document.getElementById('iciq-score').textContent = total;
+            
+            let interpretation = '';
+            if (total === 0) {
+                interpretation = 'Sin incontinencia';
+            } else if (total <= 5) {
+                interpretation = 'Incontinencia leve';
+            } else if (total <= 12) {
+                interpretation = 'Incontinencia moderada';
+            } else if (total <= 18) {
+                interpretation = 'Incontinencia severa';
+            } else {
+                interpretation = 'Incontinencia muy severa';
+            }
+            
+            document.getElementById('iciq-interpretation').textContent = interpretation;
+            generateConclusion();
+        }
+
+        function calculateIIEF() {
+            const questions = ['confianza', 'firmeza', 'mantenimiento', 'dificultad', 'satisfaccion'];
+            let total = 0;
+            let answered = 0;
+            
+            questions.forEach(q => {
+                const value = parseFloat(document.getElementById(`iief-${q}`).value);
+                if (!isNaN(value)) {
+                    total += value;
+                    answered++;
+                }
+            });
+            
+            document.getElementById('iief-score').textContent = answered === questions.length ? total : '--';
+            
+            let interpretation = '';
+            if (answered === questions.length) {
+                if (total >= 22) {
+                    interpretation = 'Sin disfunción eréctil';
+                } else if (total >= 17) {
+                    interpretation = 'Disfunción eréctil leve';
+                } else if (total >= 12) {
+                    interpretation = 'Disfunción eréctil leve-moderada';
+                } else if (total >= 8) {
+                    interpretation = 'Disfunción eréctil moderada';
+                } else {
+                    interpretation = 'Disfunción eréctil severa';
+                }
+            }
+            
+            document.getElementById('iief-interpretation').textContent = interpretation;
+            generateConclusion();
+        }
+
+        function generateConclusion() {
+            const conclusionEl = document.getElementById('conclusion-text');
+            let conclusion = 'EXAMEN UROLÓGICO:\n\n';
+
+            // Obtener género
+            const isMale = document.getElementById('gender-male').checked;
+            const isFemale = document.getElementById('gender-female').checked;
+            
+            if (isMale || isFemale) {
+                conclusion += `GÉNERO: ${isMale ? 'Masculino' : 'Femenino'}\n\n`;
+            }
+
+            // Obtener quejas principales
+            const complaints = [];
+            if (document.getElementById('sin-quejas-uro').checked) {
+                complaints.push('Sin quejas urológicas');
+            } else {
+                document.querySelectorAll('#anamnesis input[type="checkbox"]:checked:not(#sin-quejas-uro)').forEach(cb => {
+                    const label = document.querySelector(`label[for="${cb.id}"]`);
+                    if (label && cb.style.display !== 'none') {
+                        complaints.push(label.textContent.toLowerCase());
+                    }
+                });
+            }
+            
+            if (complaints.length > 0) {
+                conclusion += 'QUEJAS PRINCIPALES:\n';
+                complaints.forEach(complaint => conclusion += `• ${complaint}\n`);
+                conclusion += '\n';
+            }
+
+            // Intensidad del dolor
+            const dolorGeneral = document.getElementById('dolor-general-intensidad').value;
+            const dolorOrinar = document.getElementById('dolor-orinar-intensidad').value;
+            const dolorLumbar = document.getElementById('dolor-lumbar-intensidad').value;
+            
+            if (dolorGeneral > 0 || dolorOrinar > 0 || dolorLumbar > 0) {
+                conclusion += 'INTENSIDAD DEL DOLOR:\n';
+                if (dolorGeneral > 0) conclusion += `• Dolor general: ${dolorGeneral}/10\n`;
+                if (dolorOrinar > 0) conclusion += `• Dolor al orinar: ${dolorOrinar}/10\n`;
+                if (dolorLumbar > 0) conclusion += `• Dolor lumbar: ${dolorLumbar}/10\n`;
+                conclusion += '\n';
+            }
+
+            // Síntomas miccionales
+            const frecuenciaDiurna = document.getElementById('frecuencia-diurna').value;
+            const nicturiaFrec = document.getElementById('nicturia-frecuencia').value;
+            
+            if (frecuenciaDiurna || nicturiaFrec) {
+                conclusion += 'SÍNTOMAS MICCIONALES:\n';
+                if (frecuenciaDiurna) {
+                    const frecStatus = frecuenciaDiurna > 8 ? ' (aumentada)' : frecuenciaDiurna < 4 ? ' (disminuida)' : ' (normal)';
+                    conclusion += `• Frecuencia diurna: ${frecuenciaDiurna} veces/día${frecStatus}\n`;
+                }
+                if (nicturiaFrec) {
+                    const nictStatus = nicturiaFrec > 2 ? ' (aumentada)' : nicturiaFrec <= 1 ? ' (normal)' : ' (límite)';
+                    conclusion += `• Nicturia: ${nicturiaFrec} veces/noche${nictStatus}\n`;
+                }
+                conclusion += '\n';
+            }
+
+            // Examen físico general
+            const generalFindings = [];
+            document.querySelectorAll('#general-exam input[type="checkbox"]:checked').forEach(cb => {
+                if (!cb.id.includes('-neg') && !cb.id.includes('-normal')) {
+                    const label = document.querySelector(`label[for="${cb.id}"]`);
+                    if (label) generalFindings.push(label.textContent);
+                }
+            });
+
+            if (generalFindings.length > 0) {
+                conclusion += 'EXAMEN FÍSICO GENERAL:\n';
+                generalFindings.forEach(finding => conclusion += `• ${finding}\n`);
+                conclusion += '\n';
+            }
+
+            // Examen genital masculino
+            if (isMale) {
+                const maleFindings = [];
+                document.querySelectorAll('#male-genital-exam input[type="checkbox"]:checked').forEach(cb => {
+                    if (!cb.id.includes('-neg') && !cb.id.includes('-normal')) {
+                        const label = document.querySelector(`label[for="${cb.id}"]`);
+                        if (label) maleFindings.push(label.textContent);
+                    }
+                });
+
+                // Tamaños testiculares
+                const testDerTam = document.getElementById('testiculo-der-tamaño').value;
+                const testIzqTam = document.getElementById('testiculo-izq-tamaño').value;
+                
+                if (maleFindings.length > 0 || testDerTam || testIzqTam) {
+                    conclusion += 'EXAMEN GENITAL MASCULINO:\n';
+                    if (testDerTam) conclusion += `• Testículo derecho: ${testDerTam} cm\n`;
+                    if (testIzqTam) conclusion += `• Testículo izquierdo: ${testIzqTam} cm\n`;
+                    maleFindings.forEach(finding => conclusion += `• ${finding}\n`);
+                    conclusion += '\n';
+                }
+
+                // Examen prostático
+                const prostataInterpret = document.getElementById('prostata-interpretation').textContent;
+                if (prostataInterpret !== '--') {
+                    conclusion += 'EXAMEN PROSTÁTICO:\n';
+                    conclusion += `• ${prostataInterpret}\n`;
+                    
+                    // Características adicionales de la próstata
+                    const prostateFindings = [];
+                    document.querySelectorAll('#male-genital-exam .prostate-exam input[type="checkbox"]:checked').forEach(cb => {
+                        const label = document.querySelector(`label[for="${cb.id}"]`);
+                        if (label) prostateFindings.push(label.textContent);
+                    });
+                    prostateFindings.forEach(finding => conclusion += `• ${finding}\n`);
+                    conclusion += '\n';
+                }
+            }
+
+            // Examen genital femenino
+            if (isFemale) {
+                const femaleFindings = [];
+                document.querySelectorAll('#female-genital-exam input[type="checkbox"]:checked').forEach(cb => {
+                    if (!cb.id.includes('-neg') && !cb.id.includes('-normal')) {
+                        const label = document.querySelector(`label[for="${cb.id}"]`);
+                        if (label) femaleFindings.push(label.textContent);
+                    }
+                });
+
+                const qtipAngle = document.getElementById('qtip-angle').value;
+
+                if (femaleFindings.length > 0 || qtipAngle) {
+                    conclusion += 'EXAMEN GENITAL FEMENINO:\n';
+                    if (qtipAngle) {
+                        const qtipStatus = parseFloat(qtipAngle) > 30 ? ' (aumentada)' : ' (normal)';
+                        conclusion += `• Q-tip test: ${qtipAngle}°${qtipStatus}\n`;
+                    }
+                    femaleFindings.forEach(finding => conclusion += `• ${finding}\n`);
+                    conclusion += '\n';
+                }
+            }
+
+            // Escalas de evaluación
+            const ipssScore = document.getElementById('ipss-score').textContent;
+            const ipssInterpret = document.getElementById('ipss-interpretation').textContent;
+            const iciqScore = document.getElementById('iciq-score').textContent;
+            const iciqInterpret = document.getElementById('iciq-interpretation').textContent;
+            
+            if (isMale) {
+                const iiefScore = document.getElementById('iief-score').textContent;
+                const iiefInterpret = document.getElementById('iief-interpretation').textContent;
+                
+                if (ipssScore !== '0' && ipssScore !== '--' || iiefScore !== '0' && iiefScore !== '--') {
+                    conclusion += 'ESCALAS DE EVALUACIÓN:\n';
+                    if (ipssScore !== '0' && ipssScore !== '--') {
+                        conclusion += `• IPSS: ${ipssScore}/35 - ${ipssInterpret}\n`;
+                    }
+                    if (iiefScore !== '0' && iiefScore !== '--') {
+                        conclusion += `• IIEF-5: ${iiefScore}/25 - ${iiefInterpret}\n`;
+                    }
+                    conclusion += '\n';
+                }
+            }
+
+            if (iciqScore !== '0') {
+                if (!conclusion.includes('ESCALAS DE EVALUACIÓN:')) {
+                    conclusion += 'ESCALAS DE EVALUACIÓN:\n';
+                }
+                conclusion += `• ICIQ-SF: ${iciqScore}/21 - ${iciqInterpret}\n\n`;
+            }
+
+            if (conclusion === 'EXAMEN UROLÓGICO:\n\n') {
+                conclusion = 'Seleccione los parámetros del examen para generar la conclusión urológica...';
+            } else {
+                conclusion += 'IMPRESIÓN DIAGNÓSTICA:\n';
+                conclusion += '[Pendiente de evaluación clínica completa y estudios complementarios]\n\n';
+                conclusion += 'PLAN:\n';
+                conclusion += '[A determinar según hallazgos clínicos, estudios de imagen y laboratorio]';
+            }
+
+            conclusionEl.textContent = conclusion;
+        }
+
+        function printConclusion() {
+            const conclusion = document.getElementById('conclusion-text').textContent;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Conclusión Examen Urológico</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        pre { white-space: pre-wrap; font-family: 'Courier New', monospace; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Examen Urológico - Conclusión</h1>
+                    <pre>${conclusion}</pre>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function clearForm() {
+            if (confirm('¿Está seguro de que desea limpiar todos los datos del formulario?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[type="radio"]').forEach(rb => rb.checked = false);
+                document.querySelectorAll('input[type="number"]').forEach(nb => nb.value = '');
+                document.querySelectorAll('input[type="text"]').forEach(tb => tb.value = '');
+                document.querySelectorAll('input[type="range"]').forEach(rb => rb.value = 0);
+                document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+                
+                // Resetear valores específicos
+                document.getElementById('dolor-general-value').textContent = '0';
+                document.getElementById('dolor-orinar-value').textContent = '0';
+                document.getElementById('dolor-lumbar-value').textContent = '0';
+                document.getElementById('prostata-interpretation').textContent = '--';
+                document.getElementById('ipss-score').textContent = '0';
+                document.getElementById('ipss-interpretation').textContent = '--';
+                document.getElementById('ipss-qol-score').textContent = '--';
+                document.getElementById('iciq-score').textContent = '0';
+                document.getElementById('iciq-interpretation').textContent = '--';
+                document.getElementById('iief-score').textContent = '0';
+                document.getElementById('iief-interpretation').textContent = '--';
+                
+                // Ocultar secciones específicas de género
+                document.querySelectorAll('.male-section, .female-section, .male-scale').forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                document.querySelectorAll('.male-only, .female-only').forEach(field => {
+                    field.style.display = 'none';
+                });
+                
+                // Habilitar checkboxes que podrían estar deshabilitados
+                document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-uro)').forEach(cb => cb.disabled = false);
+                
+                generateConclusion();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                el.addEventListener('change', generateConclusion);
+                el.addEventListener('input', generateConclusion);
+            });
+             
+            document.querySelector('.main-container').addEventListener('change', (event) => {
+                const sectionContent = event.target.closest('.section-content.expanded');
+                if (sectionContent) {
+                    updateSectionHeight(sectionContent);
+                }
+            });
+             
+            // Expandir la primera sección por defecto
+            toggleSection(document.querySelector('.section-header'));
+            
+            // Inicializar evaluaciones
+            evaluateUrinarySymptoms();
+            evaluateProstate();
+            calculateIPSS();
+            calculateICIQ();
+            calculateIIEF();
+            generateConclusion();
+        });
+    </script>
+</body>
+</html>

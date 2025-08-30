@@ -1,0 +1,2944 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Endocrinológico - Algoritmo de Evaluación</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ========== ESTILOS ORIGINALES MANTENIDOS ========== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.4;
+            transition: all 0.3s ease;
+        }
+
+        /* ========== NUEVO: DASHBOARD SUPERIOR ========== */
+        .dashboard {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 20px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .dashboard-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 8px 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-1px);
+        }
+
+        .dashboard-label {
+            font-size: 11px;
+            opacity: 0.9;
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .dashboard-value {
+            font-size: 14px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .dashboard-alert {
+            color: #ff6b6b !important;
+            animation: pulse 2s infinite;
+        }
+
+        .dashboard-warning {
+            color: #ffa726 !important;
+        }
+
+        .dashboard-normal {
+            color: #4caf50 !important;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        /* ========== NUEVO: CONTROLES SUPERIORES ========== */
+        .top-controls {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            z-index: 999;
+            display: flex;
+            gap: 10px;
+        }
+
+        .control-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .control-btn:hover {
+            background: #5a6fd8;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .control-btn.secondary {
+            background: #6c757d;
+        }
+
+        .control-btn.secondary:hover {
+            background: #5a6268;
+        }
+
+        /* ========== NUEVO: MODO OSCURO ========== */
+        .dark-mode {
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+        }
+
+        .dark-mode .dashboard {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+        }
+
+        .dark-mode .main-container {
+            background-color: #2d2d2d;
+        }
+
+        .dark-mode .section {
+            background-color: #3d3d3d;
+            border-color: #555;
+        }
+
+        .dark-mode .exam-container {
+            background-color: #4d4d4d;
+            border-color: #666;
+        }
+
+        .dark-mode input, .dark-mode select, .dark-mode textarea {
+            background-color: #555;
+            color: #e0e0e0;
+            border-color: #777;
+        }
+
+        .dark-mode .section-header {
+            background-color: #555;
+            color: #e0e0e0;
+        }
+
+        /* ========== NUEVO: VISTA DIVIDIDA ========== */
+        .split-view-container {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+            max-width: none;
+            width: 100%;
+        }
+
+        .sticky-conclusion {
+            position: fixed;
+            right: 20px;
+            top: 120px;
+            bottom: 20px;
+            width: 380px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            z-index: 998;
+            display: none;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .dark-mode .sticky-conclusion {
+            background: #3d3d3d;
+            color: #e0e0e0;
+        }
+
+        .sticky-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 15px 15px 0 0;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sticky-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+
+        .sticky-actions {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+
+        .dark-mode .sticky-actions {
+            border-top-color: #555;
+        }
+
+        .copy-notification {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #4caf50;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 25px;
+            font-weight: 600;
+            z-index: 10000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .copy-notification.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ========== ESTILOS ORIGINALES MANTENIDOS ========== */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 140px 20px 20px 20px; /* Ajustado para el dashboard */
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .content-wrapper {
+            transition: all 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .section {
+            background-color: #ffffff;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .section.active {
+            border-color: #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4b93 100%);
+        }
+
+        .section-header.expanded {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4b93 100%);
+        }
+
+        .arrow {
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
+        }
+
+        .section-header.expanded .arrow {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: #f8f9fa;
+        }
+
+        .section-content.expanded {
+            max-height: 2000px;
+        }
+
+        .exam-container {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            margin: 15px;
+            overflow: hidden;
+        }
+
+        .exam-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 12px 15px;
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .exam-section {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .exam-section:last-child {
+            border-bottom: none;
+        }
+
+        .exam-section h4 {
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 5px;
+            display: inline-block;
+        }
+
+        .exam-section h6 {
+            color: #666;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 5px;
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #28a745;
+        }
+
+        .checkbox-item label {
+            font-size: 0.85rem;
+            color: #495057;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .measurement {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .measurement label {
+            font-weight: 600;
+            color: #495057;
+            min-width: 120px;
+            font-size: 0.85rem;
+        }
+
+        .input-field {
+            border: 2px solid #ced4da;
+            border-radius: 6px;
+            padding: 8px 12px;
+            width: 80px;
+            font-size: 0.9rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .score-value {
+            font-weight: 700;
+            color: #28a745;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .metabolic-color { background-color: #28a745; }
+        .thyroid-color { background-color: #17a2b8; }
+        .glucose-color { background-color: #ffc107; }
+        .reproductive-color { background-color: #e83e8c; }
+
+        .anthropometric {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .anthropometric h4 {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+
+        .thyroid-assessment {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .thyroid-palpation {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .thyroid-lobe {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .nodule-assessment {
+            margin-top: 10px;
+        }
+
+        .nodule-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 8px;
+            font-size: 0.8rem;
+        }
+
+        .nodule-size {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .nodule-size input[type="number"] {
+            width: 50px;
+        }
+
+        .bilateral-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .side-container {
+            background-color: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .side-header {
+            background-color: #e9ecef;
+            color: #495057;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
+        .glucose-assessment {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .test-results {
+            margin-top: 15px;
+        }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: #f8f9fa;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .test-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .test-checkbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+        }
+
+        .positive {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .negative {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .score-calculation {
+            background-color: #e7f3ff;
+            border: 1px solid #b3d7ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .severity-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .severity-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background-color: white;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+        }
+
+        .severity-item input[type="radio"] {
+            accent-color: #007bff;
+        }
+
+        .severity-item label {
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .reproductive-assessment {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .conclusion {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .conclusion h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .conclusion-text {
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            font-size: 0.9rem;
+            min-height: 200px;
+            backdrop-filter: blur(10px);
+        }
+
+        .control-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #1e7e34 0%, #17a085 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(135deg, #5a6268 0%, #343a40 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 0;
+                border-radius: 0;
+                padding: 140px 10px 20px 10px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 8px;
+            }
+
+            .dashboard {
+                padding: 8px 15px;
+            }
+
+            .top-controls {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin: 10px 0;
+                justify-content: center;
+            }
+
+            .thyroid-palpation,
+            .bilateral-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .control-buttons {
+                justify-content: center;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+
+            .sticky-conclusion {
+                display: none !important;
+            }
+
+            .split-view-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Utilidades */
+        .text-center { text-align: center; }
+        .mt-2 { margin-top: 10px; }
+        .mb-2 { margin-bottom: 10px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <!-- ========== NUEVO: DASHBOARD SUPERIOR ========== -->
+    <div class="dashboard">
+        <div class="dashboard-grid">
+            <div class="dashboard-item">
+                <div class="dashboard-label">IMC</div>
+                <div class="dashboard-value" id="dashboard-imc">
+                    <i class="fas fa-weight"></i>
+                    <span>-- kg/m²</span>
+                </div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-label">Presión Arterial</div>
+                <div class="dashboard-value" id="dashboard-pa">
+                    <i class="fas fa-heartbeat"></i>
+                    <span>-- mmHg</span>
+                </div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-label">Glucemia</div>
+                <div class="dashboard-value" id="dashboard-glucemia">
+                    <i class="fas fa-tint"></i>
+                    <span>-- mg/dL</span>
+                </div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-label">FINDRISK</div>
+                <div class="dashboard-value" id="dashboard-findrisk">
+                    <i class="fas fa-calculator"></i>
+                    <span>0/25 pts</span>
+                </div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-label">Bocio</div>
+                <div class="dashboard-value" id="dashboard-bocio">
+                    <i class="fas fa-user-md"></i>
+                    <span>No evaluado</span>
+                </div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-label">Alertas</div>
+                <div class="dashboard-value" id="dashboard-alerts">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span id="alert-count">0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== NUEVO: CONTROLES SUPERIORES ========== -->
+    <div class="top-controls">
+        <button class="control-btn" onclick="toggleSplitView()">
+            <i class="fas fa-columns"></i> Vista Dividida
+        </button>
+        <button class="control-btn secondary" onclick="toggleDarkMode()">
+            <i class="fas fa-moon"></i> Modo Oscuro
+        </button>
+    </div>
+
+    <!-- ========== NUEVO: NOTIFICACIÓN DE COPIA ========== -->
+    <div class="copy-notification" id="copyNotification">
+        <i class="fas fa-check"></i> ¡Texto copiado al portapapeles!
+    </div>
+
+    <!-- ========== NUEVO: BARRA LATERAL STICKY ========== -->
+    <div class="sticky-conclusion" id="stickyConclusion">
+        <div class="sticky-header">
+            <span><i class="fas fa-file-medical"></i> Informe Endocrinológico</span>
+            <button class="control-btn" onclick="copyToClipboard()" style="padding: 5px 10px; font-size: 11px;">
+                <i class="fas fa-copy"></i> Copiar
+            </button>
+        </div>
+        <div class="sticky-content" id="conclusion-text">
+            Seleccione los parámetros del examen para generar la conclusión endocrinológica...
+        </div>
+        <div class="sticky-actions">
+            <button class="btn btn-primary" onclick="copyToClipboard()" style="flex: 1; padding: 8px;">
+                <i class="fas fa-copy"></i> Copiar Texto
+            </button>
+        </div>
+    </div>
+
+    <!-- ========== CONTENIDO PRINCIPAL (ORIGINAL MANTENIDO) ========== -->
+    <div id="contentWrapper" class="content-wrapper">
+        <div class="main-container">
+            <h1>Examen Endocrinológico - Algoritmo de Evaluación</h1>
+            
+            <!-- Anamnesis y Quejas -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>Anamnesis y Quejas Principales</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="anamnesis">
+                    <div class="exam-container">
+                        <div class="exam-header">Quejas Endocrinológicas Principales</div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="fatiga-astenia"><label for="fatiga-astenia">Fatiga/Astenia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cambios-peso"><label for="cambios-peso">Cambios de peso</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="polidipsia"><label for="polidipsia">Polidipsia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="poliuria"><label for="poliuria">Poliuria</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="polifagia"><label for="polifagia">Polifagia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="intolerancia-calor"><label for="intolerancia-calor">Intolerancia al calor</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="intolerancia-frio"><label for="intolerancia-frio">Intolerancia al frío</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="palpitaciones"><label for="palpitaciones">Palpitaciones</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="nerviosismo"><label for="nerviosismo">Nerviosismo/Ansiedad</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="irregularidades-menstruales"><label for="irregularidades-menstruales">Irregularidades menstruales</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="disfuncion-erectil"><label for="disfuncion-erectil">Disfunción eréctil</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="galactorrea"><label for="galactorrea">Galactorrea</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hirsutismo"><label for="hirsutismo">Hirsutismo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="alopecia"><label for="alopecia">Alopecia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cambios-voz"><label for="cambios-voz">Cambios en la voz</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-oseo"><label for="dolor-oseo">Dolor óseo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fracturas-fragalidad"><label for="fracturas-fragalidad">Fracturas de fragilidad</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cefalea"><label for="cefalea">Cefalea</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="alteraciones-vision"><label for="alteraciones-vision">Alteraciones visuales</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="sin-quejas-endo" onchange="handleNoComplaints()"><label for="sin-quejas-endo">Sin quejas</label></div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Caracterización de Síntomas</div>
+                        <div class="exam-section">
+                            <h4>Cambios de Peso</h4>
+                            <div class="measurement">
+                                <label>Pérdida de peso (kg):</label>
+                                <input type="number" class="input-field" id="perdida-peso" min="0" max="50" step="0.5" onchange="evaluateWeightChange()">
+                                <span>kg en</span>
+                                <input type="number" class="input-field" id="tiempo-perdida" min="1" max="24" style="width: 50px;">
+                                <span>meses</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Ganancia de peso (kg):</label>
+                                <input type="number" class="input-field" id="ganancia-peso" min="0" max="50" step="0.5" onchange="evaluateWeightChange()">
+                                <span>kg en</span>
+                                <input type="number" class="input-field" id="tiempo-ganancia" min="1" max="24" style="width: 50px;">
+                                <span>meses</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Interpretación cambio peso:</span>
+                                <span class="score-value" id="interpretacion-peso">--</span>
+                            </div>
+                        </div>
+
+                        <div class="exam-section">
+                            <h4>Síntomas Poliúricos</h4>
+                            <div class="measurement">
+                                <label>Volumen urinario (L/día):</label>
+                                <input type="number" class="input-field" id="volumen-urinario" min="0" max="10" step="0.5" onchange="evaluatePolyuria()">
+                                <span>L/día</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Frecuencia urinaria/día:</label>
+                                <input type="number" class="input-field" id="frecuencia-urinaria" min="0" max="30" onchange="evaluatePolyuria()">
+                                <span>veces</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Nicturia (veces/noche):</label>
+                                <input type="number" class="input-field" id="nicturia" min="0" max="10" onchange="evaluatePolyuria()">
+                                <span>veces</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Interpretación poliuria:</span>
+                                <span class="score-value" id="interpretacion-poliuria">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Antecedentes Endocrinológicos</div>
+                        <div class="exam-section">
+                            <h4>Historia Personal</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="diabetes-previa"><label for="diabetes-previa">Diabetes mellitus</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="hipertension-arterial"><label for="hipertension-arterial">Hipertensión arterial</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="dislipidemia"><label for="dislipidemia">Dislipidemia</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="enfermedad-tiroidea"><label for="enfermedad-tiroidea">Enfermedad tiroidea</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="osteoporosis"><label for="osteoporosis">Osteoporosis</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="sindrome-ovarico-poliquistico"><label for="sindrome-ovarico-poliquistico">Síndrome ovario poliquístico</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="infertilidad"><label for="infertilidad">Infertilidad</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="radioterapia-cuello"><label for="radioterapia-cuello">Radioterapia cuello/cabeza</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Historia Familiar</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="familia-diabetes"><label for="familia-diabetes">Diabetes mellitus</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="familia-tiroides"><label for="familia-tiroides">Enfermedad tiroidea</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="familia-osteoporosis"><label for="familia-osteoporosis">Osteoporosis</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="familia-cancer-endocrino"><label for="familia-cancer-endocrino">Cáncer endocrino</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="familia-sindrome-metabolico"><label for="familia-sindrome-metabolico">Síndrome metabólico</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Medicamentos</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="medicamento-levotiroxina"><label for="medicamento-levotiroxina">Levotiroxina</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="medicamento-metformina"><label for="medicamento-metformina">Metformina</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="medicamento-insulina"><label for="medicamento-insulina">Insulina</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="medicamento-corticoides"><label for="medicamento-corticoides">Corticoides</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="medicamento-anticonceptivos"><label for="medicamento-anticonceptivos">Anticonceptivos orales</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="medicamento-estatinas"><label for="medicamento-estatinas">Estatinas</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Examen Físico General -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>Examen Físico General y Antropometría</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="physical-exam">
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color metabolic-color"></div>
+                            <span>Evaluación Metabólica</span>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Signos Vitales y Antropometría</div>
+                        <div class="anthropometric">
+                            <h4>Medidas Antropométricas</h4>
+                            <div class="measurement">
+                                <label>Peso actual (kg):</label>
+                                <input type="number" class="input-field" id="peso-actual" min="30" max="200" step="0.1" onchange="calculateBMI()">
+                                <span>kg</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Talla (cm):</label>
+                                <input type="number" class="input-field" id="talla" min="120" max="220" onchange="calculateBMI()">
+                                <span>cm</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Circunferencia cintura:</label>
+                                <input type="number" class="input-field" id="circunferencia-cintura" min="50" max="200" onchange="evaluateWaistCircumference()">
+                                <span>cm</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Circunferencia cadera:</label>
+                                <input type="number" class="input-field" id="circunferencia-cadera" min="50" max="200" onchange="calculateWHR()">
+                                <span>cm</span>
+                            </div>
+                            <div class="score-item">
+                                <span>IMC:</span>
+                                <span class="score-value" id="imc-value">--</span>
+                                <span>kg/m²</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Clasificación IMC:</span>
+                                <span class="score-value" id="imc-classification">--</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Índice cintura/cadera:</span>
+                                <span class="score-value" id="whr-value">--</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Riesgo por cintura:</span>
+                                <span class="score-value" id="waist-risk">--</span>
+                            </div>
+                        </div>
+
+                        <div class="exam-section">
+                            <h4>Signos Vitales</h4>
+                            <div class="measurement">
+                                <label>Presión arterial sistólica:</label>
+                                <input type="number" class="input-field" id="pas" min="70" max="250" onchange="evaluateBloodPressure()">
+                                <span>mmHg</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Presión arterial diastólica:</label>
+                                <input type="number" class="input-field" id="pad" min="40" max="150" onchange="evaluateBloodPressure()">
+                                <span>mmHg</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Frecuencia cardíaca:</label>
+                                <input type="number" class="input-field" id="frecuencia-cardiaca" min="40" max="200" onchange="evaluateHeartRate()">
+                                <span>lpm</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Temperatura:</label>
+                                <input type="number" class="input-field" id="temperatura" min="35" max="42" step="0.1">
+                                <span>°C</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Clasificación PA:</span>
+                                <span class="score-value" id="bp-classification">--</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Clasificación FC:</span>
+                                <span class="score-value" id="hr-classification">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Inspección General</div>
+                        <div class="exam-section">
+                            <h4>Habitus y Distribución Corporal</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="habitus-normal"><label for="habitus-normal">Habitus normal</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="obesidad-central"><label for="obesidad-central">Obesidad central</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="obesidad-periferica"><label for="obesidad-periferica">Obesidad periférica</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="lipodistrofia"><label for="lipodistrofia">Lipodistrofia</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="giba-buffalo"><label for="giba-buffalo">Giba de búfalo</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cara-luna"><label for="cara-luna">Cara de luna llena</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="estrias-purpuras"><label for="estrias-purpuras">Estrías púrpuras</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="acantosis-nigricans"><label for="acantosis-nigricans">Acantosis nigricans</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Características Secundarias Sexuales</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="desarrollo-normal"><label for="desarrollo-normal">Desarrollo sexual normal</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="hirsutismo-facial"><label for="hirsutismo-facial">Hirsutismo facial</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="hirsutismo-corporal"><label for="hirsutismo-corporal">Hirsutismo corporal</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="ginecomastia"><label for="ginecomastia">Ginecomastia</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="galactorrea-fisica"><label for="galactorrea-fisica">Galactorrea</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="alopecia-androgenica"><label for="alopecia-androgenica">Alopecia androgénica</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="virilizacion"><label for="virilizacion">Signos de virilización</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Examen Tiroideo -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>Examen Tiroideo</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="thyroid-exam">
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color thyroid-color"></div>
+                            <span>Evaluación Tiroidea</span>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Inspección del Cuello</div>
+                        <div class="thyroid-assessment">
+                            <h4>Características Generales</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="cuello-normal"><label for="cuello-normal">Cuello de aspecto normal</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="aumento-volumen-tiroideo"><label for="aumento-volumen-tiroideo">Aumento de volumen tiroideo</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="asimetria-tiroidea"><label for="asimetria-tiroidea">Asimetría tiroidea</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="masa-cervical"><label for="masa-cervical">Masa cervical</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="adenopatias-cervicales"><label for="adenopatias-cervicales">Adenopatías cervicales</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cicatrices-cuello"><label for="cicatrices-cuello">Cicatrices en cuello</label></div>
+                            </div>
+                            <div class="measurement">
+                                <label>Grado de bocio (OMS):</label>
+                                <select id="grado-bocio" onchange="evaluateGoiter()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Grado 0 (No palpable/visible)</option>
+                                    <option value="1a">Grado 1a (Palpable, no visible)</option>
+                                    <option value="1b">Grado 1b (Palpable, visible cuello extendido)</option>
+                                    <option value="2">Grado 2 (Visible cuello posición normal)</option>
+                                    <option value="3">Grado 3 (Visible a distancia)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Palpación Tiroidea</div>
+                        <div class="thyroid-palpation">
+                            <div class="thyroid-lobe">
+                                <h6>Lóbulo Derecho</h6>
+                                <div class="exam-section">
+                                    <h4>Características</h4>
+                                    <div class="checkbox-grid">
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-der-normal"><label for="lobulo-der-normal">Normal</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-der-aumentado"><label for="lobulo-der-aumentado">Aumentado</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-der-nodular"><label for="lobulo-der-nodular">Nodular</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-der-duro"><label for="lobulo-der-duro">Consistencia dura</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-der-doloroso"><label for="lobulo-der-doloroso">Doloroso</label></div>
+                                    </div>
+                                </div>
+                                <div class="nodule-assessment">
+                                    <h6>Nódulos</h6>
+                                    <div class="nodule-item">
+                                        <span>Nódulo 1:</span>
+                                        <div class="nodule-size">
+                                            <input type="number" id="nodulo-der-1-size" min="0" max="10" step="0.1">
+                                            <span>cm</span>
+                                            <input type="checkbox" id="nodulo-der-1-mobile">
+                                            <label for="nodulo-der-1-mobile" style="font-size: 9px;">Móvil</label>
+                                        </div>
+                                    </div>
+                                    <div class="nodule-item">
+                                        <span>Nódulo 2:</span>
+                                        <div class="nodule-size">
+                                            <input type="number" id="nodulo-der-2-size" min="0" max="10" step="0.1">
+                                            <span>cm</span>
+                                            <input type="checkbox" id="nodulo-der-2-mobile">
+                                            <label for="nodulo-der-2-mobile" style="font-size: 9px;">Móvil</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="thyroid-lobe">
+                                <h6>Lóbulo Izquierdo</h6>
+                                <div class="exam-section">
+                                    <h4>Características</h4>
+                                    <div class="checkbox-grid">
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-izq-normal"><label for="lobulo-izq-normal">Normal</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-izq-aumentado"><label for="lobulo-izq-aumentado">Aumentado</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-izq-nodular"><label for="lobulo-izq-nodular">Nodular</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-izq-duro"><label for="lobulo-izq-duro">Consistencia dura</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="lobulo-izq-doloroso"><label for="lobulo-izq-doloroso">Doloroso</label></div>
+                                    </div>
+                                </div>
+                                <div class="nodule-assessment">
+                                    <h6>Nódulos</h6>
+                                    <div class="nodule-item">
+                                        <span>Nódulo 1:</span>
+                                        <div class="nodule-size">
+                                            <input type="number" id="nodulo-izq-1-size" min="0" max="10" step="0.1">
+                                            <span>cm</span>
+                                            <input type="checkbox" id="nodulo-izq-1-mobile">
+                                            <label for="nodulo-izq-1-mobile" style="font-size: 9px;">Móvil</label>
+                                        </div>
+                                    </div>
+                                    <div class="nodule-item">
+                                        <span>Nódulo 2:</span>
+                                        <div class="nodule-size">
+                                            <input type="number" id="nodulo-izq-2-size" min="0" max="10" step="0.1">
+                                            <span>cm</span>
+                                            <input type="checkbox" id="nodulo-izq-2-mobile">
+                                            <label for="nodulo-izq-2-mobile" style="font-size: 9px;">Móvil</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="exam-section">
+                            <h4>Istmo Tiroideo</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="istmo-normal"><label for="istmo-normal">Normal</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="istmo-aumentado"><label for="istmo-aumentado">Aumentado</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="istmo-nodular"><label for="istmo-nodular">Nodular</label></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Signos de Disfunción Tiroidea</div>
+                        <div class="bilateral-container">
+                            <div class="side-container">
+                                <div class="side-header">Signos de Hipertiroidismo</div>
+                                <div class="checkbox-grid">
+                                    <div class="checkbox-item"><input type="checkbox" id="temblor-fino"><label for="temblor-fino">Temblor fino</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="piel-caliente-humeda"><label for="piel-caliente-humeda">Piel caliente y húmeda</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="hiperreflexia"><label for="hiperreflexia">Hiperreflexia</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="exoftalmos"><label for="exoftalmos">Exoftalmos</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="retraccion-palpebral"><label for="retraccion-palpebral">Retracción palpebral</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="signo-graefe"><label for="signo-graefe">Signo de Graefe</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="mixedema-pretibial"><label for="mixedema-pretibial">Mixedema pretibial</label></div>
+                                </div>
+                            </div>
+                            
+                            <div class="side-container">
+                                <div class="side-header">Signos de Hipotiroidismo</div>
+                                <div class="checkbox-grid">
+                                    <div class="checkbox-item"><input type="checkbox" id="bradicinesia"><label for="bradicinesia">Bradicinesia</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="piel-seca-fria"><label for="piel-seca-fria">Piel seca y fría</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="hiporreflexia"><label for="hiporreflexia">Hiporreflexia</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="edema-facial"><label for="edema-facial">Edema facial</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="cabello-quebradizo"><label for="cabello-quebradizo">Cabello quebradizo</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="macroglosia"><label for="macroglosia">Macroglosia</label></div>
+                                    <div class="checkbox-item"><input type="checkbox" id="relajacion-aquiliana-retardada"><label for="relajacion-aquiliana-retardada">Relajación aquiliana retardada</label></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación Metabólica -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>Evaluación Metabólica y Diabetes</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="metabolic-evaluation">
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color glucose-color"></div>
+                            <span>Evaluación Glucémica</span>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Evaluación Glucémica</div>
+                        <div class="glucose-assessment">
+                            <h4>Valores de Glucemia</h4>
+                            <div class="measurement">
+                                <label>Glucemia en ayunas:</label>
+                                <input type="number" class="input-field" id="glucemia-ayunas" min="50" max="500" onchange="evaluateGlucose()">
+                                <span>mg/dL</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Glucemia postprandial (2h):</label>
+                                <input type="number" class="input-field" id="glucemia-postprandial" min="50" max="500" onchange="evaluateGlucose()">
+                                <span>mg/dL</span>
+                            </div>
+                            <div class="measurement">
+                                <label>HbA1c (%):</label>
+                                <input type="number" class="input-field" id="hba1c" min="3" max="20" step="0.1" onchange="evaluateHbA1c()">
+                                <span>%</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Clasificación glucemia ayunas:</span>
+                                <span class="score-value" id="clasificacion-glucemia">--</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Clasificación HbA1c:</span>
+                                <span class="score-value" id="clasificacion-hba1c">--</span>
+                            </div>
+                        </div>
+
+                        <div class="exam-section">
+                            <h4>Signos de Descompensación Diabética</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="deshidratacion"><label for="deshidratacion">Deshidratación</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="aliento-cetonico"><label for="aliento-cetonico">Aliento cetónico</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="respiracion-kussmaul"><label for="respiracion-kussmaul">Respiración de Kussmaul</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="alteracion-conciencia"><label for="alteracion-conciencia">Alteración de conciencia</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="nauseas-vomitos"><label for="nauseas-vomitos">Náuseas/vómitos</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="dolor-abdominal"><label for="dolor-abdominal">Dolor abdominal</label></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Complicaciones Diabéticas</div>
+                        <div class="exam-section">
+                            <h4>Examen de Pies</h4>
+                            <div class="bilateral-container">
+                                <div class="side-container">
+                                    <div class="side-header">Pie Derecho</div>
+                                    <div class="checkbox-grid">
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-der-normal"><label for="pie-der-normal">Aspecto normal</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-der-callos"><label for="pie-der-callos">Callos/callosidades</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-der-ulceras"><label for="pie-der-ulceras">Úlceras</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-der-deformidades"><label for="pie-der-deformidades">Deformidades</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-der-piel-seca"><label for="pie-der-piel-seca">Piel seca</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-der-micosis"><label for="pie-der-micosis">Micosis</label></div>
+                                    </div>
+                                    <div class="test-results">
+                                        <div class="test-item">
+                                            <label>Sensibilidad vibratoria</label>
+                                            <div class="test-controls">
+                                                <div class="test-checkbox"><input type="checkbox" id="vibracion-der-normal" onchange="handleMutuallyExclusive('vibracion-der-normal', 'vibracion-der-alterada', this)"><span class="negative">Normal</span></div>
+                                                <div class="test-checkbox"><input type="checkbox" id="vibracion-der-alterada" onchange="handleMutuallyExclusive('vibracion-der-normal', 'vibracion-der-alterada', this)"><span class="positive">Alterada</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="test-item">
+                                            <label>Monofilamento 10g</label>
+                                            <div class="test-controls">
+                                                <div class="test-checkbox"><input type="checkbox" id="monofilamento-der-normal" onchange="handleMutuallyExclusive('monofilamento-der-normal', 'monofilamento-der-alterado', this)"><span class="negative">Normal</span></div>
+                                                <div class="test-checkbox"><input type="checkbox" id="monofilamento-der-alterado" onchange="handleMutuallyExclusive('monofilamento-der-normal', 'monofilamento-der-alterado', this)"><span class="positive">Alterado</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="test-item">
+                                            <label>Pulsos pedios</label>
+                                            <div class="test-controls">
+                                                <div class="test-checkbox"><input type="checkbox" id="pulsos-der-presentes" onchange="handleMutuallyExclusive('pulsos-der-presentes', 'pulsos-der-ausentes', this)"><span class="negative">Presentes</span></div>
+                                                <div class="test-checkbox"><input type="checkbox" id="pulsos-der-ausentes" onchange="handleMutuallyExclusive('pulsos-der-presentes', 'pulsos-der-ausentes', this)"><span class="positive">Ausentes</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="side-container">
+                                    <div class="side-header">Pie Izquierdo</div>
+                                    <div class="checkbox-grid">
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-izq-normal"><label for="pie-izq-normal">Aspecto normal</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-izq-callos"><label for="pie-izq-callos">Callos/callosidades</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-izq-ulceras"><label for="pie-izq-ulceras">Úlceras</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-izq-deformidades"><label for="pie-izq-deformidades">Deformidades</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-izq-piel-seca"><label for="pie-izq-piel-seca">Piel seca</label></div>
+                                        <div class="checkbox-item"><input type="checkbox" id="pie-izq-micosis"><label for="pie-izq-micosis">Micosis</label></div>
+                                    </div>
+                                    <div class="test-results">
+                                        <div class="test-item">
+                                            <label>Sensibilidad vibratoria</label>
+                                            <div class="test-controls">
+                                                <div class="test-checkbox"><input type="checkbox" id="vibracion-izq-normal" onchange="handleMutuallyExclusive('vibracion-izq-normal', 'vibracion-izq-alterada', this)"><span class="negative">Normal</span></div>
+                                                <div class="test-checkbox"><input type="checkbox" id="vibracion-izq-alterada" onchange="handleMutuallyExclusive('vibracion-izq-normal', 'vibracion-izq-alterada', this)"><span class="positive">Alterada</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="test-item">
+                                            <label>Monofilamento 10g</label>
+                                            <div class="test-controls">
+                                                <div class="test-checkbox"><input type="checkbox" id="monofilamento-izq-normal" onchange="handleMutuallyExclusive('monofilamento-izq-normal', 'monofilamento-izq-alterado', this)"><span class="negative">Normal</span></div>
+                                                <div class="test-checkbox"><input type="checkbox" id="monofilamento-izq-alterado" onchange="handleMutuallyExclusive('monofilamento-izq-normal', 'monofilamento-izq-alterado', this)"><span class="positive">Alterado</span></div>
+                                            </div>
+                                        </div>
+                                        <div class="test-item">
+                                            <label>Pulsos pedios</label>
+                                            <div class="test-controls">
+                                                <div class="test-checkbox"><input type="checkbox" id="pulsos-izq-presentes" onchange="handleMutuallyExclusive('pulsos-izq-presentes', 'pulsos-izq-ausentes', this)"><span class="negative">Presentes</span></div>
+                                                <div class="test-checkbox"><input type="checkbox" id="pulsos-izq-ausentes" onchange="handleMutuallyExclusive('pulsos-izq-presentes', 'pulsos-izq-ausentes', this)"><span class="positive">Ausentes</span></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Escalas de Riesgo -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>Escalas de Riesgo y Criterios Diagnósticos</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="risk-scales">
+                    <div class="exam-container">
+                        <div class="exam-header">FINDRISK - Riesgo de Diabetes Tipo 2</div>
+                        <div class="score-calculation">
+                            <h4>Cuestionario FINDRISK</h4>
+                            <div class="exam-section">
+                                <h4>Edad</h4>
+                                <div class="severity-grid">
+                                    <div class="severity-item"><input type="radio" name="findrisk-edad" id="edad-menor-45" value="0"><label for="edad-menor-45">&lt;45 años (0 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-edad" id="edad-45-54" value="2"><label for="edad-45-54">45-54 años (2 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-edad" id="edad-55-64" value="3"><label for="edad-55-64">55-64 años (3 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-edad" id="edad-mayor-64" value="4"><label for="edad-mayor-64">&gt;64 años (4 puntos)</label></div>
+                                </div>
+                            </div>
+                            <div class="exam-section">
+                                <h4>IMC</h4>
+                                <div class="severity-grid">
+                                    <div class="severity-item"><input type="radio" name="findrisk-imc" id="imc-menor-25" value="0"><label for="imc-menor-25">&lt;25 kg/m² (0 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-imc" id="imc-25-30" value="1"><label for="imc-25-30">25-30 kg/m² (1 punto)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-imc" id="imc-mayor-30" value="3"><label for="imc-mayor-30">&gt;30 kg/m² (3 puntos)</label></div>
+                                </div>
+                            </div>
+                            <div class="exam-section">
+                                <h4>Circunferencia de cintura</h4>
+                                <div class="severity-grid">
+                                    <div class="severity-item"><input type="radio" name="findrisk-cintura" id="cintura-normal" value="0"><label for="cintura-normal">Normal (0 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-cintura" id="cintura-aumentada" value="3"><label for="cintura-aumentada">Aumentada♂&gt;102/♀&gt;88 cm (3 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-cintura" id="cintura-muy-aumentada" value="4"><label for="cintura-muy-aumentada">Muy aumentada♂&gt;110/♀&gt;95 cm (4 puntos)</label></div>
+                                </div>
+                            </div>
+                            <div class="exam-section">
+                                <h4>Actividad física</h4>
+                                <div class="severity-grid">
+                                    <div class="severity-item"><input type="radio" name="findrisk-actividad" id="actividad-si" value="0"><label for="actividad-si">≥30 min/día (0 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-actividad" id="actividad-no" value="2"><label for="actividad-no">&lt;30 min/día (2 puntos)</label></div>
+                                </div>
+                            </div>
+                            <div class="exam-section">
+                                <h4>Consumo de frutas/verduras</h4>
+                                <div class="severity-grid">
+                                    <div class="severity-item"><input type="radio" name="findrisk-dieta" id="dieta-si" value="0"><label for="dieta-si">Diario (0 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-dieta" id="dieta-no" value="1"><label for="dieta-no">No diario (1 punto)</label></div>
+                                </div>
+                            </div>
+                            <div class="exam-section">
+                                <h4>Hipertensión arterial</h4>
+                                <div class="severity-grid">
+                                    <div class="severity-item"><input type="radio" name="findrisk-hta" id="hta-no" value="0"><label for="hta-no">No (0 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-hta" id="hta-si" value="2"><label for="hta-si">Sí (2 puntos)</label></div>
+                                </div>
+                            </div>
+                            <div class="exam-section">
+                                <h4>Historia de glucemia elevada</h4>
+                                <div class="severity-grid">
+                                    <div class="severity-item"><input type="radio" name="findrisk-glucemia" id="glucemia-no" value="0"><label for="glucemia-no">No (0 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-glucemia" id="glucemia-si" value="5"><label for="glucemia-si">Sí (5 puntos)</label></div>
+                                </div>
+                            </div>
+                            <div class="exam-section">
+                                <h4>Historia familiar de diabetes</h4>
+                                <div class="severity-grid">
+                                    <div class="severity-item"><input type="radio" name="findrisk-familia" id="familia-no" value="0"><label for="familia-no">No (0 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-familia" id="familia-lejana" value="3"><label for="familia-lejana">Familia lejana (3 puntos)</label></div>
+                                    <div class="severity-item"><input type="radio" name="findrisk-familia" id="familia-cercana" value="5"><label for="familia-cercana">Padres/hermanos (5 puntos)</label></div>
+                                </div>
+                            </div>
+                            <div class="score-item">
+                                <span>Puntuación FINDRISK:</span>
+                                <span class="score-value" id="findrisk-score">0</span>
+                                <span>/25 puntos</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Riesgo a 10 años:</span>
+                                <span class="score-value" id="findrisk-risk">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Síndrome Metabólico (Criterios IDF)</div>
+                        <div class="score-calculation">
+                            <h4>Criterios Diagnósticos</h4>
+                            <div class="exam-section">
+                                <h4>Obesidad central (Obligatorio)</h4>
+                                <div class="test-item">
+                                    <label>Circunferencia cintura (♂≥90cm, ♀≥80cm)</label>
+                                    <div class="test-controls">
+                                        <div class="test-checkbox"><input type="checkbox" id="sm-cintura" onchange="calculateMetabolicSyndrome()"><span class="positive">Presente</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="exam-section">
+                                <h4>Criterios adicionales (≥2 de los siguientes)</h4>
+                                <div class="test-item">
+                                    <label>Triglicéridos ≥150 mg/dL</label>
+                                    <div class="test-controls">
+                                        <div class="test-checkbox"><input type="checkbox" id="sm-trigliceridos" onchange="calculateMetabolicSyndrome()"><span class="positive">Presente</span></div>
+                                    </div>
+                                </div>
+                                <div class="test-item">
+                                    <label>HDL bajo (♂&lt;40, ♀&lt;50 mg/dL)</label>
+                                    <div class="test-controls">
+                                        <div class="test-checkbox"><input type="checkbox" id="sm-hdl" onchange="calculateMetabolicSyndrome()"><span class="positive">Presente</span></div>
+                                    </div>
+                                </div>
+                                <div class="test-item">
+                                    <label>Presión arterial ≥130/85 mmHg</label>
+                                    <div class="test-controls">
+                                        <div class="test-checkbox"><input type="checkbox" id="sm-presion" onchange="calculateMetabolicSyndrome()"><span class="positive">Presente</span></div>
+                                    </div>
+                                </div>
+                                <div class="test-item">
+                                    <label>Glucemia ≥100 mg/dL</label>
+                                    <div class="test-controls">
+                                        <div class="test-checkbox"><input type="checkbox" id="sm-glucemia" onchange="calculateMetabolicSyndrome()"><span class="positive">Presente</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="score-item">
+                                <span>Criterios cumplidos:</span>
+                                <span class="score-value" id="sm-criterios">0</span>
+                                <span>/5</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Diagnóstico:</span>
+                                <span class="score-value" id="sm-diagnosis">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Criterios Diagnósticos de Diabetes (ADA 2024)</div>
+                        <div class="score-calculation">
+                            <h4>Criterios para Diagnóstico</h4>
+                            <div class="test-item">
+                                <label>Glucemia en ayunas ≥126 mg/dL</label>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="checkbox" id="diabetes-ayunas" onchange="calculateDiabetesCriteria()"><span class="positive">Presente</span></div>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>HbA1c ≥6.5%</label>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="checkbox" id="diabetes-hba1c" onchange="calculateDiabetesCriteria()"><span class="positive">Presente</span></div>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Glucemia 2h post-carga ≥200 mg/dL</label>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="checkbox" id="diabetes-postcarga" onchange="calculateDiabetesCriteria()"><span class="positive">Presente</span></div>
+                                </div>
+                            </div>
+                            <div class="test-item">
+                                <label>Glucemia al azar ≥200 mg/dL + síntomas</label>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="checkbox" id="diabetes-random" onchange="calculateDiabetesCriteria()"><span class="positive">Presente</span></div>
+                                </div>
+                            </div>
+                            <div class="score-item">
+                                <span>Criterios cumplidos:</span>
+                                <span class="score-value" id="diabetes-criterios">0</span>
+                                <span>/4</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Diagnóstico:</span>
+                                <span class="score-value" id="diabetes-diagnosis">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evaluación Reproductiva -->
+            <div class="section">
+                <div class="section-header" onclick="toggleSection(this)">
+                    <span>Evaluación Reproductiva y Hormonal</span>
+                    <span class="arrow">▼</span>
+                </div>
+                <div class="section-content" id="reproductive-evaluation">
+                    <div class="legend">
+                        <div class="legend-item">
+                            <div class="legend-color reproductive-color"></div>
+                            <span>Evaluación Reproductiva</span>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Historia Reproductiva</div>
+                        <div class="reproductive-assessment">
+                            <h4>Antecedentes Gineco-Obstétricos</h4>
+                            <div class="measurement">
+                                <label>Edad de menarquia:</label>
+                                <input type="number" class="input-field" id="edad-menarquia" min="8" max="18">
+                                <span>años</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Ciclos menstruales:</label>
+                                <input type="number" class="input-field" id="ciclos-dias" min="15" max="45">
+                                <span>días</span>
+                            </div>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="ciclos-regulares"><label for="ciclos-regulares">Ciclos regulares</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="oligomenorrea"><label for="oligomenorrea">Oligomenorrea</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="amenorrea"><label for="amenorrea">Amenorrea</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="menorragia"><label for="menorragia">Menorragia</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="dismenorrea"><label for="dismenorrea">Dismenorrea</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="menopausia"><label for="menopausia">Menopausia</label></div>
+                            </div>
+                            <div class="measurement">
+                                <label>Número de embarazos:</label>
+                                <input type="number" class="input-field" id="numero-embarazos" min="0" max="20">
+                            </div>
+                            <div class="measurement">
+                                <label>Número de partos:</label>
+                                <input type="number" class="input-field" id="numero-partos" min="0" max="20">
+                            </div>
+                        </div>
+
+                        <div class="exam-section">
+                            <h4>Síntomas Androgénicos</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="acne"><label for="acne">Acné</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="hirsutismo-score"><label for="hirsutismo-score">Hirsutismo</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="alopecia-androgenica-fem"><label for="alopecia-androgenica-fem">Alopecia androgénica</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="voz-grave"><label for="voz-grave">Voz grave</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="clitoromegalia"><label for="clitoromegalia">Clitoromegalia</label></div>
+                            </div>
+                            <div class="measurement">
+                                <label>Escala Ferriman-Gallwey:</label>
+                                <input type="number" class="input-field" id="ferriman-gallwey" min="0" max="36" onchange="evaluateHirsutism()">
+                                <span>/36</span>
+                            </div>
+                            <div class="score-item">
+                                <span>Interpretación hirsutismo:</span>
+                                <span class="score-value" id="hirsutism-interpretation">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="exam-container">
+                        <div class="exam-header">Evaluación Androgénica Masculina</div>
+                        <div class="exam-section">
+                            <h4>Síntomas de Hipogonadismo</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="libido-disminuida"><label for="libido-disminuida">Libido disminuida</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="disfuncion-erectil-masc"><label for="disfuncion-erectil-masc">Disfunción eréctil</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="fatiga-masculina"><label for="fatiga-masculina">Fatiga</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="perdida-masa-muscular"><label for="perdida-masa-muscular">Pérdida de masa muscular</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="osteoporosis-masculina"><label for="osteoporosis-masculina">Osteoporosis</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="ginecomastia-masc"><label for="ginecomastia-masc">Ginecomastia</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Examen Genital Masculino</h4>
+                            <div class="measurement">
+                                <label>Volumen testicular derecho:</label>
+                                <input type="number" class="input-field" id="volumen-testicular-der" min="1" max="30">
+                                <span>mL</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Volumen testicular izquierdo:</label>
+                                <input type="number" class="input-field" id="volumen-testicular-izq" min="1" max="30">
+                                <span>mL</span>
+                            </div>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="testiculos-normales"><label for="testiculos-normales">Testículos normales</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="testiculos-pequeños"><label for="testiculos-pequeños">Testículos pequeños (&lt;15 mL)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="varicocele"><label for="varicocele">Varicocele</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="hidrocele"><label for="hidrocele">Hidrocele</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Conclusión Tradicional -->
+            <div class="conclusion" id="traditionalConclusion">
+                <h3>Conclusión del Examen Endocrinológico</h3>
+                <div class="conclusion-text" id="conclusion-text-traditional">Seleccione los parámetros del examen para generar la conclusión endocrinológica...</div>
+            </div>
+            
+            <div class="control-buttons">
+                <button class="btn btn-primary" onclick="generateConclusion()">Generar Conclusión</button>
+                <button class="btn btn-primary" onclick="copyToClipboard()"><i class="fas fa-copy"></i> Copiar Texto</button>
+                <button class="btn btn-primary" onclick="printConclusion()">Imprimir Conclusión</button>
+                <button class="btn btn-secondary" onclick="clearForm()">Limpiar Formulario</button>
+                <button class="btn btn-secondary" onclick="expandAllSections()">Expandir Todo</button>
+                <button class="btn btn-secondary" onclick="collapseAllSections()">Contraer Todo</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== VARIABLES GLOBALES ==========
+        let isDarkMode = false;
+        let isSplitView = false;
+
+        // ========== NUEVAS FUNCIONES: DASHBOARD ==========
+        function updateDashboard() {
+            updateDashboardIMC();
+            updateDashboardPA();
+            updateDashboardGlucemia();
+            updateDashboardFINDRISK();
+            updateDashboardBocio();
+            updateDashboardAlerts();
+        }
+
+        function updateDashboardIMC() {
+            const imc = document.getElementById('imc-value').textContent;
+            const classification = document.getElementById('imc-classification').textContent;
+            const dashboardIMC = document.getElementById('dashboard-imc');
+            
+            if (imc !== '--') {
+                dashboardIMC.innerHTML = `<i class="fas fa-weight"></i><span>${imc} kg/m²</span>`;
+                
+                if (classification.includes('Obesidad')) {
+                    dashboardIMC.className = 'dashboard-value dashboard-alert';
+                } else if (classification === 'Sobrepeso') {
+                    dashboardIMC.className = 'dashboard-value dashboard-warning';
+                } else {
+                    dashboardIMC.className = 'dashboard-value dashboard-normal';
+                }
+            } else {
+                dashboardIMC.innerHTML = `<i class="fas fa-weight"></i><span>-- kg/m²</span>`;
+                dashboardIMC.className = 'dashboard-value';
+            }
+        }
+
+        function updateDashboardPA() {
+            const pas = document.getElementById('pas').value;
+            const pad = document.getElementById('pad').value;
+            const classification = document.getElementById('bp-classification').textContent;
+            const dashboardPA = document.getElementById('dashboard-pa');
+            
+            if (pas && pad) {
+                dashboardPA.innerHTML = `<i class="fas fa-heartbeat"></i><span>${pas}/${pad}</span>`;
+                
+                if (classification.includes('HTA')) {
+                    dashboardPA.className = 'dashboard-value dashboard-alert';
+                } else if (classification === 'Prehipertensión') {
+                    dashboardPA.className = 'dashboard-value dashboard-warning';
+                } else {
+                    dashboardPA.className = 'dashboard-value dashboard-normal';
+                }
+            } else {
+                dashboardPA.innerHTML = `<i class="fas fa-heartbeat"></i><span>-- mmHg</span>`;
+                dashboardPA.className = 'dashboard-value';
+            }
+        }
+
+        function updateDashboardGlucemia() {
+            const glucemia = document.getElementById('glucemia-ayunas').value;
+            const classification = document.getElementById('clasificacion-glucemia').textContent;
+            const dashboardGlucemia = document.getElementById('dashboard-glucemia');
+            
+            if (glucemia) {
+                dashboardGlucemia.innerHTML = `<i class="fas fa-tint"></i><span>${glucemia} mg/dL</span>`;
+                
+                if (classification === 'Diabetes') {
+                    dashboardGlucemia.className = 'dashboard-value dashboard-alert';
+                } else if (classification === 'Prediabetes') {
+                    dashboardGlucemia.className = 'dashboard-value dashboard-warning';
+                } else {
+                    dashboardGlucemia.className = 'dashboard-value dashboard-normal';
+                }
+            } else {
+                dashboardGlucemia.innerHTML = `<i class="fas fa-tint"></i><span>-- mg/dL</span>`;
+                dashboardGlucemia.className = 'dashboard-value';
+            }
+        }
+
+        function updateDashboardFINDRISK() {
+            const score = document.getElementById('findrisk-score').textContent;
+            const risk = document.getElementById('findrisk-risk').textContent;
+            const dashboardFINDRISK = document.getElementById('dashboard-findrisk');
+            
+            dashboardFINDRISK.innerHTML = `<i class="fas fa-calculator"></i><span>${score}/25 pts</span>`;
+            
+            if (parseInt(score) >= 15) {
+                dashboardFINDRISK.className = 'dashboard-value dashboard-alert';
+            } else if (parseInt(score) >= 12) {
+                dashboardFINDRISK.className = 'dashboard-value dashboard-warning';
+            } else {
+                dashboardFINDRISK.className = 'dashboard-value dashboard-normal';
+            }
+        }
+
+        function updateDashboardBocio() {
+            const bocio = document.getElementById('grado-bocio').value;
+            const dashboardBocio = document.getElementById('dashboard-bocio');
+            
+            if (bocio) {
+                dashboardBocio.innerHTML = `<i class="fas fa-user-md"></i><span>Grado ${bocio}</span>`;
+                
+                if (bocio === '2' || bocio === '3') {
+                    dashboardBocio.className = 'dashboard-value dashboard-alert';
+                } else if (bocio === '1a' || bocio === '1b') {
+                    dashboardBocio.className = 'dashboard-value dashboard-warning';
+                } else {
+                    dashboardBocio.className = 'dashboard-value dashboard-normal';
+                }
+            } else {
+                dashboardBocio.innerHTML = `<i class="fas fa-user-md"></i><span>No evaluado</span>`;
+                dashboardBocio.className = 'dashboard-value';
+            }
+        }
+
+        function updateDashboardAlerts() {
+            let alertCount = 0;
+            
+            // Contar alertas críticas
+            document.querySelectorAll('.dashboard-alert').forEach(() => alertCount++);
+            
+            // Verificar hallazgos patológicos adicionales
+            const patologicos = [
+                'pie-der-ulceras', 'pie-izq-ulceras',
+                'vibracion-der-alterada', 'vibracion-izq-alterada',
+                'monofilamento-der-alterado', 'monofilamento-izq-alterado',
+                'pulsos-der-ausentes', 'pulsos-izq-ausentes',
+                'exoftalmos', 'retraccion-palpebral',
+                'deshidratacion', 'aliento-cetonico', 'respiracion-kussmaul'
+            ];
+            
+            patologicos.forEach(id => {
+                if (document.getElementById(id)?.checked) alertCount++;
+            });
+            
+            const dashboardAlerts = document.getElementById('dashboard-alerts');
+            const alertCountEl = document.getElementById('alert-count');
+            
+            alertCountEl.textContent = alertCount;
+            
+            if (alertCount > 3) {
+                dashboardAlerts.className = 'dashboard-value dashboard-alert';
+            } else if (alertCount > 0) {
+                dashboardAlerts.className = 'dashboard-value dashboard-warning';
+            } else {
+                dashboardAlerts.className = 'dashboard-value dashboard-normal';
+            }
+        }
+
+        // ========== NUEVAS FUNCIONES: MODO OSCURO ==========
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark-mode', isDarkMode);
+
+            const darkModeBtn = document.querySelector('.control-btn.secondary');
+            if (isDarkMode) {
+                darkModeBtn.innerHTML = '<i class="fas fa-sun"></i> Modo Claro';
+            } else {
+                darkModeBtn.innerHTML = '<i class="fas fa-moon"></i> Modo Oscuro';
+            }
+
+            try {
+                localStorage.setItem('endocrinology-dark-mode', isDarkMode);
+            } catch (e) {
+                console.error("El almacenamiento local no está disponible.");
+            }
+        }
+
+        // ========== NUEVAS FUNCIONES: VISTA DIVIDIDA ==========
+        function toggleSplitView() {
+            isSplitView = !isSplitView;
+            const contentWrapper = document.getElementById('contentWrapper');
+            const stickyConclusion = document.getElementById('stickyConclusion');
+            const traditionalConclusion = document.getElementById('traditionalConclusion');
+            const btn = document.querySelector('.control-btn:not(.secondary)');
+
+            if (isSplitView) {
+                contentWrapper.className = 'split-view-container';
+                stickyConclusion.style.display = 'flex';
+                traditionalConclusion.style.display = 'none';
+                btn.innerHTML = '<i class="fas fa-window-restore"></i> Vista Normal';
+            } else {
+                contentWrapper.className = 'content-wrapper';
+                stickyConclusion.style.display = 'none';
+                traditionalConclusion.style.display = 'block';
+                btn.innerHTML = '<i class="fas fa-columns"></i> Vista Dividida';
+            }
+            generateConclusion();
+        }
+
+        // ========== NUEVAS FUNCIONES: COPIAR AL PORTAPAPELES ==========
+        function copyToClipboard() {
+            const conclusionText = isSplitView ?
+                document.getElementById('conclusion-text').textContent :
+                document.getElementById('conclusion-text-traditional').textContent;
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(conclusionText).then(() => {
+                    showCopyNotification();
+                }).catch(err => {
+                    console.error('Error al copiar con la API del portapapeles: ', err);
+                    fallbackCopyToClipboard(conclusionText);
+                });
+            } else {
+                fallbackCopyToClipboard(conclusionText);
+            }
+        }
+
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showCopyNotification();
+            } catch (err) {
+                console.error('Error al usar el método de respaldo para copiar: ', err);
+                alert('No se pudo copiar el texto. Por favor, cópielo manualmente.');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyNotification() {
+            const notification = document.getElementById('copyNotification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+
+        // ========== FUNCIONES ORIGINALES MANTENIDAS ==========
+        function updateSectionHeight(contentElement) {
+            if (contentElement && contentElement.classList.contains('expanded')) {
+                setTimeout(() => {
+                    contentElement.style.maxHeight = contentElement.scrollHeight + 'px';
+                }, 50);
+            }
+        }
+
+        function toggleSection(headerElement) {
+            const content = headerElement.nextElementSibling;
+            const section = headerElement.parentElement;
+            
+            headerElement.classList.toggle('expanded');
+            section.classList.toggle('active');
+            
+            if (content.classList.toggle('expanded')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            } else {
+                content.style.maxHeight = '0';
+            }
+        }
+
+        function expandAllSections() {
+            document.querySelectorAll('.section-header:not(.expanded)').forEach(header => toggleSection(header));
+        }
+
+        function collapseAllSections() {
+            document.querySelectorAll('.section-header.expanded').forEach(header => toggleSection(header));
+        }
+        
+        function handleNoComplaints() {
+            const noComplaintsCheckbox = document.getElementById('sin-quejas-endo');
+            const otherCheckboxes = document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-endo)');
+            
+            otherCheckboxes.forEach(checkbox => {
+                checkbox.disabled = noComplaintsCheckbox.checked;
+                if (noComplaintsCheckbox.checked) checkbox.checked = false;
+            });
+            generateConclusion();
+        }
+        
+        function handleMutuallyExclusive(positiveId, negativeId, checkbox) {
+            if (checkbox.checked) {
+                const oppositeId = checkbox.id === positiveId ? negativeId : positiveId;
+                const oppositeCheckbox = document.getElementById(oppositeId);
+                if (oppositeCheckbox) oppositeCheckbox.checked = false;
+            }
+            generateConclusion();
+        }
+
+        function evaluateWeightChange() {
+            const perdida = parseFloat(document.getElementById('perdida-peso').value) || 0;
+            const ganancia = parseFloat(document.getElementById('ganancia-peso').value) || 0;
+            const interpretEl = document.getElementById('interpretacion-peso');
+            
+            if (perdida === 0 && ganancia === 0) {
+                interpretEl.textContent = '--';
+                return;
+            }
+            
+            if (perdida > 0) {
+                if (perdida >= 5) {
+                    interpretEl.textContent = 'Pérdida significativa';
+                    interpretEl.style.color = '#e74c3c';
+                } else {
+                    interpretEl.textContent = 'Pérdida leve';
+                    interpretEl.style.color = '#f39c12';
+                }
+            } else if (ganancia > 0) {
+                if (ganancia >= 5) {
+                    interpretEl.textContent = 'Ganancia significativa';
+                    interpretEl.style.color = '#e74c3c';
+                } else {
+                    interpretEl.textContent = 'Ganancia leve';
+                    interpretEl.style.color = '#f39c12';
+                }
+            }
+            generateConclusion();
+        }
+
+        function evaluatePolyuria() {
+            const volumen = parseFloat(document.getElementById('volumen-urinario').value) || 0;
+            const interpretEl = document.getElementById('interpretacion-poliuria');
+            
+            if (volumen === 0) {
+                interpretEl.textContent = '--';
+                return;
+            }
+            
+            if (volumen >= 3) {
+                interpretEl.textContent = 'Poliuria severa';
+                interpretEl.style.color = '#e74c3c';
+            } else if (volumen >= 2.5) {
+                interpretEl.textContent = 'Poliuria moderada';
+                interpretEl.style.color = '#f39c12';
+            } else {
+                interpretEl.textContent = 'Normal';
+                interpretEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+        function calculateBMI() {
+            const peso = parseFloat(document.getElementById('peso-actual').value);
+            const talla = parseFloat(document.getElementById('talla').value);
+            
+            if (!peso || !talla) {
+                document.getElementById('imc-value').textContent = '--';
+                document.getElementById('imc-classification').textContent = '--';
+                return;
+            }
+            
+            const imc = peso / Math.pow(talla / 100, 2);
+            document.getElementById('imc-value').textContent = imc.toFixed(1);
+            
+            let classification = '';
+            if (imc < 18.5) classification = 'Bajo peso';
+            else if (imc < 25) classification = 'Normal';
+            else if (imc < 30) classification = 'Sobrepeso';
+            else if (imc < 35) classification = 'Obesidad I';
+            else if (imc < 40) classification = 'Obesidad II';
+            else classification = 'Obesidad III';
+            
+            document.getElementById('imc-classification').textContent = classification;
+            generateConclusion();
+        }
+
+        function calculateWHR() {
+            const cintura = parseFloat(document.getElementById('circunferencia-cintura').value);
+            const cadera = parseFloat(document.getElementById('circunferencia-cadera').value);
+            
+            if (!cintura || !cadera) {
+                document.getElementById('whr-value').textContent = '--';
+                return;
+            }
+            
+            const whr = cintura / cadera;
+            document.getElementById('whr-value').textContent = whr.toFixed(2);
+            generateConclusion();
+        }
+
+        function evaluateWaistCircumference() {
+            const cintura = parseFloat(document.getElementById('circunferencia-cintura').value);
+            const interpretEl = document.getElementById('waist-risk');
+            
+            if (!cintura) {
+                interpretEl.textContent = '--';
+                return;
+            }
+            
+            // Asumiendo valores para mujeres (puede ajustarse según el género)
+            if (cintura >= 88) {
+                interpretEl.textContent = 'Riesgo alto';
+                interpretEl.style.color = '#e74c3c';
+            } else if (cintura >= 80) {
+                interpretEl.textContent = 'Riesgo moderado';
+                interpretEl.style.color = '#f39c12';
+            } else {
+                interpretEl.textContent = 'Riesgo bajo';
+                interpretEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+        function evaluateBloodPressure() {
+            const pas = parseFloat(document.getElementById('pas').value);
+            const pad = parseFloat(document.getElementById('pad').value);
+            const classificationEl = document.getElementById('bp-classification');
+            
+            if (!pas || !pad) {
+                classificationEl.textContent = '--';
+                return;
+            }
+            
+            if (pas >= 180 || pad >= 110) {
+                classificationEl.textContent = 'HTA III (crisis)';
+                classificationEl.style.color = '#e74c3c';
+            } else if (pas >= 160 || pad >= 100) {
+                classificationEl.textContent = 'HTA II (moderada)';
+                classificationEl.style.color = '#e74c3c';
+            } else if (pas >= 140 || pad >= 90) {
+                classificationEl.textContent = 'HTA I (leve)';
+                classificationEl.style.color = '#f39c12';
+            } else if (pas >= 130 || pad >= 85) {
+                classificationEl.textContent = 'Prehipertensión';
+                classificationEl.style.color = '#f39c12';
+            } else {
+                classificationEl.textContent = 'Normal';
+                classificationEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+        function evaluateHeartRate() {
+            const fc = parseFloat(document.getElementById('frecuencia-cardiaca').value);
+            const classificationEl = document.getElementById('hr-classification');
+            
+            if (!fc) {
+                classificationEl.textContent = '--';
+                return;
+            }
+            
+            if (fc < 60) {
+                classificationEl.textContent = 'Bradicardia';
+                classificationEl.style.color = '#f39c12';
+            } else if (fc > 100) {
+                classificationEl.textContent = 'Taquicardia';
+                classificationEl.style.color = '#f39c12';
+            } else {
+                classificationEl.textContent = 'Normal';
+                classificationEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+        function evaluateGoiter() {
+            const grado = document.getElementById('grado-bocio').value;
+            generateConclusion();
+        }
+
+        function evaluateGlucose() {
+            const ayunas = parseFloat(document.getElementById('glucemia-ayunas').value);
+            const classificationEl = document.getElementById('clasificacion-glucemia');
+            
+            if (!ayunas) {
+                classificationEl.textContent = '--';
+                return;
+            }
+            
+            if (ayunas >= 126) {
+                classificationEl.textContent = 'Diabetes';
+                classificationEl.style.color = '#e74c3c';
+            } else if (ayunas >= 100) {
+                classificationEl.textContent = 'Prediabetes';
+                classificationEl.style.color = '#f39c12';
+            } else {
+                classificationEl.textContent = 'Normal';
+                classificationEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+        function evaluateHbA1c() {
+            const hba1c = parseFloat(document.getElementById('hba1c').value);
+            const classificationEl = document.getElementById('clasificacion-hba1c');
+            
+            if (!hba1c) {
+                classificationEl.textContent = '--';
+                return;
+            }
+            
+            if (hba1c >= 6.5) {
+                classificationEl.textContent = 'Diabetes';
+                classificationEl.style.color = '#e74c3c';
+            } else if (hba1c >= 5.7) {
+                classificationEl.textContent = 'Prediabetes';
+                classificationEl.style.color = '#f39c12';
+            } else {
+                classificationEl.textContent = 'Normal';
+                classificationEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+        function calculateFINDRISK() {
+            let total = 0;
+            
+            const edad = document.querySelector('input[name="findrisk-edad"]:checked');
+            if (edad) total += parseInt(edad.value);
+            
+            const imc = document.querySelector('input[name="findrisk-imc"]:checked');
+            if (imc) total += parseInt(imc.value);
+            
+            const cintura = document.querySelector('input[name="findrisk-cintura"]:checked');
+            if (cintura) total += parseInt(cintura.value);
+            
+            const actividad = document.querySelector('input[name="findrisk-actividad"]:checked');
+            if (actividad) total += parseInt(actividad.value);
+            
+            const dieta = document.querySelector('input[name="findrisk-dieta"]:checked');
+            if (dieta) total += parseInt(dieta.value);
+            
+            const hta = document.querySelector('input[name="findrisk-hta"]:checked');
+            if (hta) total += parseInt(hta.value);
+            
+            const glucemia = document.querySelector('input[name="findrisk-glucemia"]:checked');
+            if (glucemia) total += parseInt(glucemia.value);
+            
+            const familia = document.querySelector('input[name="findrisk-familia"]:checked');
+            if (familia) total += parseInt(familia.value);
+            
+            document.getElementById('findrisk-score').textContent = total;
+            
+            let riesgo = '';
+            if (total < 7) {
+                riesgo = 'Bajo (1%)';
+            } else if (total < 12) {
+                riesgo = 'Ligeramente elevado (4%)';
+            } else if (total < 15) {
+                riesgo = 'Moderado (17%)';
+            } else if (total < 21) {
+                riesgo = 'Alto (33%)';
+            } else {
+                riesgo = 'Muy alto (50%)';
+            }
+            
+            document.getElementById('findrisk-risk').textContent = riesgo;
+            generateConclusion();
+        }
+
+        function calculateMetabolicSyndrome() {
+            let criterios = 0;
+            const cinturaObligatoria = document.getElementById('sm-cintura').checked;
+            
+            if (document.getElementById('sm-trigliceridos').checked) criterios++;
+            if (document.getElementById('sm-hdl').checked) criterios++;
+            if (document.getElementById('sm-presion').checked) criterios++;
+            if (document.getElementById('sm-glucemia').checked) criterios++;
+            
+            document.getElementById('sm-criterios').textContent = (cinturaObligatoria ? 1 : 0) + criterios;
+            
+            let diagnosis = '';
+            if (cinturaObligatoria && criterios >= 2) {
+                diagnosis = 'SÍ - Cumple criterios de Síndrome Metabólico';
+            } else {
+                diagnosis = 'NO - No cumple criterios de Síndrome Metabólico';
+            }
+            
+            document.getElementById('sm-diagnosis').textContent = diagnosis;
+            generateConclusion();
+        }
+
+        function calculateDiabetesCriteria() {
+            let criterios = 0;
+            
+            if (document.getElementById('diabetes-ayunas').checked) criterios++;
+            if (document.getElementById('diabetes-hba1c').checked) criterios++;
+            if (document.getElementById('diabetes-postcarga').checked) criterios++;
+            if (document.getElementById('diabetes-random').checked) criterios++;
+            
+            document.getElementById('diabetes-criterios').textContent = criterios;
+            
+            let diagnosis = '';
+            if (criterios >= 1) {
+                diagnosis = 'SÍ - Cumple criterios para Diabetes Mellitus';
+            } else {
+                diagnosis = 'NO - No cumple criterios para Diabetes Mellitus';
+            }
+            
+            document.getElementById('diabetes-diagnosis').textContent = diagnosis;
+            generateConclusion();
+        }
+
+        function evaluateHirsutism() {
+            const score = parseFloat(document.getElementById('ferriman-gallwey').value) || 0;
+            const interpretEl = document.getElementById('hirsutism-interpretation');
+            
+            if (score === 0) {
+                interpretEl.textContent = '--';
+                return;
+            }
+            
+            if (score >= 8) {
+                interpretEl.textContent = 'Hirsutismo significativo';
+                interpretEl.style.color = '#e74c3c';
+            } else if (score >= 6) {
+                interpretEl.textContent = 'Hirsutismo leve';
+                interpretEl.style.color = '#f39c12';
+            } else {
+                interpretEl.textContent = 'Normal';
+                interpretEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+/**
+ * Genera una conclusión narrativa del examen endocrinológico basada en los datos del formulario.
+ * Recopila información de todas las secciones, la formatea en un texto coherente y la muestra
+ * en los paneles de conclusión.
+ */
+function generateConclusion() {
+    // Obtiene los elementos del DOM donde se mostrará la conclusión.
+    const conclusionEl = document.getElementById('conclusion-text');
+    const conclusionTraditional = document.getElementById('conclusion-text-traditional');
+    let conclusion = 'EXAMEN ENDOCRINOLÓGICO\n\n';
+
+    // === 1. HISTORIA CLÍNICA ENDOCRINOLÓGICA ===
+    let historia = '';
+
+    // -- Antecedentes Personales Endocrinológicos --
+    const antecedentesPersonales = [];
+    ['diabetes-previa', 'hipertension-arterial', 'dislipidemia', 'enfermedad-tiroidea', 
+     'osteoporosis', 'sindrome-ovarico-poliquistico', 'infertilidad', 'radioterapia-cuello'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            antecedentesPersonales.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    // -- Antecedentes Familiares --
+    const antecedentesFamiliares = [];
+    ['familia-diabetes', 'familia-tiroides', 'familia-osteoporosis', 
+     'familia-cancer-endocrino', 'familia-sindrome-metabolico'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            antecedentesFamiliares.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    // -- Medicación Actual --
+    const medicamentos = [];
+    ['medicamento-levotiroxina', 'medicamento-metformina', 'medicamento-insulina',
+     'medicamento-corticoides', 'medicamento-anticonceptivos', 'medicamento-estatinas'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            medicamentos.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    // Construye la sección de historia clínica si hay datos.
+    if (antecedentesPersonales.length > 0 || antecedentesFamiliares.length > 0 || medicamentos.length > 0) {
+        historia += 'HISTORIA CLÍNICA ENDOCRINOLÓGICA:\n';
+        if (antecedentesPersonales.length > 0) historia += `Antecedentes personales: ${antecedentesPersonales.join(', ')}. `;
+        if (antecedentesFamiliares.length > 0) historia += `Antecedentes familiares: ${antecedentesFamiliares.join(', ')}. `;
+        if (medicamentos.length > 0) historia += `Medicación actual: ${medicamentos.join(', ')}. `;
+        historia += '\n\n';
+    }
+
+    // === 2. MOTIVO DE CONSULTA Y QUEJAS PRINCIPALES ===
+    if (document.getElementById('sin-quejas-endo')?.checked) {
+        historia += 'MOTIVO DE CONSULTA: Control endocrinológico de rutina, paciente asintomático.\n\n';
+    } else {
+        const quejasSeleccionadas = [];
+        ['fatiga-astenia', 'cambios-peso', 'polidipsia', 'poliuria', 'polifagia', 
+         'intolerancia-calor', 'intolerancia-frio', 'palpitaciones', 'nerviosismo',
+         'irregularidades-menstruales', 'disfuncion-erectil', 'galactorrea',
+         'hirsutismo', 'alopecia', 'cambios-voz', 'dolor-oseo', 'fracturas-fragalidad',
+         'cefalea', 'alteraciones-vision'].forEach(id => {
+            if (document.getElementById(id)?.checked) {
+                quejasSeleccionadas.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+            }
+        });
+
+        if (quejasSeleccionadas.length > 0) {
+            historia += `MOTIVO DE CONSULTA: Paciente consulta por ${quejasSeleccionadas.join(', ')}. `;
+            
+            // === CARACTERIZACIÓN DETALLADA DE SÍNTOMAS ===
+            // Cambios de peso
+            const perdidaPeso = document.getElementById('perdida-peso')?.value;
+            const gananciaPeso = document.getElementById('ganancia-peso')?.value;
+            const tiempoPerdida = document.getElementById('tiempo-perdida')?.value;
+            const tiempoGanancia = document.getElementById('tiempo-ganancia')?.value;
+            const interpretacionPeso = document.getElementById('interpretacion-peso')?.textContent;
+
+            if (perdidaPeso && perdidaPeso > 0) {
+                historia += `Refiere pérdida de peso de ${perdidaPeso} kg en ${tiempoPerdida || 'tiempo no especificado'} meses (${interpretacionPeso}). `;
+            }
+            if (gananciaPeso && gananciaPeso > 0) {
+                historia += `Refiere ganancia de peso de ${gananciaPeso} kg en ${tiempoGanancia || 'tiempo no especificado'} meses (${interpretacionPeso}). `;
+            }
+
+            // Síntomas poliúricos
+            const volumenUrinario = document.getElementById('volumen-urinario')?.value;
+            const frecuenciaUrinaria = document.getElementById('frecuencia-urinaria')?.value;
+            const nicturia = document.getElementById('nicturia')?.value;
+            const interpretacionPoliuria = document.getElementById('interpretacion-poliuria')?.textContent;
+
+            if (volumenUrinario && volumenUrinario > 0) {
+                historia += `Síntomas poliúricos: volumen urinario estimado ${volumenUrinario} L/día`;
+                if (frecuenciaUrinaria && frecuenciaUrinaria > 0) historia += `, frecuencia miccional ${frecuenciaUrinaria} veces/día`;
+                if (nicturia && nicturia > 0) historia += `, nicturia ${nicturia} veces/noche`;
+                if (interpretacionPoliuria !== '--') historia += ` (${interpretacionPoliuria})`;
+                historia += '. ';
+            }
+
+            historia += '\n\n';
+        }
+    }
+    conclusion += historia;
+
+    // === 3. EXAMEN FÍSICO GENERAL Y ANTROPOMETRÍA ===
+    conclusion += 'EXAMEN FÍSICO:\n';
+
+    // -- Antropometría --
+    const peso = document.getElementById('peso-actual')?.value;
+    const talla = document.getElementById('talla')?.value;
+    const imc = document.getElementById('imc-value')?.textContent;
+    const imcClasificacion = document.getElementById('imc-classification')?.textContent;
+    const cintura = document.getElementById('circunferencia-cintura')?.value;
+    const cadera = document.getElementById('circunferencia-cadera')?.value;
+    const whr = document.getElementById('whr-value')?.textContent;
+    const riesgoCintura = document.getElementById('waist-risk')?.textContent;
+
+    if (peso && talla) {
+        conclusion += `Antropometría: Peso ${peso} kg, talla ${talla} cm, IMC ${imc} kg/m² (${imcClasificacion}). `;
+        if (cintura) {
+            conclusion += `Circunferencia de cintura ${cintura} cm`;
+            if (cadera) conclusion += `, circunferencia de cadera ${cadera} cm, ICC ${whr}`;
+            if (riesgoCintura !== '--') conclusion += ` (riesgo ${riesgoCintura.toLowerCase()})`;
+            conclusion += '. ';
+        }
+    }
+
+    // -- Signos Vitales --
+    const pas = document.getElementById('pas')?.value;
+    const pad = document.getElementById('pad')?.value;
+    const fc = document.getElementById('frecuencia-cardiaca')?.value;
+    const temperatura = document.getElementById('temperatura')?.value;
+    const clasificacionPA = document.getElementById('bp-classification')?.textContent;
+    const clasificacionFC = document.getElementById('hr-classification')?.textContent;
+
+    if (pas && pad) {
+        conclusion += `Signos vitales: PA ${pas}/${pad} mmHg (${clasificacionPA})`;
+        if (fc) conclusion += `, FC ${fc} lpm (${clasificacionFC})`;
+        if (temperatura) conclusion += `, T° ${temperatura}°C`;
+        conclusion += '. ';
+    }
+
+    // -- Inspección General y Distribución Corporal --
+    const habitusHallazgos = [];
+    ['obesidad-central', 'obesidad-periferica', 'lipodistrofia', 'giba-buffalo',
+     'cara-luna', 'estrias-purpuras', 'acantosis-nigricans'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            habitusHallazgos.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    if (habitusHallazgos.length > 0) {
+        conclusion += `Inspección general: Se observa ${habitusHallazgos.join(', ')}. `;
+    } else if (document.getElementById('habitus-normal')?.checked) {
+        conclusion += 'Inspección general: Habitus corporal normal. ';
+    }
+
+    // -- Características Sexuales Secundarias --
+    const caracteristicasSexuales = [];
+    ['hirsutismo-facial', 'hirsutismo-corporal', 'ginecomastia', 'galactorrea-fisica',
+     'alopecia-androgenica', 'virilizacion'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            caracteristicasSexuales.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    if (caracteristicasSexuales.length > 0) {
+        conclusion += `Características sexuales secundarias: ${caracteristicasSexuales.join(', ')}. `;
+    } else if (document.getElementById('desarrollo-normal')?.checked) {
+        conclusion += 'Desarrollo sexual secundario normal. ';
+    }
+    conclusion += '\n\n';
+
+    // === 4. EXAMEN TIROIDEO ESPECÍFICO ===
+    const gradoBocio = document.getElementById('grado-bocio')?.value;
+    const hallazgosTiroideos = [];
+    
+    // Características generales del cuello
+    ['aumento-volumen-tiroideo', 'asimetria-tiroidea', 'masa-cervical', 
+     'adenopatias-cervicales', 'cicatrices-cuello'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            hallazgosTiroideos.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    // Características de los lóbulos
+    const lobuloDerechoHallazgos = [];
+    ['lobulo-der-aumentado', 'lobulo-der-nodular', 'lobulo-der-duro', 'lobulo-der-doloroso'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            const text = document.querySelector(`label[for="${id}"]`).textContent.toLowerCase();
+            lobuloDerechoHallazgos.push(text.replace('lóbulo derecho ', '').replace('derecho ', ''));
+        }
+    });
+
+    const lobuloIzquierdoHallazgos = [];
+    ['lobulo-izq-aumentado', 'lobulo-izq-nodular', 'lobulo-izq-duro', 'lobulo-izq-doloroso'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            const text = document.querySelector(`label[for="${id}"]`).textContent.toLowerCase();
+            lobuloIzquierdoHallazgos.push(text.replace('lóbulo izquierdo ', '').replace('izquierdo ', ''));
+        }
+    });
+
+    if (gradoBocio || hallazgosTiroideos.length > 0 || lobuloDerechoHallazgos.length > 0 || 
+        lobuloIzquierdoHallazgos.length > 0 || !document.getElementById('cuello-normal')?.checked) {
+        conclusion += 'EXAMEN TIROIDEO:\n';
+        
+        if (document.getElementById('cuello-normal')?.checked) {
+            conclusion += 'Inspección: Cuello de aspecto normal. ';
+        } else {
+            conclusion += 'Inspección: ';
+            if (hallazgosTiroideos.length > 0) {
+                conclusion += `${hallazgosTiroideos.join(', ')}. `;
+            } else {
+                conclusion += 'Cuello evaluado. ';
+            }
+        }
+        
+        if (gradoBocio) conclusion += `Bocio grado ${gradoBocio} según clasificación OMS. `;
+        
+        conclusion += 'Palpación: ';
+        if (document.getElementById('lobulo-der-normal')?.checked && document.getElementById('lobulo-izq-normal')?.checked) {
+            conclusion += 'Lóbulos tiroideos de tamaño, forma y consistencia normales. ';
+        } else {
+            if (lobuloDerechoHallazgos.length > 0) {
+                conclusion += `Lóbulo derecho ${lobuloDerechoHallazgos.join(' y ')}. `;
+            } else if (document.getElementById('lobulo-der-normal')?.checked) {
+                conclusion += 'Lóbulo derecho normal. ';
+            }
+            
+            if (lobuloIzquierdoHallazgos.length > 0) {
+                conclusion += `Lóbulo izquierdo ${lobuloIzquierdoHallazgos.join(' y ')}. `;
+            } else if (document.getElementById('lobulo-izq-normal')?.checked) {
+                conclusion += 'Lóbulo izquierdo normal. ';
+            }
+        }
+
+        // Nódulos tiroideos
+        const nodulos = [];
+        ['der', 'izq'].forEach(lado => {
+            [1, 2].forEach(num => {
+                const size = document.getElementById(`nodulo-${lado}-${num}-size`)?.value;
+                const mobile = document.getElementById(`nodulo-${lado}-${num}-mobile`)?.checked;
+                if (size && size > 0) {
+                    const ladoTexto = lado === 'der' ? 'derecho' : 'izquierdo';
+                    const movilidad = mobile ? 'móvil' : 'fijo';
+                    nodulos.push(`nódulo ${ladoTexto} ${num} de ${size} cm, ${movilidad}`);
+                }
+            });
+        });
+        if (nodulos.length > 0) conclusion += `Se palpa ${nodulos.join(', ')}. `;
+
+        // Istmo tiroideo
+        if (document.getElementById('istmo-aumentado')?.checked || document.getElementById('istmo-nodular')?.checked) {
+            const istmoHallazgos = [];
+            if (document.getElementById('istmo-aumentado')?.checked) istmoHallazgos.push('aumentado');
+            if (document.getElementById('istmo-nodular')?.checked) istmoHallazgos.push('nodular');
+            conclusion += `Istmo ${istmoHallazgos.join(' y ')}. `;
+        } else if (document.getElementById('istmo-normal')?.checked) {
+            conclusion += 'Istmo normal. ';
+        }
+        conclusion += '\n\n';
+    }
+
+    // === 5. SIGNOS DE DISFUNCIÓN TIROIDEA ===
+    const signosHipertiroidismo = [];
+    ['temblor-fino', 'piel-caliente-humeda', 'hiperreflexia', 'exoftalmos',
+     'retraccion-palpebral', 'signo-graefe', 'mixedema-pretibial'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            signosHipertiroidismo.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    const signosHipotiroidismo = [];
+    ['bradicinesia', 'piel-seca-fria', 'hiporreflexia', 'edema-facial',
+     'cabello-quebradizo', 'macroglosia', 'relajacion-aquiliana-retardada'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            signosHipotiroidismo.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    if (signosHipertiroidismo.length > 0 || signosHipotiroidismo.length > 0) {
+        conclusion += 'SIGNOS DE DISFUNCIÓN TIROIDEA:\n';
+        if (signosHipertiroidismo.length > 0) conclusion += `Signos sugestivos de hipertiroidismo: ${signosHipertiroidismo.join(', ')}. `;
+        if (signosHipotiroidismo.length > 0) conclusion += `Signos sugestivos de hipotiroidismo: ${signosHipotiroidismo.join(', ')}. `;
+        conclusion += '\n\n';
+    }
+
+    // === 6. EVALUACIÓN METABÓLICA Y GLUCÉMICA ===
+    const glucemiaAyunas = document.getElementById('glucemia-ayunas')?.value;
+    const glucemiaPostprandial = document.getElementById('glucemia-postprandial')?.value;
+    const hba1c = document.getElementById('hba1c')?.value;
+    const clasificacionGlucemia = document.getElementById('clasificacion-glucemia')?.textContent;
+    const clasificacionHbA1c = document.getElementById('clasificacion-hba1c')?.textContent;
+
+    if (glucemiaAyunas || glucemiaPostprandial || hba1c) {
+        conclusion += 'EVALUACIÓN GLUCÉMICA:\n';
+        if (glucemiaAyunas) conclusion += `Glucemia en ayunas: ${glucemiaAyunas} mg/dL (${clasificacionGlucemia}). `;
+        if (glucemiaPostprandial) conclusion += `Glucemia postprandial 2 horas: ${glucemiaPostprandial} mg/dL. `;
+        if (hba1c) conclusion += `Hemoglobina glicosilada (HbA1c): ${hba1c}% (${clasificacionHbA1c}). `;
+        conclusion += '\n\n';
+    }
+
+    // -- Signos de Descompensación Diabética --
+    const signosDescompensacion = [];
+    ['deshidratacion', 'aliento-cetonico', 'respiracion-kussmaul', 'alteracion-conciencia',
+     'nauseas-vomitos', 'dolor-abdominal'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            signosDescompensacion.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    if (signosDescompensacion.length > 0) {
+        conclusion += `SIGNOS DE DESCOMPENSACIÓN METABÓLICA: ${signosDescompensacion.join(', ')}.\n\n`;
+    }
+
+    // === 7. EVALUACIÓN COMPLETA DE PIES DIABÉTICOS ===
+    const hallazgosPiesDer = [];
+    const hallazgosPiesIzq = [];
+    
+    ['callos', 'ulceras', 'deformidades', 'piel-seca', 'micosis'].forEach(hallazgo => {
+        if (document.getElementById(`pie-der-${hallazgo}`)?.checked) {
+            hallazgosPiesDer.push(hallazgo === 'ulceras' ? 'úlceras' : hallazgo);
+        }
+        if (document.getElementById(`pie-izq-${hallazgo}`)?.checked) {
+            hallazgosPiesIzq.push(hallazgo === 'ulceras' ? 'úlceras' : hallazgo);
+        }
+    });
+
+    const pruebasAlteradasDer = [];
+    const pruebasAlteradasIzq = [];
+    const pruebasNormalesDer = [];
+    const pruebasNormalesIzq = [];
+    
+    // Pruebas pie derecho
+    if (document.getElementById('vibracion-der-alterada')?.checked) pruebasAlteradasDer.push('sensibilidad vibratoria alterada');
+    if (document.getElementById('vibracion-der-normal')?.checked) pruebasNormalesDer.push('sensibilidad vibratoria normal');
+    if (document.getElementById('monofilamento-der-alterado')?.checked) pruebasAlteradasDer.push('monofilamento 10g alterado');
+    if (document.getElementById('monofilamento-der-normal')?.checked) pruebasNormalesDer.push('monofilamento 10g normal');
+    if (document.getElementById('pulsos-der-ausentes')?.checked) pruebasAlteradasDer.push('pulsos pedios ausentes');
+    if (document.getElementById('pulsos-der-presentes')?.checked) pruebasNormalesDer.push('pulsos pedios presentes');
+    
+    // Pruebas pie izquierdo
+    if (document.getElementById('vibracion-izq-alterada')?.checked) pruebasAlteradasIzq.push('sensibilidad vibratoria alterada');
+    if (document.getElementById('vibracion-izq-normal')?.checked) pruebasNormalesIzq.push('sensibilidad vibratoria normal');
+    if (document.getElementById('monofilamento-izq-alterado')?.checked) pruebasAlteradasIzq.push('monofilamento 10g alterado');
+    if (document.getElementById('monofilamento-izq-normal')?.checked) pruebasNormalesIzq.push('monofilamento 10g normal');
+    if (document.getElementById('pulsos-izq-ausentes')?.checked) pruebasAlteradasIzq.push('pulsos pedios ausentes');
+    if (document.getElementById('pulsos-izq-presentes')?.checked) pruebasNormalesIzq.push('pulsos pedios presentes');
+
+    if (hallazgosPiesDer.length > 0 || hallazgosPiesIzq.length > 0 || pruebasAlteradasDer.length > 0 || 
+        pruebasAlteradasIzq.length > 0 || pruebasNormalesDer.length > 0 || pruebasNormalesIzq.length > 0 ||
+        document.getElementById('pie-der-normal')?.checked || document.getElementById('pie-izq-normal')?.checked) {
+        
+        conclusion += 'EVALUACIÓN DE PIES:\n';
+        
+        // Pie derecho
+        conclusion += 'Pie derecho: ';
+        if (document.getElementById('pie-der-normal')?.checked && pruebasAlteradasDer.length === 0) {
+            conclusion += 'aspecto normal';
+            if (pruebasNormalesDer.length > 0) conclusion += `, ${pruebasNormalesDer.join(', ')}`;
+        } else {
+            const hallazgosTotalesDer = [...hallazgosPiesDer, ...pruebasAlteradasDer, ...pruebasNormalesDer];
+            if (hallazgosTotalesDer.length > 0) conclusion += hallazgosTotalesDer.join(', ');
+        }
+        conclusion += '. ';
+        
+        // Pie izquierdo
+        conclusion += 'Pie izquierdo: ';
+        if (document.getElementById('pie-izq-normal')?.checked && pruebasAlteradasIzq.length === 0) {
+            conclusion += 'aspecto normal';
+            if (pruebasNormalesIzq.length > 0) conclusion += `, ${pruebasNormalesIzq.join(', ')}`;
+        } else {
+            const hallazgosTotalesIzq = [...hallazgosPiesIzq, ...pruebasAlteradasIzq, ...pruebasNormalesIzq];
+            if (hallazgosTotalesIzq.length > 0) conclusion += hallazgosTotalesIzq.join(', ');
+        }
+        conclusion += '. ';
+        conclusion += '\n\n';
+    }
+
+    // === 8. ESCALAS DE RIESGO Y CRITERIOS DIAGNÓSTICOS ===
+    const findriskScore = document.getElementById('findrisk-score')?.textContent;
+    const findriskRisk = document.getElementById('findrisk-risk')?.textContent;
+    const smCriterios = document.getElementById('sm-criterios')?.textContent;
+    const smDiagnosis = document.getElementById('sm-diagnosis')?.textContent;
+    const diabetesCriterios = document.getElementById('diabetes-criterios')?.textContent;
+    const diabetesDiagnosis = document.getElementById('diabetes-diagnosis')?.textContent;
+    
+    if (findriskScore !== '0' || (smDiagnosis && smDiagnosis !== '--') || (diabetesDiagnosis && diabetesDiagnosis !== '--')) {
+        conclusion += 'ESCALAS DE RIESGO Y CRITERIOS DIAGNÓSTICOS:\n';
+        
+        if (findriskScore && findriskScore !== '0') {
+            conclusion += `FINDRISK: ${findriskScore}/25 puntos, riesgo de desarrollar diabetes a 10 años ${findriskRisk}. `;
+        }
+        
+        if (smDiagnosis && smDiagnosis !== '--') {
+            const cumpleSM = smDiagnosis.includes('SÍ') ? 'Cumple' : 'No cumple';
+            conclusion += `Síndrome metabólico (criterios IDF): ${cumpleSM} criterios diagnósticos (${smCriterios}/5 criterios). `;
+        }
+        
+        if (diabetesDiagnosis && diabetesDiagnosis !== '--') {
+            const cumpleDM = diabetesDiagnosis.includes('SÍ') ? 'Cumple' : 'No cumple';
+            conclusion += `Diabetes mellitus (criterios ADA 2024): ${cumpleDM} criterios diagnósticos (${diabetesCriterios}/4 criterios). `;
+        }
+        conclusion += '\n\n';
+    }
+
+    // === 9. EVALUACIÓN REPRODUCTIVA Y HORMONAL COMPLETA ===
+    const edadMenarquia = document.getElementById('edad-menarquia')?.value;
+    const ciclosDias = document.getElementById('ciclos-dias')?.value;
+    const numeroEmbarazos = document.getElementById('numero-embarazos')?.value;
+    const numeroPartos = document.getElementById('numero-partos')?.value;
+    const ferrimanScore = document.getElementById('ferriman-gallwey')?.value;
+    const hirsutismInterpretation = document.getElementById('hirsutism-interpretation')?.textContent;
+    const volumenTestDer = document.getElementById('volumen-testicular-der')?.value;
+    const volumenTestIzq = document.getElementById('volumen-testicular-izq')?.value;
+
+    // Historia reproductiva femenina
+    const alteracionesMenstruales = [];
+    ['oligomenorrea', 'amenorrea', 'menorragia', 'dismenorrea', 'menopausia'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            alteracionesMenstruales.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    // Síntomas androgénicos femeninos
+    const sintomasAndrogenicos = [];
+    ['acne', 'hirsutismo-score', 'alopecia-androgenica-fem', 'voz-grave', 'clitoromegalia'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            sintomasAndrogenicos.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    // Síntomas de hipogonadismo masculino
+    const sintomasHipogonadismo = [];
+    ['libido-disminuida', 'disfuncion-erectil-masc', 'fatiga-masculina', 
+     'perdida-masa-muscular', 'osteoporosis-masculina', 'ginecomastia-masc'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            sintomasHipogonadismo.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    // Hallazgos genitales masculinos
+    const hallazgosGenitales = [];
+    ['testiculos-pequeños', 'varicocele', 'hidrocele'].forEach(id => {
+        if (document.getElementById(id)?.checked) {
+            hallazgosGenitales.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+        }
+    });
+
+    if (edadMenarquia || alteracionesMenstruales.length > 0 || sintomasAndrogenicos.length > 0 ||
+        ferrimanScore > 0 || volumenTestDer || volumenTestIzq || sintomasHipogonadismo.length > 0 ||
+        hallazgosGenitales.length > 0 || document.getElementById('testiculos-normales')?.checked ||
+        document.getElementById('ciclos-regulares')?.checked) {
+        
+        conclusion += 'EVALUACIÓN REPRODUCTIVA Y HORMONAL:\n';
+        
+        // Historia gineco-obstétrica
+        if (edadMenarquia || alteracionesMenstruales.length > 0 || numeroEmbarazos || numeroPartos || 
+            document.getElementById('ciclos-regulares')?.checked) {
+            conclusion += `Historia gineco-obstétrica: `;
+            if (edadMenarquia) conclusion += `menarquia a los ${edadMenarquia} años`;
+            if (ciclosDias) conclusion += `, ciclos de ${ciclosDias} días`;
+            if (document.getElementById('ciclos-regulares')?.checked) conclusion += ', ciclos regulares';
+            if (alteracionesMenstruales.length > 0) conclusion += `, presenta ${alteracionesMenstruales.join(', ')}`;
+            if (numeroEmbarazos || numeroPartos) {
+                conclusion += '. Fórmula obstétrica: G${numeroEmbarazos || 0}P${numeroPartos || 0}';
+            }
+            conclusion += '. ';
+        }
+        
+        // Evaluación androgénica
+        if (sintomasAndrogenicos.length > 0 || ferrimanScore > 0) {
+            conclusion += `Evaluación androgénica: `;
+            if (sintomasAndrogenicos.length > 0) conclusion += `${sintomasAndrogenicos.join(', ')}`;
+            if (ferrimanScore && ferrimanScore > 0) {
+                if (sintomasAndrogenicos.length > 0) conclusion += ', ';
+                conclusion += `escala Ferriman-Gallwey ${ferrimanScore}/36 (${hirsutismInterpretation})`;
+            }
+            conclusion += '. ';
+        }
+        
+        // Evaluación masculina
+        if (volumenTestDer || volumenTestIzq || hallazgosGenitales.length > 0 || 
+            document.getElementById('testiculos-normales')?.checked) {
+            conclusion += `Examen genital masculino: `;
+            if (document.getElementById('testiculos-normales')?.checked && hallazgosGenitales.length === 0) {
+                conclusion += 'testículos de aspecto normal';
+                if (volumenTestDer) conclusion += `, volumen testicular derecho ${volumenTestDer} mL`;
+                if (volumenTestIzq) conclusion += `, izquierdo ${volumenTestIzq} mL`;
+            } else {
+                if (volumenTestDer) conclusion += `volumen testicular derecho ${volumenTestDer} mL`;
+                if (volumenTestIzq) {
+                    if (volumenTestDer) conclusion += ', ';
+                    conclusion += `izquierdo ${volumenTestIzq} mL`;
+                }
+                if (hallazgosGenitales.length > 0) {
+                    if (volumenTestDer || volumenTestIzq) conclusion += ', ';
+                    conclusion += `${hallazgosGenitales.join(', ')}`;
+                }
+            }
+            conclusion += '. ';
+        }
+        
+        // Síntomas de hipogonadismo
+        if (sintomasHipogonadismo.length > 0) {
+            conclusion += `Síntomas sugestivos de hipogonadismo: ${sintomasHipogonadismo.join(', ')}. `;
+        }
+        
+        conclusion += '\n\n';
+    }
+
+    // === 10. CONCLUSIÓN FINAL ===
+    if (conclusion.trim() === 'EXAMEN ENDOCRINOLÓGICO\n\nEXAMEN FÍSICO:\n') {
+        conclusion = 'Seleccione los parámetros del examen para generar la conclusión endocrinológica...';
+    } else {
+        conclusion += 'IMPRESIÓN DIAGNÓSTICA:\n[Pendiente de correlación con estudios hormonales y bioquímicos]\n\n';
+        conclusion += 'PLAN DE MANEJO:\n[A determinar según hallazgos clínicos y resultados de laboratorio]\n\n';
+        conclusion += 'SEGUIMIENTO:\n[Control según patología endocrinológica sospechada]';
+    }
+
+    // Actualiza los elementos de la interfaz.
+    if (conclusionEl) conclusionEl.textContent = conclusion;
+    if (conclusionTraditional) conclusionTraditional.textContent = conclusion;
+    
+    // Actualiza el dashboard si existe la función
+    if (typeof updateDashboard === 'function') {
+        updateDashboard();
+    }
+}
+
+        function printConclusion() {
+            const conclusion = isSplitView ? 
+                document.getElementById('conclusion-text').textContent :
+                document.getElementById('conclusion-text-traditional').textContent;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Conclusión Examen Endocrinológico</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        pre { white-space: pre-wrap; font-family: 'Courier New', monospace; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Examen Endocrinológico - Conclusión</h1>
+                    <pre>${conclusion}</pre>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function clearForm() {
+            if (confirm('¿Está seguro de que desea limpiar todos los datos del formulario?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[type="radio"]').forEach(rb => rb.checked = false);
+                document.querySelectorAll('input[type="number"]').forEach(nb => nb.value = '');
+                document.querySelectorAll('input[type="range"]').forEach(rb => rb.value = 0);
+                document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+                
+                // Resetear valores específicos
+                document.getElementById('interpretacion-peso').textContent = '--';
+                document.getElementById('interpretacion-poliuria').textContent = '--';
+                document.getElementById('imc-value').textContent = '--';
+                document.getElementById('imc-classification').textContent = '--';
+                document.getElementById('whr-value').textContent = '--';
+                document.getElementById('waist-risk').textContent = '--';
+                document.getElementById('bp-classification').textContent = '--';
+                document.getElementById('hr-classification').textContent = '--';
+                document.getElementById('clasificacion-glucemia').textContent = '--';
+                document.getElementById('clasificacion-hba1c').textContent = '--';
+                document.getElementById('findrisk-score').textContent = '0';
+                document.getElementById('findrisk-risk').textContent = '--';
+                document.getElementById('sm-criterios').textContent = '0';
+                document.getElementById('sm-diagnosis').textContent = '--';
+                document.getElementById('diabetes-criterios').textContent = '0';
+                document.getElementById('diabetes-diagnosis').textContent = '--';
+                document.getElementById('hirsutism-interpretation').textContent = '--';
+                
+                // Habilitar checkboxes que podrían estar deshabilitados
+                document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-endo)').forEach(cb => cb.disabled = false);
+                
+                generateConclusion();
+            }
+        }
+        
+        // ========== INICIALIZACIÓN ==========
+        document.addEventListener('DOMContentLoaded', () => {
+            // Restaurar modo oscuro si se guardó previamente
+            try {
+                const savedDarkMode = localStorage.getItem('endocrinology-dark-mode');
+                if (savedDarkMode === 'true' && !document.body.classList.contains('dark-mode')) {
+                    toggleDarkMode();
+                }
+            } catch (e) {
+                // No hacer nada si el almacenamiento local no está disponible
+            }
+
+            // Event listeners para inputs generales
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                el.addEventListener('change', generateConclusion);
+                el.addEventListener('input', generateConclusion);
+            });
+             
+            // Event listeners específicos para cálculos
+            document.querySelectorAll('input[name^="findrisk-"]').forEach(el => {
+                el.addEventListener('change', calculateFINDRISK);
+            });
+
+            document.querySelectorAll('#sm-cintura, #sm-trigliceridos, #sm-hdl, #sm-presion, #sm-glucemia').forEach(el => {
+                el.addEventListener('change', calculateMetabolicSyndrome);
+            });
+
+            document.querySelectorAll('#diabetes-ayunas, #diabetes-hba1c, #diabetes-postcarga, #diabetes-random').forEach(el => {
+                el.addEventListener('change', calculateDiabetesCriteria);
+            });
+             
+            // Ajustar altura de secciones cuando cambian
+            document.querySelector('.main-container').addEventListener('change', (event) => {
+                const sectionContent = event.target.closest('.section-content.expanded');
+                if (sectionContent) {
+                    updateSectionHeight(sectionContent);
+                }
+            });
+             
+            // Expandir la primera sección por defecto
+            toggleSection(document.querySelector('.section-header'));
+            
+            // Inicializar evaluaciones
+            calculateBMI();
+            calculateWHR();
+            evaluateWaistCircumference();
+            evaluateBloodPressure();
+            evaluateHeartRate();
+            evaluateGlucose();
+            evaluateHbA1c();
+            calculateFINDRISK();
+            calculateMetabolicSyndrome();
+            calculateDiabetesCriteria();
+            evaluateHirsutism();
+            generateConclusion();
+        });
+    </script>
+</body>
+</html>

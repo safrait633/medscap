@@ -1,0 +1,3231 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evaluación Geriátrica Integral - Algoritmo Premium</title>
+    <!-- Fuentes y Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./styles/main.css">
+    <link rel="stylesheet" href="./styles/dashboard.css">
+    <style>
+        /* Variables CSS para el tema y colores */
+        :root {
+            --primary-gradient: linear-gradient(135deg, #6c5ce7 0%, #5a4fcf 100%); /* Púrpura para geriatría */
+            --secondary-gradient: linear-gradient(135deg, #00b894 0%, #00a085 100%); /* Verde esmeralda */
+            --alert-gradient: linear-gradient(135deg, #e17055 0%, #d63031 100%); /* Rojo coral */
+            --warning-gradient: linear-gradient(135deg, #fdcb6e 0%, #e17055 100%); /* Naranja suave */
+            --normal-color: #00b894; /* Verde para positivo/normal */
+            --warning-color: #fdcb6e; /* Naranja para advertencias */
+            --alert-color: #e17055; /* Rojo coral para alertas */
+            --info-color: #6c5ce7; /* Púrpura para información */
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --dark-bg: #2d3436;
+            --dark-card: #636e72;
+            --text-color-light: #2d3436;
+            --text-color-dark: #ffffff;
+        }
+
+        /* Modo Oscuro */
+        [data-theme="dark"] {
+            --light-bg: var(--dark-bg);
+            --card-bg: var(--dark-card);
+            color: var(--text-color-dark);
+        }
+
+        /* Estilos generales del cuerpo */
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding-top: 160px;
+            background-color: var(--light-bg);
+            line-height: 1.6;
+            transition: all 0.3s ease;
+            color: var(--text-color-light);
+        }
+        
+        /* 🎪 DASHBOARD SUPERIOR FIJO */
+        .dashboard-fixed {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary-gradient);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-content {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 15px 20px;
+        }
+
+        .dashboard-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+
+        .dashboard-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 6px 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+            color: white;
+            text-align: center;
+            font-size: 11px;
+            flex: 1 1 auto;
+            min-width: 80px;
+            max-width: 150px;
+        }
+
+        .dashboard-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .dashboard-item i {
+            font-size: 16px;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .dashboard-alert {
+            color: var(--alert-color) !important;
+            animation: pulse 2s infinite;
+        }
+
+        .dashboard-warning {
+            color: var(--warning-color) !important;
+        }
+
+        .dashboard-normal {
+            color: var(--normal-color) !important;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 🎛️ CONTROLES SUPERIORES */
+        .control-bar {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .control-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .control-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-primary { background: var(--primary-gradient); }
+        .btn-success { background: var(--secondary-gradient); }
+        .btn-warning { background: var(--warning-gradient); }
+        .btn-danger { background: var(--alert-gradient); }
+
+        /* 🎯 PANEL LATERAL DE NAVEGACIÓN */
+        .nav-panel {
+            position: fixed;
+            left: 20px;
+            top: 160px;
+            width: 280px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+            z-index: 998;
+            transform: translateX(-320px);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-panel.open {
+            transform: translateX(0);
+        }
+
+        .nav-panel h3 {
+            margin: 0 0 15px 0;
+            color: var(--info-color);
+            font-size: 16px;
+            border-bottom: 2px solid var(--info-color);
+            padding-bottom: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            margin: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+
+        .nav-item:hover {
+            background: rgba(108, 92, 231, 0.1);
+        }
+
+        .nav-item.completed {
+            background: rgba(0, 184, 148, 0.1);
+            color: var(--normal-color);
+        }
+
+        .nav-item.completed i {
+            color: var(--normal-color);
+        }
+
+        .nav-item i {
+            width: 16px;
+            text-align: center;
+        }
+
+        /* 📊 PANEL LATERAL STICKY */
+        .sticky-panel {
+            position: fixed;
+            top: 160px;
+            right: -420px;
+            width: 400px;
+            height: calc(100vh - 180px);
+            background: var(--card-bg);
+            border-radius: 12px 0 0 12px;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
+            z-index: 997;
+            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            overflow: hidden;
+            border: 2px solid var(--primary-gradient);
+        }
+
+        .sticky-panel.active {
+            right: 0;
+        }
+
+        .sticky-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .sticky-controls {
+            display: flex;
+            gap: 8px;
+        }
+
+        .sticky-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            border-radius: 4px;
+            padding: 6px 10px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .sticky-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+
+        .sticky-content {
+            padding: 20px;
+            height: calc(100% - 70px);
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            background: var(--light-bg);
+        }
+
+        .update-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--primary-gradient);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            z-index: 10;
+        }
+
+        .update-indicator.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top: 2px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Notificación de copia */
+        .copy-notification {
+            position: fixed;
+            top: 200px;
+            right: 20px;
+            background: var(--normal-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            opacity: 0;
+            transform: translateX(100px);
+            transition: all 0.3s ease;
+            z-index: 1002;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .copy-notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Ajustar contenido principal cuando panel está activo */
+        body.split-view-active .main-container {
+            margin-right: 420px;
+            transition: margin-right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        body.split-view .main-container {
+            margin-left: 320px;
+            margin-right: 20px;
+            transition: margin-left 0.3s ease, margin-right 0.3s ease;
+        }
+
+        /* Contenedor principal */
+        .main-container {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin: 0 20px;
+            transition: all 0.3s ease;
+        }
+        
+        /* Título principal */
+        h1 {
+            color: var(--text-color-light);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            padding-bottom: 15px;
+        }
+        
+        /* Secciones */
+        .section {
+            margin-bottom: 25px;
+            border: 2px solid #ecf0f1;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: var(--card-bg);
+        }
+        
+        .section.active {
+            border-color: var(--info-color);
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.15);
+        }
+
+        .section-header {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .section-header:hover {
+            box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
+        }
+        
+        .section-header .arrow {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .section-header.expanded .arrow {
+            transform: rotate(180deg);
+        }
+
+        .section-header .completion-badge {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+
+        .section-header .completion-badge.completed {
+            background: var(--normal-color);
+        }
+        
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            background: var(--light-bg);
+        }
+        
+        .section-content.expanded {
+            padding: 20px;
+        }
+        
+        /* Contenedores de examen */
+        .exam-container {
+            background: var(--card-bg);
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+        }
+        .exam-container:hover {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .exam-header {
+            font-size: 18px;
+            font-weight: 600;
+            background: var(--secondary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin: -20px -20px 15px -20px;
+            padding: 12px 20px;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .exam-section {
+            background: var(--light-bg);
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .exam-section h4 {
+            color: var(--text-color-light);
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sub-header {
+            color: var(--info-color);
+            margin: 15px 0 8px 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .checkbox-item:hover {
+            background: rgba(108, 92, 231, 0.05);
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: var(--normal-color);
+        }
+        .checkbox-item input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+            accent-color: var(--normal-color);
+        }
+        
+        .checkbox-item label {
+            font-size: 13px;
+            color: var(--text-color-light);
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+        .checkbox-item input:checked + label {
+            color: var(--normal-color);
+            font-weight: 500;
+        }
+        
+        .measurement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        
+        .measurement label {
+            font-size: 12px;
+            color: #5d6d7e;
+            flex-basis: 150px;
+            flex-shrink: 0;
+        }
+        
+        .input-field {
+            width: 80px;
+            padding: 6px 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--info-color);
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--light-bg);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .score-value {
+            font-weight: 700;
+            color: var(--normal-color);
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin: 15px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-color-light);
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+        }
+
+        .cognitive-color { background-color: var(--info-color); }
+        .functional-color { background-color: var(--secondary-gradient); }
+        .nutritional-color { background-color: var(--warning-color); }
+        .social-color { background-color: #e83e8c; }
+        .fragility-color { background-color: var(--alert-color); }
+
+        /* Estilos específicos para evaluaciones geriátricas */
+        .cognitive-assessment {
+            background-color: rgba(108, 92, 231, 0.08);
+            border: 1px solid var(--info-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .functional-assessment {
+            background-color: rgba(0, 184, 148, 0.08);
+            border: 1px solid var(--normal-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .nutritional-assessment {
+            background-color: rgba(253, 203, 110, 0.08);
+            border: 1px solid var(--warning-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .social-assessment {
+            background-color: rgba(232, 62, 140, 0.08);
+            border: 1px solid #e83e8c;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .fragility-assessment {
+            background-color: rgba(225, 112, 85, 0.08);
+            border: 1px solid var(--alert-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .bilateral-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .side-container {
+            background-color: var(--card-bg);
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        .side-container:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .side-header {
+            background-color: var(--light-bg);
+            color: var(--text-color-light);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 0.9rem;
+            border-bottom: 2px solid var(--info-color);
+        }
+
+        .test-results {
+            margin-top: 15px;
+        }
+
+        .test-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--light-bg);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+        .test-item:hover {
+            border-color: var(--info-color);
+            box-shadow: 0 2px 8px rgba(108, 92, 231, 0.1);
+        }
+
+        .test-controls {
+            display: flex;
+            gap: 15px;
+        }
+
+        .test-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .test-checkbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: var(--normal-color);
+        }
+
+        .positive {
+            color: var(--alert-color);
+            font-weight: 600;
+        }
+
+        .negative {
+            color: var(--normal-color);
+            font-weight: 600;
+        }
+
+        .score-calculation {
+            background-color: rgba(108, 92, 231, 0.08);
+            border: 1px solid #c5b9ff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .severity-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .severity-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px;
+            background-color: var(--card-bg);
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        .severity-item:hover {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+        }
+
+        .severity-item input[type="radio"] {
+            accent-color: var(--normal-color);
+        }
+
+        .severity-item label {
+            font-size: 0.85rem;
+            cursor: pointer;
+            color: var(--text-color-light);
+        }
+
+        /* Conclusión */
+        .conclusion {
+            margin-top: 30px;
+            padding: 25px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 2px solid #dee2e6;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .conclusion::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+        }
+        
+        .conclusion h3 {
+            color: var(--text-color-light);
+            margin-bottom: 15px;
+        }
+        
+        .conclusion-text {
+            padding: 20px;
+            background: var(--light-bg);
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        /* Botones de control */
+        .control-buttons {
+            margin-top: 25px;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a4fcf;
+            box-shadow: 0 4px 15px rgba(108, 92, 231, 0.3);
+        }
+
+        /* TOGGLE DE TEMA */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1001;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1);
+        }
+
+        /* BOTÓN HOME */
+        .home-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--normal-color);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1001;
+            transition: all 0.3s ease;
+        }
+        
+        .home-button:hover {
+            background-color: #00a085;
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+        }
+
+        /* Animaciones */
+        @keyframes slideIn {
+            from { transform: translateX(-20px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .slide-in {
+            animation: slideIn 0.3s ease forwards;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .sticky-panel {
+                width: 350px;
+            }
+            
+            body.split-view-active .main-container {
+                margin-right: 370px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body { padding-top: 120px; }
+            
+            .control-bar {
+                position: relative;
+                top: auto;
+                right: auto;
+                justify-content: center;
+                margin: 10px 0;
+            }
+            
+            .nav-panel {
+                transform: translateX(-100%);
+                width: calc(100vw - 40px);
+            }
+            
+            .main-container {
+                margin: 0 10px;
+            }
+            
+            body.split-view .main-container {
+                margin-left: 10px;
+            }
+
+            .sticky-panel {
+                width: calc(100vw - 20px);
+                right: -100vw;
+                left: 10px;
+                border-radius: 12px;
+            }
+            
+            .sticky-panel.active {
+                right: auto;
+                left: 10px;
+            }
+            
+            body.split-view-active .main-container {
+                margin-right: 10px;
+            }
+            
+            .checkbox-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bilateral-container {
+                grid-template-columns: 1fr;
+            }
+            .severity-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 🌙 TOGGLE DE TEMA -->
+    <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
+        <i class="fas fa-moon" id="theme-icon"></i>
+    </button>
+
+    <!-- 🏠 BOTÓN HOME -->
+    <a href="index.html" class="home-button" title="Inicio">
+        <i class="fas fa-home"></i>
+    </a>
+    
+    <!-- 🎪 DASHBOARD SUPERIOR FIJO -->
+    <div class="dashboard-fixed">
+        <div class="dashboard-content">
+            <div class="dashboard-grid">
+                <div class="dashboard-item">
+                    <i class="fas fa-user-cog"></i>
+                    <div>Evaluación</div>
+                    <div id="exam-progress">0%</div>
+                </div>
+                <div class="dashboard-item">
+                    <i class="fas fa-list-check"></i>
+                    <div>Secciones</div>
+                    <div id="sections-completed">0/7</div>
+                </div>
+                <div class="dashboard-item dashboard-alert" id="alerts-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>Alertas</div>
+                    <div id="alert-count">0</div>
+                </div>
+                <div class="dashboard-item dashboard-warning" id="warnings-item">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>Avisos</div>
+                    <div id="warning-count">0</div>
+                </div>
+                <div class="dashboard-item dashboard-normal" id="findings-item">
+                    <i class="fas fa-search"></i>
+                    <div>Hallazgos</div>
+                    <div id="findings-count">0</div>
+                </div>
+                <div class="dashboard-item" id="cognitive-status-item">
+                    <i class="fas fa-brain"></i>
+                    <div>Cognitivo</div>
+                    <div id="cognitive-status">Pendiente</div>
+                </div>
+                <div class="dashboard-item" id="functional-status-item">
+                    <i class="fas fa-walking"></i>
+                    <div>Funcional</div>
+                    <div id="functional-status">Pendiente</div>
+                </div>
+            </div>
+            <div class="control-bar">
+                <button class="control-btn btn-primary" onclick="toggleNavPanel()">
+                    <i class="fas fa-bars"></i> Navegación
+                </button>
+                <button class="control-btn btn-primary" onclick="toggleStickyPanel()" id="sticky-toggle-btn">
+                    <i class="fas fa-columns"></i> Vista Dividida
+                </button>
+                <button class="control-btn btn-success" onclick="generateConclusion()">
+                    <i class="fas fa-file-medical"></i> Generar
+                </button>
+                <button class="control-btn btn-warning" onclick="expandAllSections()">
+                    <i class="fas fa-expand-alt"></i> Expandir
+                </button>
+                <button class="control-btn btn-danger" onclick="clearForm()">
+                    <i class="fas fa-trash"></i> Limpiar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎯 PANEL LATERAL DE NAVEGACIÓN -->
+    <div class="nav-panel" id="nav-panel">
+        <h3><i class="fas fa-map"></i> Navegación Rápida</h3>
+        <div class="nav-item" onclick="scrollToSection('anamnesis')">
+            <i class="fas fa-clipboard-list"></i>
+            <span>Anamnesis</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-anamnesis"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('physical-exam')">
+            <i class="fas fa-stethoscope"></i>
+            <span>Examen Físico</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-physical-exam"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('cognitive-assessment')">
+            <i class="fas fa-brain"></i>
+            <span>Evaluación Cognitiva</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-cognitive-assessment"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('functional-assessment')">
+            <i class="fas fa-walking"></i>
+            <span>Evaluación Funcional</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-functional-assessment"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('nutritional-assessment')">
+            <i class="fas fa-utensils"></i>
+            <span>Evaluación Nutricional</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-nutritional-assessment"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('social-assessment')">
+            <i class="fas fa-users"></i>
+            <span>Evaluación Social</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-social-assessment"></i>
+        </div>
+        <div class="nav-item" onclick="scrollToSection('risk-assessment')">
+            <i class="fas fa-shield-alt"></i>
+            <span>Evaluación de Riesgos</span>
+            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-risk-assessment"></i>
+        </div>
+    </div>
+
+    <!-- 📊 PANEL LATERAL STICKY -->
+    <div class="sticky-panel" id="stickyConclusion">
+        <div class="sticky-header">
+            <span><i class="fas fa-file-medical-alt"></i> Informe Geriátrico en Tiempo Real</span>
+            <div class="sticky-controls">
+                <button class="sticky-btn" onclick="copyStickyToClipboard()" title="Copiar informe">
+                    <i class="fas fa-copy"></i>
+                </button>
+                <button class="sticky-btn" onclick="printStickyConclusion()" title="Imprimir informe">
+                    <i class="fas fa-print"></i>
+                </button>
+                <button class="sticky-btn" onclick="generateStickyConclusion()" title="Actualizar informe">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
+        </div>
+        <div class="sticky-content" id="stickyContent">
+            Seleccione los parámetros de la evaluación geriátrica para generar el informe en tiempo real...
+        </div>
+        <div class="update-indicator" id="updateIndicator">
+            <div class="spinner"></div>
+            <span>Actualizando informe...</span>
+        </div>
+    </div>
+
+    <!-- Notificación de copia -->
+    <div class="copy-notification" id="copyNotification">
+        <i class="fas fa-check-circle"></i>
+        <span>¡Informe copiado al portapapeles!</span>
+    </div>
+
+    <div class="main-container">
+        <h1><i class="fas fa-user-clock"></i> Evaluación Geriátrica Integral - Algoritmo Premium</h1>
+        
+        <!-- Anamnesis Geriátrica -->
+        <div class="section" id="section-anamnesis">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-clipboard-list"></i> Anamnesis Geriátrica</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-anamnesis">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="anamnesis">
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-info-circle"></i> Datos Demográficos</div>
+                    <div class="exam-section">
+                        <h4>Información Básica</h4>
+                        <div class="measurement">
+                            <label>Edad:</label>
+                            <input type="number" class="input-field" id="edad-paciente" min="65" max="120" onchange="updateDashboard()">
+                            <span>años</span>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="sexo" id="sexo-masculino" value="masculino" onchange="updateDashboard()"><label for="sexo-masculino">Masculino</label></div>
+                            <div class="checkbox-item"><input type="radio" name="sexo" id="sexo-femenino" value="femenino" onchange="updateDashboard()"><label for="sexo-femenino">Femenino</label></div>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="vive-solo"><label for="vive-solo">Vive solo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vive-familia"><label for="vive-familia">Vive con familia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vive-institucion"><label for="vive-institucion">Vive en institución</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cuidador-principal"><label for="cuidador-principal">Tiene cuidador principal</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-exclamation-triangle"></i> Motivo de Consulta</div>
+                    <div class="exam-section">
+                        <h4>Quejas Principales Geriátricas</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="caidas-recientes"><label for="caidas-recientes">Caídas recientes</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="perdida-memoria"><label for="perdida-memoria">Pérdida de memoria</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="confusion"><label for="confusion">Confusión</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="debilidad-general"><label for="debilidad-general">Debilidad general</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="perdida-peso-involuntaria"><label for="perdida-peso-involuntaria">Pérdida de peso involuntaria</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="incontinencia"><label for="incontinencia">Incontinencia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dificultad-caminar"><label for="dificultad-caminar">Dificultad para caminar</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dificultad-actividades"><label for="dificultad-actividades">Dificultad actividades diarias</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="dolor-cronico"><label for="dolor-cronico">Dolor crónico</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="insomnio"><label for="insomnio">Insomnio</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="depresion-ansiedad"><label for="depresion-ansiedad">Depresión/Ansiedad</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="problemas-vision"><label for="problemas-vision">Problemas de visión</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="problemas-audicion"><label for="problemas-audicion">Problemas de audición</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="sin-quejas-geriatricas" onchange="handleNoComplaints()"><label for="sin-quejas-geriatricas">Sin quejas específicas</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-history"></i> Antecedentes Médicos</div>
+                    <div class="exam-section">
+                        <h4>Comorbilidades Frecuentes</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="hipertension"><label for="hipertension">Hipertensión arterial</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="diabetes"><label for="diabetes">Diabetes mellitus</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cardiopatia"><label for="cardiopatia">Cardiopatía</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="avc"><label for="avc">ACV previo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="demencia"><label for="demencia">Demencia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="depresion"><label for="depresion">Depresión</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="osteoporosis"><label for="osteoporosis">Osteoporosis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="artritis"><label for="artritis">Artritis/Artrosis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="epoc"><label for="epoc">EPOC</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="insuficiencia-renal"><label for="insuficiencia-renal">Insuficiencia renal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cancer"><label for="cancer">Cáncer</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="parkinson"><label for="parkinson">Enfermedad de Parkinson</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Medicación Actual</h4>
+                        <div class="measurement">
+                            <label>Número de medicamentos:</label>
+                            <input type="number" class="input-field" id="numero-medicamentos" min="0" max="30" onchange="evaluatePolypharmacy()">
+                            <span>medicamentos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación MNA:</span>
+                            <span class="score-value" id="mna-score">0</span>
+                            <span>/14 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Estado nutricional:</span>
+                            <span class="score-value" id="mna-status">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación Social -->
+        <div class="section" id="section-social-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-users"></i> Evaluación Social</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-social-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="social-assessment">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color social-color"></div>
+                        <span>Evaluación Social</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-home"></i> Situación Sociofamiliar</div>
+                    <div class="social-assessment">
+                        <h4>Red de Apoyo Social</h4>
+                        <div class="exam-section">
+                            <h4>Situación Familiar</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="familia-disponible"><label for="familia-disponible">Familia disponible y dispuesta</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="familia-sobrecargada"><label for="familia-sobrecargada">Familia sobrecargada</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="familia-ausente"><label for="familia-ausente">Familia ausente o poco disponible</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="conflictos-familiares"><label for="conflictos-familiares">Conflictos familiares</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="aislamiento-social"><label for="aislamiento-social">Aislamiento social</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="maltrato-sospecha"><label for="maltrato-sospecha">Sospecha de maltrato</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Recursos Sociales</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="servicio-domestico"><label for="servicio-domestico">Servicio doméstico</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="centro-dia"><label for="centro-dia">Centro de día</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="teleasistencia"><label for="teleasistencia">Teleasistencia</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="ayuda-domiciliaria"><label for="ayuda-domiciliaria">Ayuda domiciliaria</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="recursos-inadecuados"><label for="recursos-inadecuados">Recursos inadecuados</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="sin-recursos"><label for="sin-recursos">Sin recursos sociales</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Situación Económica</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="economia-suficiente"><label for="economia-suficiente">Recursos económicos suficientes</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="economia-ajustada"><label for="economia-ajustada">Economía ajustada pero suficiente</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="economia-insuficiente"><label for="economia-insuficiente">Recursos económicos insuficientes</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="problemas-medicacion-economicos"><label for="problemas-medicacion-economicos">Problemas para costear medicación</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-shield-alt"></i> Escala de Gijón</div>
+                    <div class="score-calculation">
+                        <h4>Evaluación Sociofamiliar</h4>
+                        <div class="exam-section">
+                            <h4>Situación Familiar</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="gijon-familia" value="1" onchange="calculateGijon()"><label>Vive con familia sin dependencia físico/psíquica (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-familia" value="2" onchange="calculateGijon()"><label>Vive con familia, ligera dependencia (2)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-familia" value="3" onchange="calculateGijon()"><label>Vive con familia, marcada dependencia (3)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-familia" value="4" onchange="calculateGijon()"><label>Vive solo, buenas relaciones familiares (4)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-familia" value="5" onchange="calculateGijon()"><label>Vive solo, relaciones familiares escasas (5)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Situación Económica</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="gijon-economia" value="1" onchange="calculateGijon()"><label>Más de 1.5 veces el salario mínimo (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-economia" value="2" onchange="calculateGijon()"><label>Desde 1.5 veces a 1 vez el salario mínimo (2)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-economia" value="3" onchange="calculateGijon()"><label>Desde 1 vez el salario mínimo a pensión mínima (3)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-economia" value="4" onchange="calculateGijon()"><label>Pensión mínima (4)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-economia" value="5" onchange="calculateGijon()"><label>Sin pensión o subsidio social (5)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Vivienda</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="gijon-vivienda" value="1" onchange="calculateGijon()"><label>Adecuada a necesidades (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-vivienda" value="2" onchange="calculateGijon()"><label>Barreras arquitectónicas en la vivienda (2)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-vivienda" value="3" onchange="calculateGijon()"><label>Mala conservación, equipamiento inadecuado (3)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-vivienda" value="4" onchange="calculateGijon()"><label>Vivienda inadecuada (4)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-vivienda" value="5" onchange="calculateGijon()"><label>Vivienda inadecuada y peligrosa (5)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Relaciones Sociales</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="gijon-social" value="1" onchange="calculateGijon()"><label>Relaciones sociales (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-social" value="2" onchange="calculateGijon()"><label>Relación social sólo con familia/vecinos (2)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-social" value="3" onchange="calculateGijon()"><label>Relación social sólo con familia (3)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-social" value="4" onchange="calculateGijon()"><label>No sale del domicilio pero recibe visitas (4)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-social" value="5" onchange="calculateGijon()"><label>No sale y no recibe visitas (5)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Apoyo de la Red Social</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="gijon-apoyo" value="1" onchange="calculateGijon()"><label>Con apoyo familiar y vecinal (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-apoyo" value="2" onchange="calculateGijon()"><label>Voluntariado social, ayuda domiciliaria (2)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-apoyo" value="3" onchange="calculateGijon()"><label>No cuenta con nadie (3)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-apoyo" value="4" onchange="calculateGijon()"><label>Pendiente de ingreso en residencia (4)</label></div>
+                                <div class="severity-item"><input type="radio" name="gijon-apoyo" value="5" onchange="calculateGijon()"><label>Tiene cuidador pero con alto nivel de estrés (5)</label></div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación Escala de Gijón:</span>
+                            <span class="score-value" id="gijon-score">0</span>
+                            <span>/25 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Riesgo social:</span>
+                            <span class="score-value" id="gijon-risk">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación de Riesgos -->
+        <div class="section" id="section-risk-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-shield-alt"></i> Evaluación de Riesgos</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-risk-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="risk-assessment">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color fragility-color"></div>
+                        <span>Evaluación de Fragilidad</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-exclamation-triangle"></i> Escala de Fragilidad de Fried</div>
+                    <div class="fragility-assessment">
+                        <h4>Criterios de Fragilidad</h4>
+                        <div class="exam-section">
+                            <h4>Pérdida de Peso Involuntaria</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="fried-peso" onchange="calculateFried()"><label for="fried-peso">Pérdida >4.5 kg en el último año</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Agotamiento</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="fried-agotamiento" onchange="calculateFried()"><label for="fried-agotamiento">Se siente agotado/a</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Debilidad (Fuerza de Prensión)</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="fried-debilidad" onchange="calculateFried()"><label for="fried-debilidad">Fuerza de prensión disminuida</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Lentitud</h4>
+                            <div class="measurement">
+                                <label>Tiempo caminata 4.6m:</label>
+                                <input type="number" class="input-field" id="fried-tiempo-caminata" min="0" max="60" step="0.1" onchange="evaluateWalkingSpeed()">
+                                <span>segundos</span>
+                            </div>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="fried-lentitud" onchange="calculateFried()"><label for="fried-lentitud">Velocidad de marcha lenta</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Baja Actividad Física</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="fried-actividad" onchange="calculateFried()"><label for="fried-actividad">Actividad física baja</label></div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Criterios de fragilidad:</span>
+                            <span class="score-value" id="fried-score">0</span>
+                            <span>/5</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Estado de fragilidad:</span>
+                            <span class="score-value" id="fried-status">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-falling"></i> Evaluación del Riesgo de Caídas</div>
+                    <div class="exam-section">
+                        <h4>Factores de Riesgo de Caídas</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="caidas-previas"><label for="caidas-previas">Caídas previas (último año)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="miedo-caer"><label for="miedo-caer">Miedo a caer</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="mareos-vertigo"><label for="mareos-vertigo">Mareos/vértigo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="hipotension-ortostatica"><label for="hipotension-ortostatica">Hipotensión ortostática</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="alteraciones-equilibrio"><label for="alteraciones-equilibrio">Alteraciones del equilibrio</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="medicamentos-sedantes"><label for="medicamentos-sedantes">Medicamentos sedantes</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="deficit-cognitivo"><label for="deficit-cognitivo">Déficit cognitivo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="barreras-arquitectonicas"><label for="barreras-arquitectonicas">Barreras arquitectónicas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="calzado-inadecuado"><label for="calzado-inadecuado">Calzado inadecuado</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="problemas-pies"><label for="problemas-pies">Problemas en los pies</label></div>
+                        </div>
+                        <div class="measurement">
+                            <label>Número de factores de riesgo:</label>
+                            <span class="score-value" id="fall-risk-count">0</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Riesgo de caídas:</span>
+                            <span class="score-value" id="fall-risk-level">--</span>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Pruebas de Equilibrio y Marcha</h4>
+                        <div class="test-results">
+                            <div class="test-item">
+                                <label>Test "Levántate y Anda" (Timed Up and Go)</label>
+                                <div class="measurement">
+                                    <input type="number" class="input-field" id="tug-time" min="0" max="120" step="0.1" onchange="evaluateTUG()">
+                                    <span>segundos</span>
+                                </div>
+                            </div>
+                            <div class="score-item">
+                                <span>Evaluación TUG:</span>
+                                <span class="score-value" id="tug-assessment">--</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-pills"></i> Riesgo Farmacológico</div>
+                    <div class="exam-section">
+                        <h4>Medicamentos de Alto Riesgo en Ancianos</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="benzodiacepinas"><label for="benzodiacepinas">Benzodiacepinas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="anticolinergicos"><label for="anticolinergicos">Anticolinérgicos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="antipsicotcos"><label for="antipsicotcos">Antipsicóticos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="aines"><label for="aines">AINEs</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="antidepresivos-triciclicos"><label for="antidepresivos-triciclicos">Antidepresivos tricíclicos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="digoxina"><label for="digoxina">Digoxina</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="antihistaminicos"><label for="antihistaminicos">Antihistamínicos sedantes</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="relajantes-musculares"><label for="relajantes-musculares">Relajantes musculares</label></div>
+                        </div>
+                        <div class="measurement">
+                            <label>Medicamentos potencialmente inapropiados:</label>
+                            <span class="score-value" id="inappropriate-meds-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+            
+        <!-- Conclusión Principal -->
+        <div class="conclusion" id="traditionalConclusion">
+            <h3><i class="fas fa-file-medical-alt"></i> Conclusión de la Evaluación Geriátrica Integral</h3>
+            <div class="conclusion-text" id="conclusion-text-traditional">Seleccione los parámetros de la evaluación para generar la conclusión geriátrica integral...</div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-primary" onclick="generateConclusion()">
+                <i class="fas fa-file-medical"></i> Generar Conclusión
+            </button>
+            <button class="btn btn-primary" onclick="copyToClipboard()">
+                <i class="fas fa-copy"></i> Copiar Texto
+            </button>
+            <button class="btn btn-primary" onclick="printConclusion()">
+                <i class="fas fa-print"></i> Imprimir Conclusión
+            </button>
+            <button class="btn btn-secondary" onclick="clearForm()">
+                <i class="fas fa-trash"></i> Limpiar Formulario
+            </button>
+            <button class="btn btn-secondary" onclick="expandAllSections()">
+                <i class="fas fa-expand-alt"></i> Expandir Todo
+            </button>
+            <button class="btn btn-secondary" onclick="collapseAllSections()">
+                <i class="fas fa-compress-alt"></i> Contraer Todo
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // ========== VARIABLES GLOBALES ==========
+        let examProgress = 0;
+        let sectionsCompleted = 0;
+        let alertCount = 0;
+        let warningCount = 0;
+        let findingsCount = 0;
+        let cognitiveStatus = 'Pendiente';
+        let functionalStatus = 'Pendiente';
+
+        // 🌙 Toggle de tema
+        function toggleTheme() {
+            const body = document.body;
+            const themeIcon = document.getElementById('theme-icon');
+            
+            if (body.hasAttribute('data-theme')) {
+                body.removeAttribute('data-theme');
+                themeIcon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeIcon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        // 🎯 Toggle panel de navegación
+        function toggleNavPanel() {
+            const navPanel = document.getElementById('nav-panel');
+            const body = document.body;
+            
+            navPanel.classList.toggle('open');
+            body.classList.toggle('split-view');
+        }
+
+        // 📊 FUNCIONES DEL PANEL STICKY
+        function toggleStickyPanel() {
+            const stickyPanel = document.getElementById('stickyConclusion');
+            const body = document.body;
+            const btn = document.getElementById('sticky-toggle-btn');
+            
+            stickyPanel.classList.toggle('active');
+            body.classList.toggle('split-view-active');
+            
+            if (stickyPanel.classList.contains('active')) {
+                btn.innerHTML = '<i class="fas fa-window-restore"></i> Vista Normal';
+                btn.classList.add('btn-warning');
+                btn.classList.remove('btn-primary');
+                generateStickyConclusion();
+            } else {
+                btn.innerHTML = '<i class="fas fa-columns"></i> Vista Dividida';
+                btn.classList.add('btn-primary');
+                btn.classList.remove('btn-warning');
+            }
+        }
+
+        function generateStickyConclusion() {
+            const stickyContent = document.getElementById('stickyContent');
+            const updateIndicator = document.getElementById('updateIndicator');
+            
+            updateIndicator.classList.add('active');
+            
+            setTimeout(() => {
+                const originalConclusionEl = document.getElementById('conclusion-text-traditional');
+                const originalContent = originalConclusionEl.textContent;
+                
+                stickyContent.textContent = originalContent;
+                
+                updateIndicator.classList.remove('active');
+            }, 300);
+        }
+
+        function copyStickyToClipboard() {
+            const stickyContent = document.getElementById('stickyContent').textContent;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(stickyContent).then(() => {
+                    showCopyNotification();
+                }).catch(err => {
+                    console.error('Error al copiar con la API del portapapeles: ', err);
+                    fallbackCopyToClipboard(stickyContent);
+                });
+            } else {
+                fallbackCopyToClipboard(stickyContent);
+            }
+        }
+
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.opacity = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showCopyNotification();
+            } catch (err) {
+                console.error('Error al usar el método de respaldo para copiar: ', err);
+                alert('No se pudo copiar el texto. Por favor, cópielo manualmente.');
+            }
+
+            document.body.removeChild(textArea);
+        }
+
+        function showCopyNotification() {
+            const notification = document.getElementById('copyNotification');
+            notification.classList.add('show');
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2500);
+        }
+
+        function printStickyConclusion() {
+            const conclusion = document.getElementById('stickyContent').textContent;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Evaluación Geriátrica Integral</title>
+                    <style>
+                        body { 
+                            font-family: Arial, sans-serif; 
+                            margin: 20px; 
+                            line-height: 1.6;
+                        }
+                        pre { 
+                            white-space: pre-wrap; 
+                            font-family: 'Courier New', monospace; 
+                            font-size: 12px;
+                        }
+                        .header {
+                            text-align: center;
+                            border-bottom: 2px solid #6c5ce7;
+                            padding-bottom: 10px;
+                            margin-bottom: 20px;
+                        }
+                        .footer {
+                            text-align: center;
+                            font-size: 10px;
+                            color: #666;
+                            margin-top: 20px;
+                            border-top: 1px solid #ddd;
+                            padding-top: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Evaluación Geriátrica Integral</h1>
+                        <p>Fecha: ${new Date().toLocaleDateString()}</p>
+                        <p>Hora: ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                    <pre>${conclusion}</pre>
+                    <div class="footer">
+                        <p>Generado por Sistema de Evaluación Geriátrica Integral Premium</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        // 🧭 Navegación a secciones
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(`section-${sectionId}`);
+            if (section) {
+                section.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+                
+                const header = section.querySelector('.section-header');
+                if (header && !header.classList.contains('expanded')) {
+                    toggleSection(header);
+                }
+            }
+        }
+
+        function updateSectionHeight(contentElement) {
+            if (contentElement && contentElement.classList.contains('expanded')) {
+                setTimeout(() => {
+                    contentElement.style.maxHeight = contentElement.scrollHeight + 'px';
+                }, 50);
+            }
+        }
+
+        function toggleSection(headerElement) {
+            const content = headerElement.nextElementSibling;
+            const section = headerElement.parentElement;
+            
+            headerElement.classList.toggle('expanded');
+            section.classList.toggle('active');
+            
+            if (content.classList.toggle('expanded')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.classList.add('slide-in');
+            } else {
+                content.style.maxHeight = '0';
+                content.classList.remove('slide-in');
+            }
+        }
+
+        function expandAllSections() {
+            document.querySelectorAll('.section-header:not(.expanded)').forEach(header => {
+                toggleSection(header);
+            });
+        }
+
+        function collapseAllSections() {
+            document.querySelectorAll('.section-header.expanded').forEach(header => {
+                toggleSection(header);
+            });
+        }
+        
+        // 🚫 Manejo de "Sin quejas"
+        function handleNoComplaints() {
+            const noComplaintsCheckbox = document.getElementById('sin-quejas-geriatricas');
+            const otherCheckboxes = document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-geriatricas)');
+            
+            otherCheckboxes.forEach(checkbox => {
+                checkbox.disabled = noComplaintsCheckbox.checked;
+                if (noComplaintsCheckbox.checked) checkbox.checked = false;
+            });
+            updateDashboard();
+        }
+
+        // Funciones de cálculo específicas para geriatría
+        function evaluatePolypharmacy() {
+            const numMeds = parseInt(document.getElementById('numero-medicamentos').value) || 0;
+            const assessmentEl = document.getElementById('polypharmacy-assessment');
+            
+            if (numMeds === 0) {
+                assessmentEl.textContent = '--';
+                assessmentEl.style.color = '';
+                updateDashboard();
+                return;
+            }
+            
+            let assessment = '';
+            let color = '';
+            if (numMeds >= 10) {
+                assessment = 'Polifarmacia severa'; color = 'var(--alert-color)';
+            } else if (numMeds >= 5) {
+                assessment = 'Polifarmacia'; color = 'var(--warning-color)';
+            } else {
+                assessment = 'Normal'; color = 'var(--normal-color)';
+            }
+            
+            assessmentEl.textContent = assessment;
+            assessmentEl.style.color = color;
+            updateDashboard();
+        }
+
+        function calculateBMI() {
+            const peso = parseFloat(document.getElementById('peso').value);
+            const talla = parseFloat(document.getElementById('talla').value);
+            const imcValueEl = document.getElementById('imc-value');
+            const imcClassificationEl = document.getElementById('imc-classification');
+            
+            if (!peso || !talla) {
+                imcValueEl.textContent = '--';
+                imcClassificationEl.textContent = '--';
+                imcClassificationEl.style.color = '';
+                updateDashboard();
+                return;
+            }
+            
+            const imc = peso / Math.pow(talla / 100, 2);
+            imcValueEl.textContent = imc.toFixed(1);
+            
+            let classification = '';
+            let color = '';
+            if (imc < 22) { classification = 'Bajo peso'; color = 'var(--warning-color)'; }
+            else if (imc < 27) { classification = 'Normal'; color = 'var(--normal-color)'; }
+            else if (imc < 30) { classification = 'Sobrepeso'; color = 'var(--warning-color)'; }
+            else { classification = 'Obesidad'; color = 'var(--alert-color)'; }
+            
+            imcClassificationEl.textContent = classification;
+            imcClassificationEl.style.color = color;
+            updateDashboard();
+        }
+
+        function evaluateCalfCircumference() {
+            const calf = parseFloat(document.getElementById('circunferencia-pantorrilla').value);
+            const assessmentEl = document.getElementById('calf-assessment');
+            
+            if (!calf) {
+                assessmentEl.textContent = '--';
+                assessmentEl.style.color = '';
+                updateDashboard();
+                return;
+            }
+            
+            let assessment = '';
+            let color = '';
+            if (calf < 31) {
+                assessment = 'Riesgo de sarcopenia'; color = 'var(--alert-color)';
+            } else {
+                assessment = 'Normal'; color = 'var(--normal-color)';
+            }
+            
+            assessmentEl.textContent = assessment;
+            assessmentEl.style.color = color;
+            updateDashboard();
+        }
+
+        function evaluateBloodPressure() {
+            const pas = parseFloat(document.getElementById('pas').value);
+            const pad = parseFloat(document.getElementById('pad').value);
+            const classificationEl = document.getElementById('bp-classification');
+            
+            if (!pas || !pad) {
+                classificationEl.textContent = '--';
+                classificationEl.style.color = '';
+                updateDashboard();
+                return;
+            }
+            
+            let classification = '';
+            let color = '';
+            if (pas >= 180 || pad >= 110) {
+                classification = 'HTA III (crisis)'; color = 'var(--alert-color)';
+            } else if (pas >= 160 || pad >= 100) {
+                classification = 'HTA II (moderada)'; color = 'var(--alert-color)';
+            } else if (pas >= 140 || pad >= 90) {
+                classification = 'HTA I (leve)'; color = 'var(--warning-color)';
+            } else if (pas >= 130 || pad >= 85) {
+                classification = 'Prehipertensión'; color = 'var(--warning-color)';
+            } else {
+                classification = 'Normal'; color = 'var(--normal-color)';
+            }
+            
+            classificationEl.textContent = classification;
+            classificationEl.style.color = color;
+            updateDashboard();
+        }
+
+        function calculateMMSE() {
+            let total = 0;
+            
+            total += parseInt(document.getElementById('mmse-temporal').value) || 0;
+            total += parseInt(document.getElementById('mmse-espacial').value) || 0;
+            total += parseInt(document.getElementById('mmse-registro').value) || 0;
+            total += parseInt(document.getElementById('mmse-atencion').value) || 0;
+            total += parseInt(document.getElementById('mmse-recuerdo').value) || 0;
+            total += parseInt(document.getElementById('mmse-lenguaje').value) || 0;
+            
+            document.getElementById('mmse-total').textContent = total;
+            
+            let interpretation = '';
+            let color = '';
+            if (total >= 27) {
+                interpretation = 'Normal'; color = 'var(--normal-color)';
+            } else if (total >= 24) {
+                interpretation = 'Deterioro cognitivo leve'; color = 'var(--warning-color)';
+            } else if (total >= 18) {
+                interpretation = 'Deterioro cognitivo moderado'; color = 'var(--alert-color)';
+            } else {
+                interpretation = 'Deterioro cognitivo severo'; color = 'var(--alert-color)';
+            }
+            
+            document.getElementById('mmse-interpretation').textContent = interpretation;
+            document.getElementById('mmse-interpretation').style.color = color;
+            updateDashboard();
+        }
+
+        function evaluateClockTest() {
+            const score = parseInt(document.getElementById('clock-test-score').value) || 0;
+            const interpretationEl = document.getElementById('clock-interpretation');
+            
+            if (score === 0) {
+                interpretationEl.textContent = '--';
+                interpretationEl.style.color = '';
+                updateDashboard();
+                return;
+            }
+            
+            let interpretation = '';
+            let color = '';
+            if (score >= 7) {
+                interpretation = 'Normal'; color = 'var(--normal-color)';
+            } else if (score >= 4) {
+                interpretation = 'Deterioro leve-moderado'; color = 'var(--warning-color)';
+            } else {
+                interpretation = 'Deterioro severo'; color = 'var(--alert-color)';
+            }
+            
+            interpretationEl.textContent = interpretation;
+            interpretationEl.style.color = color;
+            updateDashboard();
+        }
+
+        function calculateGDS() {
+            let score = 0;
+            
+            const gdsItems = [
+                'gds-satisfecho', 'gds-actividades', 'gds-vacia', 'gds-aburrido', 'gds-animo',
+                'gds-miedo', 'gds-feliz', 'gds-desvalido', 'gds-quedarse', 'gds-memoria',
+                'gds-vivir', 'gds-inutil', 'gds-energia', 'gds-esperanza', 'gds-mejor'
+            ];
+            
+            gdsItems.forEach(id => {
+                if (document.getElementById(id).checked) score++;
+            });
+            
+            document.getElementById('gds-score').textContent = score;
+            
+            let risk = '';
+            let color = '';
+            if (score >= 10) {
+                risk = 'Depresión severa'; color = 'var(--alert-color)';
+            } else if (score >= 5) {
+                risk = 'Depresión probable'; color = 'var(--warning-color)';
+            } else {
+                risk = 'Sin depresión'; color = 'var(--normal-color)';
+            }
+            
+            document.getElementById('gds-risk').textContent = risk;
+            document.getElementById('gds-risk').style.color = color;
+            updateDashboard();
+        }
+
+        function calculateBarthel() {
+            let total = 0;
+            
+            const categories = [
+                'barthel-alimentacion', 'barthel-bano', 'barthel-vestido', 'barthel-arreglo',
+                'barthel-deposicion', 'barthel-miccion', 'barthel-retrete', 'barthel-traslado',
+                'barthel-deambulacion', 'barthel-escaleras'
+            ];
+            
+            categories.forEach(category => {
+                const selected = document.querySelector(`input[name="${category}"]:checked`);
+                if (selected) total += parseInt(selected.value);
+            });
+            
+            document.getElementById('barthel-score').textContent = total;
+            
+            let dependency = '';
+            let color = '';
+            if (total >= 90) {
+                dependency = 'Independencia'; color = 'var(--normal-color)';
+            } else if (total >= 60) {
+                dependency = 'Dependencia leve'; color = 'var(--warning-color)';
+            } else if (total >= 40) {
+                dependency = 'Dependencia moderada'; color = 'var(--warning-color)';
+            } else if (total >= 20) {
+                dependency = 'Dependencia severa'; color = 'var(--alert-color)';
+            } else {
+                dependency = 'Dependencia total'; color = 'var(--alert-color)';
+            }
+            
+            document.getElementById('barthel-dependency').textContent = dependency;
+            document.getElementById('barthel-dependency').style.color = color;
+            updateDashboard();
+        }
+
+        function calculateLawton() {
+            let total = 0;
+            
+            const categories = [
+                'lawton-telefono', 'lawton-compras', 'lawton-comida', 'lawton-casa',
+                'lawton-ropa', 'lawton-transporte', 'lawton-medicacion', 'lawton-economia'
+            ];
+            
+            categories.forEach(category => {
+                const selected = document.querySelector(`input[name="${category}"]:checked`);
+                if (selected) total += parseInt(selected.value);
+            });
+            
+            document.getElementById('lawton-score').textContent = total;
+            
+            let dependency = '';
+            let color = '';
+            if (total === 8) {
+                dependency = 'Independencia total'; color = 'var(--normal-color)';
+            } else if (total >= 6) {
+                dependency = 'Dependencia leve'; color = 'var(--warning-color)';
+            } else if (total >= 4) {
+                dependency = 'Dependencia moderada'; color = 'var(--warning-color)';
+            } else {
+                dependency = 'Dependencia severa'; color = 'var(--alert-color)';
+            }
+            
+            document.getElementById('lawton-dependency').textContent = dependency;
+            document.getElementById('lawton-dependency').style.color = color;
+            updateDashboard();
+        }
+
+        function calculateMNA() {
+            let total = 0;
+            
+            const categories = [
+                'mna-apetito', 'mna-peso', 'mna-movilidad', 'mna-estres', 'mna-neuro', 'mna-imc'
+            ];
+            
+            categories.forEach(category => {
+                const selected = document.querySelector(`input[name="${category}"]:checked`);
+                if (selected) total += parseInt(selected.value);
+            });
+            
+            document.getElementById('mna-score').textContent = total;
+            
+            let status = '';
+            let color = '';
+            if (total >= 12) {
+                status = 'Estado nutricional normal'; color = 'var(--normal-color)';
+            } else if (total >= 8) {
+                status = 'Riesgo de malnutrición'; color = 'var(--warning-color)';
+            } else {
+                status = 'Malnutrición'; color = 'var(--alert-color)';
+            }
+            
+            document.getElementById('mna-status').textContent = status;
+            document.getElementById('mna-status').style.color = color;
+            updateDashboard();
+        }
+
+        function calculateGijon() {
+            let total = 0;
+            
+            const categories = [
+                'gijon-familia', 'gijon-economia', 'gijon-vivienda', 'gijon-social', 'gijon-apoyo'
+            ];
+            
+            categories.forEach(category => {
+                const selected = document.querySelector(`input[name="${category}"]:checked`);
+                if (selected) total += parseInt(selected.value);
+            });
+            
+            document.getElementById('gijon-score').textContent = total;
+            
+            let risk = '';
+            let color = '';
+            if (total <= 9) {
+                risk = 'Sin riesgo social'; color = 'var(--normal-color)';
+            } else if (total <= 14) {
+                risk = 'Riesgo social'; color = 'var(--warning-color)';
+            } else {
+                risk = 'Problema social'; color = 'var(--alert-color)';
+            }
+            
+            document.getElementById('gijon-risk').textContent = risk;
+            document.getElementById('gijon-risk').style.color = color;
+            updateDashboard();
+        }
+
+        function calculateFried() {
+            let score = 0;
+            
+            const friedItems = [
+                'fried-peso', 'fried-agotamiento', 'fried-debilidad', 'fried-lentitud', 'fried-actividad'
+            ];
+            
+            friedItems.forEach(id => {
+                if (document.getElementById(id).checked) score++;
+            });
+            
+            document.getElementById('fried-score').textContent = score;
+            
+            let status = '';
+            let color = '';
+            if (score === 0) {
+                status = 'Robusto'; color = 'var(--normal-color)';
+            } else if (score <= 2) {
+                status = 'Pre-frágil'; color = 'var(--warning-color)';
+            } else {
+                status = 'Frágil'; color = 'var(--alert-color)';
+            }
+            
+            document.getElementById('fried-status').textContent = status;
+            document.getElementById('fried-status').style.color = color;
+            updateDashboard();
+        }
+
+        function evaluateWalkingSpeed() {
+            const time = parseFloat(document.getElementById('fried-tiempo-caminata').value);
+            const checkbox = document.getElementById('fried-lentitud');
+            
+            if (time && time > 6) {
+                checkbox.checked = true;
+            } else if (time && time <= 6) {
+                checkbox.checked = false;
+            }
+            calculateFried();
+        }
+
+        function evaluateTUG() {
+            const time = parseFloat(document.getElementById('tug-time').value);
+            const assessmentEl = document.getElementById('tug-assessment');
+            
+            if (!time) {
+                assessmentEl.textContent = '--';
+                assessmentEl.style.color = '';
+                updateDashboard();
+                return;
+            }
+            
+            let assessment = '';
+            let color = '';
+            if (time <= 10) {
+                assessment = 'Normal'; color = 'var(--normal-color)';
+            } else if (time <= 20) {
+                assessment = 'Riesgo leve de caídas'; color = 'var(--warning-color)';
+            } else {
+                assessment = 'Alto riesgo de caídas'; color = 'var(--alert-color)';
+            }
+            
+            assessmentEl.textContent = assessment;
+            assessmentEl.style.color = color;
+            updateDashboard();
+        }
+
+        function updateFallRiskCount() {
+            const fallRiskItems = [
+                'caidas-previas', 'miedo-caer', 'mareos-vertigo', 'hipotension-ortostatica',
+                'alteraciones-equilibrio', 'medicamentos-sedantes', 'deficit-cognitivo',
+                'barreras-arquitectonicas', 'calzado-inadecuado', 'problemas-pies'
+            ];
+            
+            let count = 0;
+            fallRiskItems.forEach(id => {
+                if (document.getElementById(id).checked) count++;
+            });
+            
+            document.getElementById('fall-risk-count').textContent = count;
+            
+            let level = '';
+            let color = '';
+            if (count === 0) {
+                level = 'Bajo riesgo'; color = 'var(--normal-color)';
+            } else if (count <= 2) {
+                level = 'Riesgo moderado'; color = 'var(--warning-color)';
+            } else {
+                level = 'Alto riesgo'; color = 'var(--alert-color)';
+            }
+            
+            document.getElementById('fall-risk-level').textContent = level;
+            document.getElementById('fall-risk-level').style.color = color;
+            updateDashboard();
+        }
+
+        function updateInappropriateMedsCount() {
+            const inappropriateMeds = [
+                'benzodiacepinas', 'anticolinergicos', 'antipsicotcos', 'aines',
+                'antidepresivos-triciclicos', 'digoxina', 'antihistaminicos', 'relajantes-musculares'
+            ];
+            
+            let count = 0;
+            inappropriateMeds.forEach(id => {
+                if (document.getElementById(id).checked) count++;
+            });
+            
+            document.getElementById('inappropriate-meds-count').textContent = count;
+            updateDashboard();
+        }
+
+        function generateConclusion() {
+            const conclusionEl = document.getElementById('stickyContent');
+            const conclusionTraditional = document.getElementById('conclusion-text-traditional');
+            let conclusion = 'EVALUACIÓN GERIÁTRICA INTEGRAL\n\n';
+
+            // === 1. DATOS DEMOGRÁFICOS ===
+            const edad = document.getElementById('edad-paciente').value;
+            const sexoMasc = document.getElementById('sexo-masculino').checked;
+            const sexoFem = document.getElementById('sexo-femenino').checked;
+            
+            if (edad || sexoMasc || sexoFem) {
+                conclusion += 'DATOS DEMOGRÁFICOS:\n';
+                if (edad) conclusion += `• Edad: ${edad} años. `;
+                if (sexoMasc) conclusion += '• Sexo: Masculino. ';
+                if (sexoFem) conclusion += '• Sexo: Femenino. ';
+                
+                const situacionVivienda = [];
+                ['vive-solo', 'vive-familia', 'vive-institucion', 'cuidador-principal'].forEach(id => {
+                    if (document.getElementById(id)?.checked) {
+                        situacionVivienda.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+                    }
+                });
+                if (situacionVivienda.length > 0) {
+                    conclusion += `• Situación: ${situacionVivienda.join(', ')}. `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === 2. MOTIVO DE CONSULTA ===
+            const hasAnamnesisContent = document.querySelector('#anamnesis input:checked');
+            
+            if (document.getElementById('sin-quejas-geriatricas')?.checked) {
+                conclusion += 'MOTIVO DE CONSULTA: Control geriátrico de rutina, paciente sin quejas específicas.\n\n';
+            } else if (hasAnamnesisContent) {
+                const quejasSeleccionadas = [];
+                ['caidas-recientes', 'perdida-memoria', 'confusion', 'debilidad-general',
+                 'perdida-peso-involuntaria', 'incontinencia', 'dificultad-caminar',
+                 'dificultad-actividades', 'dolor-cronico', 'insomnio', 'depresion-ansiedad',
+                 'problemas-vision', 'problemas-audicion'].forEach(id => {
+                    if (document.getElementById(id)?.checked) {
+                        quejasSeleccionadas.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
+                    }
+                });
+
+                if (quejasSeleccionadas.length > 0) {
+                    conclusion += `MOTIVO DE CONSULTA: Paciente consulta por ${quejasSeleccionadas.join(', ')}.\n\n`;
+                }
+            }
+
+            // === 3. ANTECEDENTES MÉDICOS ===
+            const antecedentes = [];
+            ['hipertension', 'diabetes', 'cardiopatia', 'avc', 'demencia', 'depresion',
+             'osteoporosis', 'artritis', 'epoc', 'insuficiencia-renal', 'cancer', 'parkinson'].forEach(id => {
+                if (document.getElementById(id)?.checked) {
+                    antecedentes.push(document.querySelector(`label[for="${id}"]`).textContent);
+                }
+            });
+
+            if (antecedentes.length > 0) {
+                conclusion += `ANTECEDENTES MÉDICOS: ${antecedentes.join(', ')}.\n\n`;
+            }
+
+            // === 4. EVALUACIÓN DE POLIFARMACIA ===
+            const numMedicamentos = document.getElementById('numero-medicamentos').value;
+            const polypharmacyAssessment = document.getElementById('polypharmacy-assessment').textContent;
+            
+            if (numMedicamentos && numMedicamentos > 0) {
+                conclusion += `MEDICACIÓN: Paciente toma ${numMedicamentos} medicamentos (${polypharmacyAssessment}). `;
+                if (document.getElementById('medicamentos-alto-riesgo').checked) conclusion += 'Medicamentos de alto riesgo presentes. ';
+                if (document.getElementById('interacciones-medicamentosas').checked) conclusion += 'Interacciones medicamentosas identificadas. ';
+                if (document.getElementById('efectos-adversos').checked) conclusion += 'Efectos adversos reportados. ';
+                conclusion += '\n\n';
+            }
+
+            // === 5. EXAMEN FÍSICO ===
+            const peso = document.getElementById('peso').value;
+            const talla = document.getElementById('talla').value;
+            const imc = document.getElementById('imc-value').textContent;
+            const imcClasificacion = document.getElementById('imc-classification').textContent;
+            const pantorrilla = document.getElementById('circunferencia-pantorrilla').value;
+            const calfAssessment = document.getElementById('calf-assessment').textContent;
+
+            if (peso && talla) {
+                conclusion += 'EXAMEN FÍSICO:\n';
+                conclusion += `• Antropometría: Peso ${peso} kg, talla ${talla} cm, IMC ${imc} kg/m² (${imcClasificacion}). `;
+                if (pantorrilla) {
+                    conclusion += `Circunferencia de pantorrilla ${pantorrilla} cm (${calfAssessment}). `;
+                }
+                
+                const pas = document.getElementById('pas').value;
+                const pad = document.getElementById('pad').value;
+                const fc = document.getElementById('frecuencia-cardiaca').value;
+                const bpClassification = document.getElementById('bp-classification').textContent;
+
+                if (pas && pad) {
+                    conclusion += `• Signos vitales: PA ${pas}/${pad} mmHg (${bpClassification})`;
+                    if (fc) conclusion += `, FC ${fc} lpm`;
+                    conclusion += '. ';
+                }
+                conclusion += '\n\n';
+            }
+
+            // === 6. EVALUACIÓN SENSORIAL ===
+            const deficitVisual = document.getElementById('deficit-visual-severo')?.checked;
+            const hipoacusiaSevera = document.getElementById('hipoacusia-severa')?.checked;
+            const problemasAuditivos = document.getElementById('hipoacusia-moderada')?.checked || document.getElementById('hipoacusia-leve')?.checked;
+
+            if (deficitVisual || hipoacusiaSevera || problemasAuditivos) {
+                conclusion += 'EVALUACIÓN SENSORIAL:\n';
+                if (deficitVisual) conclusion += '• Déficit visual severo. ';
+                if (hipoacusiaSevera) conclusion += '• Hipoacusia severa. ';
+                if (problemasAuditivos) conclusion += '• Problemas auditivos. ';
+                conclusion += '\n\n';
+            }
+
+            // === 7. EVALUACIÓN COGNITIVA ===
+            const mmseTotal = document.getElementById('mmse-total').textContent;
+            const mmseInterpretation = document.getElementById('mmse-interpretation').textContent;
+            const clockScore = document.getElementById('clock-test-score').value;
+            const clockInterpretation = document.getElementById('clock-interpretation').textContent;
+            const gdsScore = document.getElementById('gds-score').textContent;
+            const gdsRisk = document.getElementById('gds-risk').textContent;
+
+            if ((mmseTotal && mmseTotal !== '0') || (clockScore && clockScore !== '0') || (gdsScore && gdsScore !== '0')) {
+                conclusion += 'EVALUACIÓN COGNITIVA:\n';
+                if (mmseTotal && mmseTotal !== '0') {
+                    conclusion += `• MMSE: ${mmseTotal}/30 puntos (${mmseInterpretation}). `;
+                }
+                if (clockScore && clockScore !== '0') {
+                    conclusion += `• Test del reloj: ${clockScore}/10 puntos (${clockInterpretation}). `;
+                }
+                if (gdsScore && gdsScore !== '0') {
+                    conclusion += `• Escala de depresión geriátrica: ${gdsScore}/15 puntos (${gdsRisk}). `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === 8. EVALUACIÓN FUNCIONAL ===
+            const barthelScore = document.getElementById('barthel-score').textContent;
+            const barthelDependency = document.getElementById('barthel-dependency').textContent;
+            const lawtonScore = document.getElementById('lawton-score').textContent;
+            const lawtonDependency = document.getElementById('lawton-dependency').textContent;
+
+            if ((barthelScore && barthelScore !== '0') || (lawtonScore && lawtonScore !== '0')) {
+                conclusion += 'EVALUACIÓN FUNCIONAL:\n';
+                if (barthelScore && barthelScore !== '0') {
+                    conclusion += `• Índice de Barthel: ${barthelScore}/100 puntos (${barthelDependency}). `;
+                }
+                if (lawtonScore && lawtonScore !== '0') {
+                    conclusion += `• Escala de Lawton: ${lawtonScore}/8 puntos (${lawtonDependency}). `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === 9. EVALUACIÓN NUTRICIONAL ===
+            const mnaScore = document.getElementById('mna-score').textContent;
+            const mnaStatus = document.getElementById('mna-status').textContent;
+
+            if (mnaScore && mnaScore !== '0') {
+                conclusion += `EVALUACIÓN NUTRICIONAL:\n• MNA: ${mnaScore}/14 puntos (${mnaStatus}).\n\n`;
+            }
+
+            // === 10. EVALUACIÓN SOCIAL ===
+            const gijonScore = document.getElementById('gijon-score').textContent;
+            const gijonRisk = document.getElementById('gijon-risk').textContent;
+
+            if (gijonScore && gijonScore !== '0') {
+                conclusion += `EVALUACIÓN SOCIAL:\n• Escala de Gijón: ${gijonScore}/25 puntos (${gijonRisk}).\n\n`;
+            }
+
+            // === 11. EVALUACIÓN DE FRAGILIDAD Y RIESGOS ===
+            const friedScore = document.getElementById('fried-score').textContent;
+            const friedStatus = document.getElementById('fried-status').textContent;
+            const tugTime = document.getElementById('tug-time').value;
+            const tugAssessment = document.getElementById('tug-assessment').textContent;
+            const fallRiskCount = document.getElementById('fall-risk-count').textContent;
+            const fallRiskLevel = document.getElementById('fall-risk-level').textContent;
+
+            if ((friedScore && friedScore !== '0') || tugTime || (fallRiskCount && fallRiskCount !== '0')) {
+                conclusion += 'EVALUACIÓN DE FRAGILIDAD Y RIESGOS:\n';
+                if (friedScore && friedScore !== '0') {
+                    conclusion += `• Criterios de Fried: ${friedScore}/5 (${friedStatus}). `;
+                }
+                if (tugTime) {
+                    conclusion += `• Test Levántate y Anda: ${tugTime} segundos (${tugAssessment}). `;
+                }
+                if (fallRiskCount && fallRiskCount !== '0') {
+                    conclusion += `• Factores de riesgo de caídas: ${fallRiskCount} factores (${fallRiskLevel}). `;
+                }
+                conclusion += '\n\n';
+            }
+
+            // === RESUMEN FINAL ===
+            if (conclusion.trim() === 'EVALUACIÓN GERIÁTRICA INTEGRAL') {
+                conclusion = 'Seleccione los parámetros de la evaluación para generar la conclusión geriátrica integral...';
+            } else {
+                if (alertCount > 0 || warningCount > 0 || findingsCount > 0) {
+                    conclusion += '⚠️ RESUMEN DE HALLAZGOS:\n';
+                    if (alertCount > 0) {
+                        conclusion += `• ALERTAS CRÍTICAS: ${alertCount}\n`;
+                    }
+                    if (warningCount > 0) {
+                        conclusion += `• HALLAZGOS DE ATENCIÓN: ${warningCount}\n`;
+                    }
+                    conclusion += `• TOTAL DE HALLAZGOS REGISTRADOS: ${findingsCount}\n\n`;
+                }
+
+                conclusion += '🎯 SÍNTESIS GERIÁTRICA:\n';
+                conclusion += '[Pendiente de integración de los dominios evaluados]\n\n';
+                conclusion += '📋 PLAN DE MANEJO INTEGRAL:\n';
+                conclusion += '[A determinar según los hallazgos en cada dominio geriátrico]\n\n';
+                conclusion += `📊 COMPLETITUD DE LA EVALUACIÓN: ${examProgress}%`;
+            }
+
+            conclusionEl.textContent = conclusion;
+            conclusionTraditional.textContent = conclusion;
+        }
+
+        function updateDashboard() {
+            const sections = [
+                'anamnesis', 'physical-exam', 'cognitive-assessment', 'functional-assessment',
+                'nutritional-assessment', 'social-assessment', 'risk-assessment'
+            ];
+            
+            let currentCompletedSections = 0;
+            let currentAlertCount = 0;
+            let currentWarningCount = 0;
+            let currentFindingsCount = 0;
+            
+            sections.forEach(sectionId => {
+                const sectionElement = document.getElementById(sectionId);
+                if (sectionElement) {
+                    const checkboxes = sectionElement.querySelectorAll('input[type="checkbox"]:checked');
+                    const radios = sectionElement.querySelectorAll('input[type="radio"]:checked');
+                    const numbers = sectionElement.querySelectorAll('input[type="number"]');
+                    
+                    let hasContent = false;
+                    if (checkboxes.length > 0 || radios.length > 0) hasContent = true;
+                    numbers.forEach(input => {
+                        if (input.value && input.value !== '0') hasContent = true;
+                    });
+                    
+                    if (hasContent) {
+                        currentCompletedSections++;
+                        currentFindingsCount += (checkboxes.length + radios.length);
+                        
+                        const badge = document.getElementById(`badge-${sectionId}`);
+                        const navItem = document.getElementById(`nav-${sectionId}`);
+                        
+                        if (badge) {
+                            badge.classList.add('completed');
+                            badge.innerHTML = '<i class="fas fa-check"></i>';
+                        }
+                        if (navItem) {
+                            navItem.style.opacity = '1';
+                            navItem.parentElement.classList.add('completed');
+                        }
+                        
+                        // Criterios de alerta específicos para geriatría
+                        // Polifarmacia
+                        const numMeds = parseInt(document.getElementById('numero-medicamentos').value) || 0;
+                        if (numMeds >= 10) currentAlertCount++;
+                        else if (numMeds >= 5) currentWarningCount++;
+
+                        // Estado cognitivo
+                        const mmseTotal = parseInt(document.getElementById('mmse-total').textContent) || 0;
+                        if (mmseTotal < 18) currentAlertCount++;
+                        else if (mmseTotal < 24) currentWarningCount++;
+
+                        // Depresión
+                        const gdsScore = parseInt(document.getElementById('gds-score').textContent) || 0;
+                        if (gdsScore >= 10) currentAlertCount++;
+                        else if (gdsScore >= 5) currentWarningCount++;
+
+                        // Estado funcional
+                        const barthelScore = parseInt(document.getElementById('barthel-score').textContent) || 0;
+                        if (barthelScore < 40) currentAlertCount++;
+                        else if (barthelScore < 60) currentWarningCount++;
+
+                        // Estado nutricional
+                        const mnaScore = parseInt(document.getElementById('mna-score').textContent) || 0;
+                        if (mnaScore < 8) currentAlertCount++;
+                        else if (mnaScore < 12) currentWarningCount++;
+
+                        // Fragilidad
+                        const friedScore = parseInt(document.getElementById('fried-score').textContent) || 0;
+                        if (friedScore >= 3) currentAlertCount++;
+                        else if (friedScore >= 1) currentWarningCount++;
+
+                        // Riesgo de caídas
+                        const fallRiskCount = parseInt(document.getElementById('fall-risk-count').textContent) || 0;
+                        if (fallRiskCount >= 3) currentAlertCount++;
+                        else if (fallRiskCount >= 1) currentWarningCount++;
+
+                        // Alertas específicas
+                        if (document.getElementById('caidas-recientes')?.checked) currentAlertCount++;
+                        if (document.getElementById('perdida-peso-involuntaria')?.checked) currentAlertCount++;
+                        if (document.getElementById('confusion')?.checked) currentAlertCount++;
+                        if (document.getElementById('maltrato-sospecha')?.checked) currentAlertCount++;
+                        if (document.getElementById('sin-recursos')?.checked) currentWarningCount++;
+                        if (document.getElementById('problemas-medicacion-economicos')?.checked) currentWarningCount++;
+
+                    } else {
+                        const badge = document.getElementById(`badge-${sectionId}`);
+                        const navItem = document.getElementById(`nav-${sectionId}`);
+                        
+                        if (badge) {
+                            badge.classList.remove('completed');
+                            badge.innerHTML = '<i class="fas fa-circle"></i>';
+                        }
+                        if (navItem) {
+                            navItem.style.opacity = '0';
+                            navItem.parentElement.classList.remove('completed');
+                        }
+                    }
+                }
+            });
+            
+            const totalSections = sections.length;
+            const progress = Math.round((currentCompletedSections / totalSections) * 100);
+            document.getElementById('exam-progress').textContent = `${progress}%`;
+            document.getElementById('sections-completed').textContent = `${currentCompletedSections}/${totalSections}`;
+            document.getElementById('alert-count').textContent = currentAlertCount;
+            document.getElementById('warning-count').textContent = currentWarningCount;
+            document.getElementById('findings-count').textContent = currentFindingsCount;
+            
+            const alertsItem = document.getElementById('alerts-item');
+            const warningsItem = document.getElementById('warnings-item');
+            const findingsItem = document.getElementById('findings-item');
+            const cognitiveStatusItem = document.getElementById('cognitive-status-item');
+            const functionalStatusItem = document.getElementById('functional-status-item');
+
+            alertsItem.classList.toggle('dashboard-alert', currentAlertCount > 0);
+            warningsItem.classList.toggle('dashboard-warning', currentWarningCount > 0);
+            findingsItem.classList.toggle('dashboard-normal', currentFindingsCount > 0);
+            
+            // Actualizar estado cognitivo
+            const mmseInterpretation = document.getElementById('mmse-interpretation')?.textContent;
+            let currentCognitiveStatus = 'Normal';
+            let cognitiveColorClass = 'dashboard-normal';
+
+            if (mmseInterpretation && mmseInterpretation.includes('severo')) {
+                currentCognitiveStatus = 'Deterioro severo';
+                cognitiveColorClass = 'dashboard-alert';
+            } else if (mmseInterpretation && mmseInterpretation.includes('moderado')) {
+                currentCognitiveStatus = 'Deterioro moderado';
+                cognitiveColorClass = 'dashboard-alert';
+            } else if (mmseInterpretation && mmseInterpretation.includes('leve')) {
+                currentCognitiveStatus = 'Deterioro leve';
+                cognitiveColorClass = 'dashboard-warning';
+            }
+
+            document.getElementById('cognitive-status').textContent = currentCognitiveStatus;
+            cognitiveStatusItem.className = `dashboard-item ${cognitiveColorClass}`;
+
+            // Actualizar estado funcional
+            const barthelDependency = document.getElementById('barthel-dependency')?.textContent;
+            let currentFunctionalStatus = 'Independiente';
+            let functionalColorClass = 'dashboard-normal';
+
+            if (barthelDependency && (barthelDependency.includes('total') || barthelDependency.includes('severa'))) {
+                currentFunctionalStatus = 'Dependiente';
+                functionalColorClass = 'dashboard-alert';
+            } else if (barthelDependency && barthelDependency.includes('moderada')) {
+                currentFunctionalStatus = 'Dependencia moderada';
+                functionalColorClass = 'dashboard-warning';
+            } else if (barthelDependency && barthelDependency.includes('leve')) {
+                currentFunctionalStatus = 'Dependencia leve';
+                functionalColorClass = 'dashboard-warning';
+            }
+
+            document.getElementById('functional-status').textContent = currentFunctionalStatus;
+            functionalStatusItem.className = `dashboard-item ${functionalColorClass}`;
+
+            examProgress = progress;
+            sectionsCompleted = currentCompletedSections;
+            alertCount = currentAlertCount;
+            warningCount = currentWarningCount;
+            findingsCount = currentFindingsCount;
+
+            generateConclusion();
+        }
+
+        function clearForm() {
+            if (confirm('¿Está seguro de que desea limpiar todos los datos del formulario?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                    cb.checked = false;
+                    cb.disabled = false;
+                });
+                document.querySelectorAll('input[type="radio"]').forEach(rb => rb.checked = false);
+                document.querySelectorAll('input[type="number"]').forEach(nb => nb.value = '');
+                document.querySelectorAll('input[type="text"]').forEach(tb => tb.value = '');
+                document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+                
+                // Resetear valores específicos
+                const scoreElements = [
+                    'polypharmacy-assessment', 'imc-value', 'imc-classification', 'calf-assessment',
+                    'bp-classification', 'mmse-total', 'mmse-interpretation', 'clock-interpretation',
+                    'gds-score', 'gds-risk', 'barthel-score', 'barthel-dependency', 'lawton-score',
+                    'lawton-dependency', 'mna-score', 'mna-status', 'gijon-score', 'gijon-risk',
+                    'fried-score', 'fried-status', 'tug-assessment', 'fall-risk-count',
+                    'fall-risk-level', 'inappropriate-meds-count'
+                ];
+
+                scoreElements.forEach(id => {
+                    const element = document.getElementById(id);
+                    if (element) {
+                        element.textContent = id.includes('score') || id.includes('count') ? '0' : '--';
+                        element.style.color = '';
+                    }
+                });
+
+                // Resetear dashboard
+                examProgress = 0;
+                sectionsCompleted = 0;
+                alertCount = 0;
+                warningCount = 0;
+                findingsCount = 0;
+                cognitiveStatus = 'Pendiente';
+                functionalStatus = 'Pendiente';
+
+                document.getElementById('exam-progress').textContent = '0%';
+                document.getElementById('sections-completed').textContent = '0/7';
+                document.getElementById('alert-count').textContent = '0';
+                document.getElementById('warning-count').textContent = '0';
+                document.getElementById('findings-count').textContent = '0';
+                document.getElementById('cognitive-status').textContent = 'Pendiente';
+                document.getElementById('functional-status').textContent = 'Pendiente';
+                
+                ['alerts-item', 'warnings-item', 'findings-item', 'cognitive-status-item', 'functional-status-item'].forEach(id => {
+                    const item = document.getElementById(id);
+                    item.classList.remove('dashboard-alert', 'dashboard-warning', 'dashboard-normal');
+                    item.classList.add('dashboard-item');
+                });
+
+                updateDashboard();
+            }
+        }
+
+        // Función para copiar al portapapeles (para el botón tradicional)
+        function copyToClipboard() {
+            const conclusionText = document.getElementById('conclusion-text-traditional').textContent;
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(conclusionText).then(() => {
+                    showCopyNotification();
+                }).catch(err => {
+                    fallbackCopyToClipboard(conclusionText);
+                });
+            } else {
+                fallbackCopyToClipboard(conclusionText);
+            }
+        }
+
+        // Función para imprimir (para el botón tradicional)
+        function printConclusion() {
+            const conclusion = document.getElementById('conclusion-text-traditional').textContent;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Evaluación Geriátrica Integral</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; line-height: 1.6; }
+                        pre { white-space: pre-wrap; font-family: 'Courier New', monospace; font-size: 12px; }
+                        .header { text-align: center; border-bottom: 2px solid #6c5ce7; padding-bottom: 10px; margin-bottom: 20px; }
+                        .footer { text-align: center; font-size: 10px; color: #666; margin-top: 20px; border-top: 1px solid #ddd; padding-top: 10px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">
+                        <h1>Evaluación Geriátrica Integral</h1>
+                        <p>Fecha: ${new Date().toLocaleDateString()}</p>
+                        <p>Hora: ${new Date().toLocaleTimeString()}</p>
+                    </div>
+                    <pre>${conclusion}</pre>
+                    <div class="footer">
+                        <p>Generado por Sistema de Evaluación Geriátrica Integral Premium</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Cargar tema guardado
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                document.getElementById('theme-icon').className = 'fas fa-sun';
+            }
+
+            // Event listeners para actualizar dashboard y conclusión
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                el.addEventListener('change', () => {
+                    updateDashboard();
+                    // Actualizar contadores específicos
+                    updateFallRiskCount();
+                    updateInappropriateMedsCount();
+                });
+                el.addEventListener('input', updateDashboard);
+            });
+             
+            document.querySelector('.main-container').addEventListener('change', (event) => {
+                const sectionContent = event.target.closest('.section-content.expanded');
+                if (sectionContent) {
+                    updateSectionHeight(sectionContent);
+                }
+            });
+
+            toggleSection(document.querySelector('.section-header'));
+            
+            updateDashboard();
+
+            setTimeout(() => {
+                console.log('🎉 Sistema de Evaluación Geriátrica Integral Premium cargado exitosamente!');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+                            <span>Evaluación polifarmacia:</span>
+                            <span class="score-value" id="polypharmacy-assessment">--</span>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="medicamentos-alto-riesgo"><label for="medicamentos-alto-riesgo">Medicamentos de alto riesgo</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="interacciones-medicamentosas"><label for="interacciones-medicamentosas">Interacciones medicamentosas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="efectos-adversos"><label for="efectos-adversos">Efectos adversos</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Examen Físico Geriátrico -->
+        <div class="section" id="section-physical-exam">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-stethoscope"></i> Examen Físico Geriátrico</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-physical-exam">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="physical-exam">
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-weight"></i> Antropometría y Signos Vitales</div>
+                    <div class="exam-section">
+                        <h4>Medidas Antropométricas</h4>
+                        <div class="measurement">
+                            <label>Peso (kg):</label>
+                            <input type="number" class="input-field" id="peso" min="30" max="150" step="0.1" onchange="calculateBMI()">
+                            <span>kg</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Talla (cm):</label>
+                            <input type="number" class="input-field" id="talla" min="120" max="200" onchange="calculateBMI()">
+                            <span>cm</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Circunferencia pantorrilla:</label>
+                            <input type="number" class="input-field" id="circunferencia-pantorrilla" min="15" max="50" onchange="evaluateCalfCircumference()">
+                            <span>cm</span>
+                        </div>
+                        <div class="score-item">
+                            <span>IMC:</span>
+                            <span class="score-value" id="imc-value">--</span>
+                            <span>kg/m²</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Clasificación IMC:</span>
+                            <span class="score-value" id="imc-classification">--</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Evaluación nutricional por pantorrilla:</span>
+                            <span class="score-value" id="calf-assessment">--</span>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Signos Vitales</h4>
+                        <div class="measurement">
+                            <label>Presión arterial sistólica:</label>
+                            <input type="number" class="input-field" id="pas" min="70" max="250" onchange="evaluateBloodPressure()">
+                            <span>mmHg</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Presión arterial diastólica:</label>
+                            <input type="number" class="input-field" id="pad" min="40" max="150" onchange="evaluateBloodPressure()">
+                            <span>mmHg</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Frecuencia cardíaca:</label>
+                            <input type="number" class="input-field" id="frecuencia-cardiaca" min="40" max="150" onchange="updateDashboard()">
+                            <span>lpm</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Clasificación PA:</span>
+                            <span class="score-value" id="bp-classification">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-eye"></i> Evaluación Sensorial</div>
+                    <div class="bilateral-container">
+                        <div class="side-container">
+                            <div class="side-header">Evaluación Visual</div>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="vision-normal"><label for="vision-normal">Visión normal</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cataratas"><label for="cataratas">Cataratas</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="glaucoma"><label for="glaucoma">Glaucoma</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="degeneracion-macular"><label for="degeneracion-macular">Degeneración macular</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="usa-lentes"><label for="usa-lentes">Usa lentes</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="deficit-visual-severo"><label for="deficit-visual-severo">Déficit visual severo</label></div>
+                            </div>
+                        </div>
+                        <div class="side-container">
+                            <div class="side-header">Evaluación Auditiva</div>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="audicion-normal"><label for="audicion-normal">Audición normal</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="hipoacusia-leve"><label for="hipoacusia-leve">Hipoacusia leve</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="hipoacusia-moderada"><label for="hipoacusia-moderada">Hipoacusia moderada</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="hipoacusia-severa"><label for="hipoacusia-severa">Hipoacusia severa</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="usa-audifono"><label for="usa-audifono">Usa audífono</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="cerumen"><label for="cerumen">Tapón de cerumen</label></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-walking"></i> Evaluación Motora y Equilibrio</div>
+                    <div class="exam-section">
+                        <h4>Marcha y Equilibrio</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="marcha-normal"><label for="marcha-normal">Marcha normal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="marcha-lenta"><label for="marcha-lenta">Marcha lenta</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="marcha-inestable"><label for="marcha-inestable">Marcha inestable</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="usa-baston"><label for="usa-baston">Usa bastón</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="usa-andador"><label for="usa-andador">Usa andador</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="silla-ruedas"><label for="silla-ruedas">Usa silla de ruedas</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="temblor"><label for="temblor">Temblor</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="rigidez"><label for="rigidez">Rigidez</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación Cognitiva -->
+        <div class="section" id="section-cognitive-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-brain"></i> Evaluación Cognitiva</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-cognitive-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="cognitive-assessment">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color cognitive-color"></div>
+                        <span>Evaluación Cognitiva</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-brain"></i> Mini-Mental State Examination (MMSE)</div>
+                    <div class="cognitive-assessment">
+                        <h4>Evaluación por Dominios</h4>
+                        <div class="exam-section">
+                            <h4>Orientación Temporal (5 puntos)</h4>
+                            <div class="measurement">
+                                <label>Año, mes, día, día semana, fecha:</label>
+                                <input type="number" class="input-field" id="mmse-temporal" min="0" max="5" onchange="calculateMMSE()">
+                                <span>/5 pts</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Orientación Espacial (5 puntos)</h4>
+                            <div class="measurement">
+                                <label>País, provincia, ciudad, lugar, piso:</label>
+                                <input type="number" class="input-field" id="mmse-espacial" min="0" max="5" onchange="calculateMMSE()">
+                                <span>/5 pts</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Registro (3 puntos)</h4>
+                            <div class="measurement">
+                                <label>Repetir 3 palabras:</label>
+                                <input type="number" class="input-field" id="mmse-registro" min="0" max="3" onchange="calculateMMSE()">
+                                <span>/3 pts</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Atención y Cálculo (5 puntos)</h4>
+                            <div class="measurement">
+                                <label>Sustracciones de 7 en 7:</label>
+                                <input type="number" class="input-field" id="mmse-atencion" min="0" max="5" onchange="calculateMMSE()">
+                                <span>/5 pts</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Recuerdo (3 puntos)</h4>
+                            <div class="measurement">
+                                <label>Recordar las 3 palabras:</label>
+                                <input type="number" class="input-field" id="mmse-recuerdo" min="0" max="3" onchange="calculateMMSE()">
+                                <span>/3 pts</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Lenguaje y Praxias (9 puntos)</h4>
+                            <div class="measurement">
+                                <label>Nombrar, repetir, seguir órdenes, leer, escribir, copiar:</label>
+                                <input type="number" class="input-field" id="mmse-lenguaje" min="0" max="9" onchange="calculateMMSE()">
+                                <span>/9 pts</span>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación MMSE total:</span>
+                            <span class="score-value" id="mmse-total">0</span>
+                            <span>/30 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación MMSE:</span>
+                            <span class="score-value" id="mmse-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-clock"></i> Test del Reloj</div>
+                    <div class="score-calculation">
+                        <h4>Puntuación Test del Reloj</h4>
+                        <div class="measurement">
+                            <label>Puntuación (0-10):</label>
+                            <input type="number" class="input-field" id="clock-test-score" min="0" max="10" onchange="evaluateClockTest()">
+                            <span>/10 pts</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación Test del Reloj:</span>
+                            <span class="score-value" id="clock-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-sad-tear"></i> Escala de Depresión Geriátrica (GDS-15)</div>
+                    <div class="score-calculation">
+                        <h4>Cuestionario GDS-15</h4>
+                        <div class="exam-section">
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="gds-satisfecho" onchange="calculateGDS()"><label for="gds-satisfecho">¿No está satisfecho con su vida?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-actividades" onchange="calculateGDS()"><label for="gds-actividades">¿Ha abandonado muchas actividades?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-vacia" onchange="calculateGDS()"><label for="gds-vacia">¿Siente que su vida está vacía?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-aburrido" onchange="calculateGDS()"><label for="gds-aburrido">¿Se aburre a menudo?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-animo" onchange="calculateGDS()"><label for="gds-animo">¿Está de buen ánimo la mayor parte del tiempo? (NO)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-miedo" onchange="calculateGDS()"><label for="gds-miedo">¿Tiene miedo de que algo malo le pase?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-feliz" onchange="calculateGDS()"><label for="gds-feliz">¿Se siente feliz la mayor parte del tiempo? (NO)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-desvalido" onchange="calculateGDS()"><label for="gds-desvalido">¿Se siente a menudo desvalido?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-quedarse" onchange="calculateGDS()"><label for="gds-quedarse">¿Prefiere quedarse en casa que salir?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-memoria" onchange="calculateGDS()"><label for="gds-memoria">¿Siente que tiene más problemas de memoria que otros?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-vivir" onchange="calculateGDS()"><label for="gds-vivir">¿Piensa que es maravilloso estar vivo? (NO)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-inutil" onchange="calculateGDS()"><label for="gds-inutil">¿Se siente inútil?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-energia" onchange="calculateGDS()"><label for="gds-energia">¿Se siente lleno de energía? (NO)</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-esperanza" onchange="calculateGDS()"><label for="gds-esperanza">¿Siente que su situación es desesperanzada?</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="gds-mejor" onchange="calculateGDS()"><label for="gds-mejor">¿Piensa que otros están mejor que usted?</label></div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación GDS-15:</span>
+                            <span class="score-value" id="gds-score">0</span>
+                            <span>/15 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Riesgo de depresión:</span>
+                            <span class="score-value" id="gds-risk">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación Funcional -->
+        <div class="section" id="section-functional-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-walking"></i> Evaluación Funcional</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-functional-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="functional-assessment">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color functional-color"></div>
+                        <span>Evaluación Funcional</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-list-check"></i> Índice de Barthel</div>
+                    <div class="functional-assessment">
+                        <h4>Actividades Básicas de la Vida Diaria</h4>
+                        <div class="exam-section">
+                            <h4>Alimentación</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-alimentacion" value="0" onchange="calculateBarthel()"><label>Incapaz (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-alimentacion" value="5" onchange="calculateBarthel()"><label>Necesita ayuda para cortar, etc. (5)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-alimentacion" value="10" onchange="calculateBarthel()"><label>Independiente (10)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Baño</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-bano" value="0" onchange="calculateBarthel()"><label>Dependiente (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-bano" value="5" onchange="calculateBarthel()"><label>Independiente (5)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Vestido</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-vestido" value="0" onchange="calculateBarthel()"><label>Dependiente (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-vestido" value="5" onchange="calculateBarthel()"><label>Necesita ayuda pero hace la mitad (5)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-vestido" value="10" onchange="calculateBarthel()"><label>Independiente (10)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Arreglo Personal</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-arreglo" value="0" onchange="calculateBarthel()"><label>Necesita ayuda (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-arreglo" value="5" onchange="calculateBarthel()"><label>Independiente (5)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Deposición</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-deposicion" value="0" onchange="calculateBarthel()"><label>Incontinente (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-deposicion" value="5" onchange="calculateBarthel()"><label>Accidente ocasional (5)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-deposicion" value="10" onchange="calculateBarthel()"><label>Continente (10)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Micción</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-miccion" value="0" onchange="calculateBarthel()"><label>Incontinente (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-miccion" value="5" onchange="calculateBarthel()"><label>Accidente ocasional (5)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-miccion" value="10" onchange="calculateBarthel()"><label>Continente (10)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Uso del Retrete</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-retrete" value="0" onchange="calculateBarthel()"><label>Dependiente (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-retrete" value="5" onchange="calculateBarthel()"><label>Necesita ayuda (5)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-retrete" value="10" onchange="calculateBarthel()"><label>Independiente (10)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Traslado Sillón/Cama</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-traslado" value="0" onchange="calculateBarthel()"><label>Incapaz (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-traslado" value="5" onchange="calculateBarthel()"><label>Ayuda importante (5)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-traslado" value="10" onchange="calculateBarthel()"><label>Ayuda mínima (10)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-traslado" value="15" onchange="calculateBarthel()"><label>Independiente (15)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Deambulación</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-deambulacion" value="0" onchange="calculateBarthel()"><label>Inmóvil (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-deambulacion" value="5" onchange="calculateBarthel()"><label>Silla de ruedas independiente (5)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-deambulacion" value="10" onchange="calculateBarthel()"><label>Camina con ayuda (10)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-deambulacion" value="15" onchange="calculateBarthel()"><label>Independiente (15)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Subir/Bajar Escaleras</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="barthel-escaleras" value="0" onchange="calculateBarthel()"><label>Incapaz (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-escaleras" value="5" onchange="calculateBarthel()"><label>Necesita ayuda (5)</label></div>
+                                <div class="severity-item"><input type="radio" name="barthel-escaleras" value="10" onchange="calculateBarthel()"><label>Independiente (10)</label></div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Índice de Barthel:</span>
+                            <span class="score-value" id="barthel-score">0</span>
+                            <span>/100 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Nivel de dependencia:</span>
+                            <span class="score-value" id="barthel-dependency">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-home"></i> Escala de Lawton y Brody</div>
+                    <div class="score-calculation">
+                        <h4>Actividades Instrumentales de la Vida Diaria</h4>
+                        <div class="exam-section">
+                            <h4>Teléfono</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="lawton-telefono" value="1" onchange="calculateLawton()"><label>Utiliza el teléfono por iniciativa propia (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-telefono" value="1" onchange="calculateLawton()"><label>Es capaz de marcar números conocidos (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-telefono" value="1" onchange="calculateLawton()"><label>Es capaz de contestar pero no marcar (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-telefono" value="0" onchange="calculateLawton()"><label>No es capaz de usar el teléfono (0)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Compras</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="lawton-compras" value="1" onchange="calculateLawton()"><label>Realiza las compras independientemente (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-compras" value="0" onchange="calculateLawton()"><label>Realiza pequeñas compras (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-compras" value="0" onchange="calculateLawton()"><label>Necesita ir acompañado (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-compras" value="0" onchange="calculateLawton()"><label>Totalmente incapaz de comprar (0)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Preparación de Comida</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="lawton-comida" value="1" onchange="calculateLawton()"><label>Organiza, prepara y sirve las comidas (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-comida" value="0" onchange="calculateLawton()"><label>Prepara comidas si se le proporcionan ingredientes (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-comida" value="0" onchange="calculateLawton()"><label>Calienta y sirve comidas (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-comida" value="0" onchange="calculateLawton()"><label>Necesita que le preparen la comida (0)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Cuidado de la Casa</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="lawton-casa" value="1" onchange="calculateLawton()"><label>Mantiene la casa solo (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-casa" value="1" onchange="calculateLawton()"><label>Realiza tareas ligeras (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-casa" value="1" onchange="calculateLawton()"><label>Realiza tareas ligeras pero no mantiene limpieza (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-casa" value="1" onchange="calculateLawton()"><label>Necesita ayuda en todas las tareas (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-casa" value="0" onchange="calculateLawton()"><label>No participa en ninguna tarea (0)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Lavado de Ropa</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="lawton-ropa" value="1" onchange="calculateLawton()"><label>Lava por sí solo toda su ropa (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-ropa" value="1" onchange="calculateLawton()"><label>Lava pequeñas prendas (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-ropa" value="0" onchange="calculateLawton()"><label>Todo el lavado debe ser hecho por otros (0)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Uso de Medios de Transporte</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="lawton-transporte" value="1" onchange="calculateLawton()"><label>Viaja independientemente en transporte público (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-transporte" value="1" onchange="calculateLawton()"><label>Es capaz de coger un taxi (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-transporte" value="1" onchange="calculateLawton()"><label>Viaja en transporte público acompañado (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-transporte" value="0" onchange="calculateLawton()"><label>Limitado al taxi o automóvil con ayuda (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-transporte" value="0" onchange="calculateLawton()"><label>No viaja (0)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Responsabilidad sobre Medicación</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="lawton-medicacion" value="1" onchange="calculateLawton()"><label>Es responsable de tomar medicación (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-medicacion" value="0" onchange="calculateLawton()"><label>Toma responsablemente si se le prepara (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-medicacion" value="0" onchange="calculateLawton()"><label>Incapaz de administrarse medicación (0)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Manejo de Asuntos Económicos</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="lawton-economia" value="1" onchange="calculateLawton()"><label>Maneja los asuntos financieros independientemente (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-economia" value="1" onchange="calculateLawton()"><label>Realiza las compras de cada día (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="lawton-economia" value="0" onchange="calculateLawton()"><label>Incapaz de manejar dinero (0)</label></div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Escala de Lawton:</span>
+                            <span class="score-value" id="lawton-score">0</span>
+                            <span>/8 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Nivel de dependencia instrumental:</span>
+                            <span class="score-value" id="lawton-dependency">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Evaluación Nutricional -->
+        <div class="section" id="section-nutritional-assessment">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span><i class="fas fa-utensils"></i> Evaluación Nutricional</span>
+                <div style="display: flex; align-items: center;">
+                    <div class="completion-badge" id="badge-nutritional-assessment">
+                        <i class="fas fa-circle"></i>
+                    </div>
+                    <span class="arrow">▼</span>
+                </div>
+            </div>
+            <div class="section-content" id="nutritional-assessment">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color nutritional-color"></div>
+                        <span>Evaluación Nutricional</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header"><i class="fas fa-scale-balanced"></i> Mini Nutritional Assessment (MNA)</div>
+                    <div class="nutritional-assessment">
+                        <h4>Evaluación Nutricional</h4>
+                        <div class="exam-section">
+                            <h4>Pérdida de Apetito</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="mna-apetito" value="0" onchange="calculateMNA()"><label>Pérdida severa del apetito (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-apetito" value="1" onchange="calculateMNA()"><label>Pérdida moderada del apetito (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-apetito" value="2" onchange="calculateMNA()"><label>Sin pérdida del apetito (2)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Pérdida de Peso</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="mna-peso" value="0" onchange="calculateMNA()"><label>Pérdida de peso >3 kg (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-peso" value="1" onchange="calculateMNA()"><label>No lo sabe (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-peso" value="2" onchange="calculateMNA()"><label>Pérdida 1-3 kg (2)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-peso" value="3" onchange="calculateMNA()"><label>Sin pérdida de peso (3)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Movilidad</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="mna-movilidad" value="0" onchange="calculateMNA()"><label>Confinado en cama o silla (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-movilidad" value="1" onchange="calculateMNA()"><label>Es capaz de levantarse pero no sale (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-movilidad" value="2" onchange="calculateMNA()"><label>Sale del domicilio (2)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Estrés Psicológico o Enfermedad Aguda</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="mna-estres" value="0" onchange="calculateMNA()"><label>Sí (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-estres" value="2" onchange="calculateMNA()"><label>No (2)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Problemas Neuropsicológicos</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="mna-neuro" value="0" onchange="calculateMNA()"><label>Demencia o depresión severa (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-neuro" value="1" onchange="calculateMNA()"><label>Demencia leve (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-neuro" value="2" onchange="calculateMNA()"><label>Sin problemas psicológicos (2)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Índice de Masa Corporal</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="mna-imc" value="0" onchange="calculateMNA()"><label>IMC <19 (0)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-imc" value="1" onchange="calculateMNA()"><label>IMC 19-21 (1)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-imc" value="2" onchange="calculateMNA()"><label>IMC 21-23 (2)</label></div>
+                                <div class="severity-item"><input type="radio" name="mna-imc" value="3" onchange="calculateMNA()"><label>IMC ≥23 (3)</label></div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            

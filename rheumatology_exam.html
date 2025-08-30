@@ -1,0 +1,2060 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Reumatológico - Algoritmo de Evaluación</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        
+        .home-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #d68910;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        
+        .home-button:hover {
+            background-color: #b7950b;
+            transform: scale(1.1);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+        
+        .main-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            border-bottom: 3px solid #d68910;
+            padding-bottom: 15px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .section.active {
+            border-color: #d68910;
+            box-shadow: 0 2px 8px rgba(214, 137, 16, 0.2);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #d68910, #b7950b);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        
+        .section-header:hover {
+            background: linear-gradient(135deg, #b7950b, #a04000);
+        }
+        
+        .section-header .arrow {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .section-header.expanded .arrow {
+            transform: rotate(180deg);
+        }
+        
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            background: #fafbfc;
+        }
+        
+        .section-content.expanded {
+            padding: 20px;
+        }
+        
+        .exam-container {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .exam-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #d68910;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f3f4;
+        }
+        
+        .exam-section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .exam-section h4 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sub-header {
+            color: #b7950b;
+            margin: 15px 0 8px 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+        }
+        
+        .checkbox-item label {
+            font-size: 13px;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+        
+        .measurement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        
+        .measurement label {
+            font-size: 12px;
+            color: #5d6d7e;
+            flex-basis: 120px;
+            flex-shrink: 0;
+        }
+        
+        .input-field {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #d68910;
+            box-shadow: 0 0 0 2px rgba(214, 137, 16, 0.2);
+        }
+
+        .bilateral-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .side-container {
+            padding: 15px;
+            background: #ffffff;
+            border: 1px solid #e8ecef;
+            border-radius: 6px;
+        }
+        
+        .side-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #34495e;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 1px solid #f0f3f4;
+            padding-bottom: 8px;
+        }
+
+        .pain-assessment {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .pain-assessment h4 {
+            color: #e65100;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .severity-section {
+            background: #fdf2f2;
+            border: 1px solid #e74c3c;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .severity-section h4 {
+            color: #c53030;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .severity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 8px;
+        }
+
+        .severity-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px;
+        }
+
+        .severity-item input[type="radio"] {
+            width: 14px;
+            height: 14px;
+        }
+
+        .severity-item label {
+            font-size: 12px;
+            color: #c53030;
+            cursor: pointer;
+        }
+        
+        .test-results {
+            margin-top: 10px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding: 6px 10px;
+            margin: 4px 0;
+            background: white;
+            border: 1px solid #e8ecef;
+            border-radius: 4px;
+        }
+        
+        .test-item label {
+            font-size: 12px;
+            color: #2c3e50;
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .test-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .test-checkbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .test-checkbox span {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+        
+        .positive { color: #e74c3c !important; }
+        .negative { color: #27ae60 !important; }
+        
+        .joint-map {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .joint-group {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            background: white;
+        }
+
+        .joint-group h5 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            color: #d68910;
+        }
+
+        .joint-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 11px;
+        }
+
+        .joint-checkboxes {
+            display: flex;
+            gap: 5px;
+        }
+
+        .joint-checkboxes input {
+            width: 12px;
+            height: 12px;
+        }
+
+        .score-calculation {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .score-value {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        .tender-points {
+            background: #e1f5fe;
+            border: 1px solid #0288d1;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .tender-points h4 {
+            color: #01579b;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .points-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .point-side {
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: white;
+        }
+
+        .point-side h6 {
+            margin: 0 0 8px 0;
+            font-size: 11px;
+            text-align: center;
+            color: #01579b;
+        }
+
+        .tender-point {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 2px 0;
+            font-size: 10px;
+        }
+
+        .tender-point input {
+            width: 12px;
+            height: 12px;
+        }
+
+        .stiffness-assessment {
+            background: #f3e5f5;
+            border: 1px solid #9c27b0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .stiffness-assessment h4 {
+            color: #7b1fa2;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .conclusion {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .conclusion h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .conclusion-text {
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .control-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #d68910;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #b7950b;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .pain-color { background-color: #e65100; }
+        .stiffness-color { background-color: #7b1fa2; }
+        .tender-color { background-color: #01579b; }
+        .joint-color { background-color: #d68910; }
+
+        .description-area {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        .systemic-symptoms {
+            background: #fef5e7;
+            border: 1px solid #f39c12;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .systemic-symptoms h4 {
+            color: #d68910;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="home-button">🏠 Inicio</a>
+    <div class="main-container">
+        <h1>Examen Reumatológico - Algoritmo de Evaluación</h1>
+        
+        <!-- Anamnesis y Quejas -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Anamnesis y Quejas Principales</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="anamnesis">
+                <div class="exam-container">
+                    <div class="exam-header">Quejas Reumatológicas Principales</div>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-articular"><label for="dolor-articular">Dolor articular</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="rigidez-matutina"><label for="rigidez-matutina">Rigidez matutina</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="inflamacion-articular"><label for="inflamacion-articular">Inflamación articular</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="limitacion-funcional"><label for="limitacion-funcional">Limitación funcional</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="fatiga"><label for="fatiga">Fatiga</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-muscular"><label for="dolor-muscular">Dolor muscular</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="debilidad-muscular"><label for="debilidad-muscular">Debilidad muscular</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-lumbar"><label for="dolor-lumbar">Dolor lumbar</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="deformidades"><label for="deformidades">Deformidades articulares</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="fenomeno-raynaud"><label for="fenomeno-raynaud">Fenómeno de Raynaud</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sequedad-ocular"><label for="sequedad-ocular">Sequedad ocular/bucal</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="rash-cutaneo"><label for="rash-cutaneo">Rash cutáneo</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sin-quejas-reuma" onchange="handleNoComplaints()"><label for="sin-quejas-reuma">Sin quejas</label></div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Características del Dolor Articular</div>
+                    <div class="pain-assessment">
+                        <h4>Intensidad del Dolor (EVA)</h4>
+                        <div class="measurement">
+                            <label>Dolor general:</label>
+                            <input type="range" id="dolor-general-intensidad" min="0" max="10" value="0" oninput="updateDolorValue('general', this.value)">
+                            <span id="dolor-general-value">0</span><span>/10</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Dolor en reposo:</label>
+                            <input type="range" id="dolor-reposo-intensidad" min="0" max="10" value="0" oninput="updateDolorValue('reposo', this.value)">
+                            <span id="dolor-reposo-value">0</span><span>/10</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Dolor al movimiento:</label>
+                            <input type="range" id="dolor-movimiento-intensidad" min="0" max="10" value="0" oninput="updateDolorValue('movimiento', this.value)">
+                            <span id="dolor-movimiento-value">0</span><span>/10</span>
+                        </div>
+                    </div>
+                    
+                    <div class="exam-section">
+                        <h4>Características del Dolor</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="tipo-dolor-articular" id="dolor-mecánico"><label for="dolor-mecánico">Mecánico (mejora reposo)</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tipo-dolor-articular" id="dolor-inflamatorio"><label for="dolor-inflamatorio">Inflamatorio (empeora reposo)</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tipo-dolor-articular" id="dolor-mixto"><label for="dolor-mixto">Mixto</label></div>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Patrón de Afectación</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="patron-afectacion" id="monoarticular"><label for="monoarticular">Monoarticular</label></div>
+                            <div class="checkbox-item"><input type="radio" name="patron-afectacion" id="oligoarticular"><label for="oligoarticular">Oligoarticular (2-4 articulaciones)</label></div>
+                            <div class="checkbox-item"><input type="radio" name="patron-afectacion" id="poliarticular"><label for="poliarticular">Poliarticular (&gt;4 articulaciones)</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Rigidez Matutina</div>
+                    <div class="stiffness-assessment">
+                        <h4>Duración de la Rigidez</h4>
+                        <div class="measurement">
+                            <label>Duración (minutos):</label>
+                            <input type="number" class="input-field" id="rigidez-duracion" min="0" max="600" onchange="evaluateStiffness()">
+                            <span>min</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="interpretacion-rigidez">--</span>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="rigidez-mejora-movimiento"><label for="rigidez-mejora-movimiento">Mejora con el movimiento</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="rigidez-generalizada"><label for="rigidez-generalizada">Rigidez generalizada</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="rigidez-localizada"><label for="rigidez-localizada">Rigidez localizada</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Síntomas Sistémicos</div>
+                    <div class="systemic-symptoms">
+                        <h4>Manifestaciones Extraarticulares</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="fiebre"><label for="fiebre">Fiebre</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="perdida-peso"><label for="perdida-peso">Pérdida de peso</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fatiga-sistemica"><label for="fatiga-sistemica">Fatiga sistémica</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="sudoracion-nocturna"><label for="sudoracion-nocturna">Sudoración nocturna</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="nodulos-subcutaneos"><label for="nodulos-subcutaneos">Nódulos subcutáneos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="ulceras-orales"><label for="ulceras-orales">Úlceras orales</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="alopecia"><label for="alopecia">Alopecia</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fotosensibilidad"><label for="fotosensibilidad">Fotosensibilidad</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Antecedentes Relevantes</div>
+                    <div class="exam-section">
+                        <h4>Historia Familiar</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="familia-artritis-reumatoide"><label for="familia-artritis-reumatoide">Artritis reumatoide</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="familia-lupus"><label for="familia-lupus">Lupus eritematoso sistémico</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="familia-espondiloartritis"><label for="familia-espondiloartritis">Espondiloartritis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="familia-psoriasis"><label for="familia-psoriasis">Psoriasis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="familia-enfermedad-inflamatoria"><label for="familia-enfermedad-inflamatoria">Enfermedad inflamatoria intestinal</label></div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <h4>Factores Desencadenantes</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="infeccion-previa"><label for="infeccion-previa">Infección previa</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="trauma-articular"><label for="trauma-articular">Trauma articular</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="stress-emocional"><label for="stress-emocional">Estrés emocional</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="exposicion-frio"><label for="exposicion-frio">Exposición al frío</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cambios-hormonales"><label for="cambios-hormonales">Cambios hormonales</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Examen Articular Sistemático -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Examen Articular Sistemático</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="joint-examination">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color joint-color"></div>
+                        <span>Examen Articular</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Manos y Muñecas</div>
+                    <div class="bilateral-container">
+                        <div class="side-container">
+                            <div class="side-header">Mano Derecha</div>
+                            <div class="joint-map">
+                                <div class="joint-group">
+                                    <h5>Articulaciones IFP</h5>
+                                    <div class="joint-item">
+                                        <span>2° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="ifp2-der-dolor">D</label>
+                                            <label><input type="checkbox" id="ifp2-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="ifp2-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>3° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="ifp3-der-dolor">D</label>
+                                            <label><input type="checkbox" id="ifp3-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="ifp3-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>4° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="ifp4-der-dolor">D</label>
+                                            <label><input type="checkbox" id="ifp4-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="ifp4-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>5° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="ifp5-der-dolor">D</label>
+                                            <label><input type="checkbox" id="ifp5-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="ifp5-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Articulaciones MCF</h5>
+                                    <div class="joint-item">
+                                        <span>1° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf1-der-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf1-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf1-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>2° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf2-der-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf2-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf2-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>3° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf3-der-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf3-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf3-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>4° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf4-der-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf4-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf4-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>5° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf5-der-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf5-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf5-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Muñeca</h5>
+                                    <div class="joint-item">
+                                        <span>Radiocarpiana</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="muneca-der-dolor">D</label>
+                                            <label><input type="checkbox" id="muneca-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="muneca-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="side-container">
+                            <div class="side-header">Mano Izquierda</div>
+                            <div class="joint-map">
+                                <div class="joint-group">
+                                    <h5>Articulaciones IFP</h5>
+                                    <div class="joint-item">
+                                        <span>2° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="ifp2-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="ifp2-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="ifp2-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>3° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="ifp3-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="ifp3-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="ifp3-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>4° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="ifp4-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="ifp4-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="ifp4-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>5° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="ifp5-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="ifp5-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="ifp5-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Articulaciones MCF</h5>
+                                    <div class="joint-item">
+                                        <span>1° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf1-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf1-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf1-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>2° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf2-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf2-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf2-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>3° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf3-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf3-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf3-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>4° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf4-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf4-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf4-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                    <div class="joint-item">
+                                        <span>5° dedo</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="mcf5-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="mcf5-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="mcf5-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Muñeca</h5>
+                                    <div class="joint-item">
+                                        <span>Radiocarpiana</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="muneca-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="muneca-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="muneca-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="exam-section">
+                        <div style="font-size: 10px; color: #7f8c8d; margin-top: 10px;">
+                            D = Dolor, T = Tumefacción, L = Limitación del movimiento
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Articulaciones Grandes</div>
+                    <div class="bilateral-container">
+                        <div class="side-container">
+                            <div class="side-header">Lado Derecho</div>
+                            <div class="joint-map">
+                                <div class="joint-group">
+                                    <h5>Hombro</h5>
+                                    <div class="joint-item">
+                                        <span>Glenohumeral</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="hombro-der-dolor">D</label>
+                                            <label><input type="checkbox" id="hombro-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="hombro-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Codo</h5>
+                                    <div class="joint-item">
+                                        <span>Humeroulnar</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="codo-der-dolor">D</label>
+                                            <label><input type="checkbox" id="codo-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="codo-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Cadera</h5>
+                                    <div class="joint-item">
+                                        <span>Coxofemoral</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="cadera-der-dolor">D</label>
+                                            <label><input type="checkbox" id="cadera-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="cadera-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Rodilla</h5>
+                                    <div class="joint-item">
+                                        <span>Tibiofemoral</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="rodilla-der-dolor">D</label>
+                                            <label><input type="checkbox" id="rodilla-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="rodilla-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Tobillo</h5>
+                                    <div class="joint-item">
+                                        <span>Tibiotalar</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="tobillo-der-dolor">D</label>
+                                            <label><input type="checkbox" id="tobillo-der-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="tobillo-der-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="side-container">
+                            <div class="side-header">Lado Izquierdo</div>
+                            <div class="joint-map">
+                                <div class="joint-group">
+                                    <h5>Hombro</h5>
+                                    <div class="joint-item">
+                                        <span>Glenohumeral</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="hombro-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="hombro-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="hombro-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Codo</h5>
+                                    <div class="joint-item">
+                                        <span>Humeroulnar</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="codo-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="codo-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="codo-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Cadera</h5>
+                                    <div class="joint-item">
+                                        <span>Coxofemoral</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="cadera-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="cadera-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="cadera-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Rodilla</h5>
+                                    <div class="joint-item">
+                                        <span>Tibiofemoral</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="rodilla-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="rodilla-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="rodilla-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="joint-group">
+                                    <h5>Tobillo</h5>
+                                    <div class="joint-item">
+                                        <span>Tibiotalar</span>
+                                        <div class="joint-checkboxes">
+                                            <label><input type="checkbox" id="tobillo-izq-dolor">D</label>
+                                            <label><input type="checkbox" id="tobillo-izq-tumefaccion">T</label>
+                                            <label><input type="checkbox" id="tobillo-izq-limitacion">L</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Columna Vertebral</div>
+                    <div class="exam-section">
+                        <h4>Segmentos Espinales</h4>
+                        <div class="joint-map">
+                            <div class="joint-group">
+                                <h5>Cervical</h5>
+                                <div class="joint-item">
+                                    <span>Occipito-atloidea</span>
+                                    <div class="joint-checkboxes">
+                                        <label><input type="checkbox" id="cervical-alto-dolor">D</label>
+                                        <label><input type="checkbox" id="cervical-alto-limitacion">L</label>
+                                    </div>
+                                </div>
+                                <div class="joint-item">
+                                    <span>C2-C7</span>
+                                    <div class="joint-checkboxes">
+                                        <label><input type="checkbox" id="cervical-bajo-dolor">D</label>
+                                        <label><input type="checkbox" id="cervical-bajo-limitacion">L</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="joint-group">
+                                <h5>Torácica</h5>
+                                <div class="joint-item">
+                                    <span>T1-T12</span>
+                                    <div class="joint-checkboxes">
+                                        <label><input type="checkbox" id="toracica-dolor">D</label>
+                                        <label><input type="checkbox" id="toracica-limitacion">L</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="joint-group">
+                                <h5>Lumbar</h5>
+                                <div class="joint-item">
+                                    <span>L1-L5</span>
+                                    <div class="joint-checkboxes">
+                                        <label><input type="checkbox" id="lumbar-dolor">D</label>
+                                        <label><input type="checkbox" id="lumbar-limitacion">L</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="joint-group">
+                                <h5>Sacroilíacas</h5>
+                                <div class="joint-item">
+                                    <span>Bilateral</span>
+                                    <div class="joint-checkboxes">
+                                        <label><input type="checkbox" id="sacroiliacas-dolor">D</label>
+                                        <label><input type="checkbox" id="sacroiliacas-limitacion">L</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Escalas DAS28 -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Escalas de Actividad de Enfermedad</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="disease-activity">
+                <div class="exam-container">
+                    <div class="exam-header">Escala DAS28 (Disease Activity Score)</div>
+                    <div class="score-calculation">
+                        <h4>Componentes del DAS28</h4>
+                        <div class="measurement">
+                            <label>Articulaciones dolorosas (0-28):</label>
+                            <input type="number" class="input-field" id="das28-tender" min="0" max="28" onchange="calculateDAS28()">
+                        </div>
+                        <div class="measurement">
+                            <label>Articulaciones tumefactas (0-28):</label>
+                            <input type="number" class="input-field" id="das28-swollen" min="0" max="28" onchange="calculateDAS28()">
+                        </div>
+                        <div class="measurement">
+                            <label>VHS (mm/h):</label>
+                            <input type="number" class="input-field" id="das28-esr" min="0" max="200" onchange="calculateDAS28()">
+                        </div>
+                        <div class="measurement">
+                            <label>EVA actividad global (0-100):</label>
+                            <input type="number" class="input-field" id="das28-vas" min="0" max="100" onchange="calculateDAS28()">
+                        </div>
+                        <div class="score-item">
+                            <span>DAS28 Score:</span>
+                            <span class="score-value" id="das28-score">--</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="das28-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">HAQ (Health Assessment Questionnaire)</div>
+                    <div class="score-calculation">
+                        <h4>Capacidad Funcional</h4>
+                        <div class="severity-section">
+                            <h4>Dificultad para realizar actividades (0=sin dificultad, 3=imposible)</h4>
+                            <div class="measurement">
+                                <label>Vestirse y asearse:</label>
+                                <select id="haq-dressing" onchange="calculateHAQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin dificultad (0)</option>
+                                    <option value="1">Alguna dificultad (1)</option>
+                                    <option value="2">Mucha dificultad (2)</option>
+                                    <option value="3">Imposible (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Levantarse:</label>
+                                <select id="haq-arising" onchange="calculateHAQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin dificultad (0)</option>
+                                    <option value="1">Alguna dificultad (1)</option>
+                                    <option value="2">Mucha dificultad (2)</option>
+                                    <option value="3">Imposible (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Comer:</label>
+                                <select id="haq-eating" onchange="calculateHAQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin dificultad (0)</option>
+                                    <option value="1">Alguna dificultad (1)</option>
+                                    <option value="2">Mucha dificultad (2)</option>
+                                    <option value="3">Imposible (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Caminar:</label>
+                                <select id="haq-walking" onchange="calculateHAQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin dificultad (0)</option>
+                                    <option value="1">Alguna dificultad (1)</option>
+                                    <option value="2">Mucha dificultad (2)</option>
+                                    <option value="3">Imposible (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Higiene:</label>
+                                <select id="haq-hygiene" onchange="calculateHAQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin dificultad (0)</option>
+                                    <option value="1">Alguna dificultad (1)</option>
+                                    <option value="2">Mucha dificultad (2)</option>
+                                    <option value="3">Imposible (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Alcanzar objetos:</label>
+                                <select id="haq-reach" onchange="calculateHAQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin dificultad (0)</option>
+                                    <option value="1">Alguna dificultad (1)</option>
+                                    <option value="2">Mucha dificultad (2)</option>
+                                    <option value="3">Imposible (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Agarrar objetos:</label>
+                                <select id="haq-grip" onchange="calculateHAQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin dificultad (0)</option>
+                                    <option value="1">Alguna dificultad (1)</option>
+                                    <option value="2">Mucha dificultad (2)</option>
+                                    <option value="3">Imposible (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Actividades comunes:</label>
+                                <select id="haq-activities" onchange="calculateHAQ()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin dificultad (0)</option>
+                                    <option value="1">Alguna dificultad (1)</option>
+                                    <option value="2">Mucha dificultad (2)</option>
+                                    <option value="3">Imposible (3)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>HAQ Score:</span>
+                            <span class="score-value" id="haq-score">--</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="haq-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Puntos Gatillo de Fibromialgia</div>
+                    <div class="tender-points">
+                        <h4>Puntos de Dolor a la Palpación (18 puntos)</h4>
+                        <div class="points-grid">
+                            <div class="point-side">
+                                <h6>Lado Derecho</h6>
+                                <div class="tender-point"><input type="checkbox" id="occipital-der"><label for="occipital-der">Occipital</label></div>
+                                <div class="tender-point"><input type="checkbox" id="cervical-bajo-der"><label for="cervical-bajo-der">Cervical bajo</label></div>
+                                <div class="tender-point"><input type="checkbox" id="trapecio-der"><label for="trapecio-der">Trapecio</label></div>
+                                <div class="tender-point"><input type="checkbox" id="supraespinoso-der"><label for="supraespinoso-der">Supraespinoso</label></div>
+                                <div class="tender-point"><input type="checkbox" id="segunda-costilla-der"><label for="segunda-costilla-der">Segunda costilla</label></div>
+                                <div class="tender-point"><input type="checkbox" id="epicondilo-lateral-der"><label for="epicondilo-lateral-der">Epicóndilo lateral</label></div>
+                                <div class="tender-point"><input type="checkbox" id="gluteo-der"><label for="gluteo-der">Glúteo</label></div>
+                                <div class="tender-point"><input type="checkbox" id="trocanter-mayor-der"><label for="trocanter-mayor-der">Trocánter mayor</label></div>
+                                <div class="tender-point"><input type="checkbox" id="rodilla-der-fibro"><label for="rodilla-der-fibro">Rodilla (medial)</label></div>
+                            </div>
+                            <div class="point-side">
+                                <h6>Lado Izquierdo</h6>
+                                <div class="tender-point"><input type="checkbox" id="occipital-izq"><label for="occipital-izq">Occipital</label></div>
+                                <div class="tender-point"><input type="checkbox" id="cervical-bajo-izq"><label for="cervical-bajo-izq">Cervical bajo</label></div>
+                                <div class="tender-point"><input type="checkbox" id="trapecio-izq"><label for="trapecio-izq">Trapecio</label></div>
+                                <div class="tender-point"><input type="checkbox" id="supraespinoso-izq"><label for="supraespinoso-izq">Supraespinoso</label></div>
+                                <div class="tender-point"><input type="checkbox" id="segunda-costilla-izq"><label for="segunda-costilla-izq">Segunda costilla</label></div>
+                                <div class="tender-point"><input type="checkbox" id="epicondilo-lateral-izq"><label for="epicondilo-lateral-izq">Epicóndilo lateral</label></div>
+                                <div class="tender-point"><input type="checkbox" id="gluteo-izq"><label for="gluteo-izq">Glúteo</label></div>
+                                <div class="tender-point"><input type="checkbox" id="trocanter-mayor-izq"><label for="trocanter-mayor-izq">Trocánter mayor</label></div>
+                                <div class="tender-point"><input type="checkbox" id="rodilla-izq-fibro"><label for="rodilla-izq-fibro">Rodilla (medial)</label></div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntos positivos:</span>
+                            <span class="score-value" id="tender-points-count">0</span>
+                            <span>/18</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="tender-points-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pruebas Especiales -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Pruebas Especiales y Maniobras</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="special-tests">
+                <div class="exam-container">
+                    <div class="exam-header">Pruebas de Sacroilíacas</div>
+                    <div class="test-results">
+                        <div class="test-item">
+                            <label>Maniobra de FABERE (Patrick)</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="fabere-pos" onchange="handleMutuallyExclusive('fabere-pos', 'fabere-neg', this)"><span class="positive">Positiva</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="fabere-neg" onchange="handleMutuallyExclusive('fabere-pos', 'fabere-neg', this)"><span class="negative">Negativa</span></div>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Maniobra de Gaenslen</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="gaenslen-pos" onchange="handleMutuallyExclusive('gaenslen-pos', 'gaenslen-neg', this)"><span class="positive">Positiva</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="gaenslen-neg" onchange="handleMutuallyExclusive('gaenslen-pos', 'gaenslen-neg', this)"><span class="negative">Negativa</span></div>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Prueba de compresión sacroilíaca</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="compresion-si-pos" onchange="handleMutuallyExclusive('compresion-si-pos', 'compresion-si-neg', this)"><span class="positive">Positiva</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="compresion-si-neg" onchange="handleMutuallyExclusive('compresion-si-pos', 'compresion-si-neg', this)"><span class="negative">Negativa</span></div>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Prueba de distracción sacroilíaca</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="distraccion-si-pos" onchange="handleMutuallyExclusive('distraccion-si-pos', 'distraccion-si-neg', this)"><span class="positive">Positiva</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="distraccion-si-neg" onchange="handleMutuallyExclusive('distraccion-si-pos', 'distraccion-si-neg', this)"><span class="negative">Negativa</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Pruebas de Flexibilidad Espinal</div>
+                    <div class="test-results">
+                        <div class="test-item">
+                            <label>Prueba de Schober</label>
+                            <div class="test-controls">
+                                <input type="number" id="schober-inicial" placeholder="Inicial" class="input-field" style="width: 50px;">
+                                <span>cm →</span>
+                                <input type="number" id="schober-final" placeholder="Final" class="input-field" style="width: 50px;">
+                                <span id="schober-resultado" style="font-weight: bold; min-width: 50px;"></span>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Expansión torácica</label>
+                            <div class="test-controls">
+                                <input type="number" id="expansion-toracica" placeholder="cm" class="input-field" style="width: 50px;">
+                                <span>cm (normal &gt;5 cm)</span>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Distancia occipucio-pared</label>
+                            <div class="test-controls">
+                                <input type="number" id="occipucio-pared" placeholder="cm" class="input-field" style="width: 50px;">
+                                <span>cm (normal &lt;5 cm)</span>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Flexión lateral lumbar</label>
+                            <div class="test-controls">
+                                <input type="number" id="flexion-lateral" placeholder="cm" class="input-field" style="width: 50px;">
+                                <span>cm (normal &gt;10 cm)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Pruebas de Inflamación</div>
+                    <div class="test-results">
+                        <div class="test-item">
+                            <label>Signo de Tinel (síndrome túnel carpiano)</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="tinel-der-pos" onchange="handleMutuallyExclusive('tinel-der-pos', 'tinel-der-neg', this)"><span class="positive">Derecho +</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="tinel-der-neg" onchange="handleMutuallyExclusive('tinel-der-pos', 'tinel-der-neg', this)"><span class="negative">Derecho -</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="tinel-izq-pos" onchange="handleMutuallyExclusive('tinel-izq-pos', 'tinel-izq-neg', this)"><span class="positive">Izquierdo +</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="tinel-izq-neg" onchange="handleMutuallyExclusive('tinel-izq-pos', 'tinel-izq-neg', this)"><span class="negative">Izquierdo -</span></div>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Signo de Phalen (síndrome túnel carpiano)</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="phalen-der-pos" onchange="handleMutuallyExclusive('phalen-der-pos', 'phalen-der-neg', this)"><span class="positive">Derecho +</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="phalen-der-neg" onchange="handleMutuallyExclusive('phalen-der-pos', 'phalen-der-neg', this)"><span class="negative">Derecho -</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="phalen-izq-pos" onchange="handleMutuallyExclusive('phalen-izq-pos', 'phalen-izq-neg', this)"><span class="positive">Izquierdo +</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="phalen-izq-neg" onchange="handleMutuallyExclusive('phalen-izq-pos', 'phalen-izq-neg', this)"><span class="negative">Izquierdo -</span></div>
+                            </div>
+                        </div>
+                        <div class="test-item">
+                            <label>Prueba de McMurray (meniscos)</label>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="mcmurray-der-pos" onchange="handleMutuallyExclusive('mcmurray-der-pos', 'mcmurray-der-neg', this)"><span class="positive">Derecho +</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="mcmurray-der-neg" onchange="handleMutuallyExclusive('mcmurray-der-pos', 'mcmurray-der-neg', this)"><span class="negative">Derecho -</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="mcmurray-izq-pos" onchange="handleMutuallyExclusive('mcmurray-izq-pos', 'mcmurray-izq-neg', this)"><span class="positive">Izquierdo +</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="mcmurray-izq-neg" onchange="handleMutuallyExclusive('mcmurray-izq-pos', 'mcmurray-izq-neg', this)"><span class="negative">Izquierdo -</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Criterios Diagnósticos -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Criterios Diagnósticos</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="diagnostic-criteria">
+                <div class="exam-container">
+                    <div class="exam-header">Criterios ACR/EULAR 2010 para Artritis Reumatoide</div>
+                    <div class="score-calculation">
+                        <h4>Sistema de Puntuación (total ≥6 confirma AR)</h4>
+                        <div class="exam-section">
+                            <h4>A. Afectación articular</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="ar-articulaciones" id="ar-1-art" value="0"><label for="ar-1-art">1 articulación grande (0 puntos)</label></div>
+                                <div class="severity-item"><input type="radio" name="ar-articulaciones" id="ar-2-10-art-grandes" value="1"><label for="ar-2-10-art-grandes">2-10 articulaciones grandes (1 punto)</label></div>
+                                <div class="severity-item"><input type="radio" name="ar-articulaciones" id="ar-1-3-art-pequenas" value="2"><label for="ar-1-3-art-pequenas">1-3 articulaciones pequeñas (2 puntos)</label></div>
+                                <div class="severity-item"><input type="radio" name="ar-articulaciones" id="ar-4-10-art-pequenas" value="3"><label for="ar-4-10-art-pequenas">4-10 articulaciones pequeñas (3 puntos)</label></div>
+                                <div class="severity-item"><input type="radio" name="ar-articulaciones" id="ar-mas-10-art" value="5"><label for="ar-mas-10-art">&gt;10 articulaciones (5 puntos)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>B. Serología</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="ar-serologia" id="ar-rf-neg-acpa-neg" value="0"><label for="ar-rf-neg-acpa-neg">RF negativo y ACPA negativo (0 puntos)</label></div>
+                                <div class="severity-item"><input type="radio" name="ar-serologia" id="ar-rf-bajo-acpa-bajo" value="2"><label for="ar-rf-bajo-acpa-bajo">RF bajo positivo o ACPA bajo positivo (2 puntos)</label></div>
+                                <div class="severity-item"><input type="radio" name="ar-serologia" id="ar-rf-alto-acpa-alto" value="3"><label for="ar-rf-alto-acpa-alto">RF alto positivo o ACPA alto positivo (3 puntos)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>C. Reactantes de fase aguda</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="ar-reactantes" id="ar-pcr-normal-vhs-normal" value="0"><label for="ar-pcr-normal-vhs-normal">PCR normal y VHS normal (0 puntos)</label></div>
+                                <div class="severity-item"><input type="radio" name="ar-reactantes" id="ar-pcr-alta-vhs-alta" value="1"><label for="ar-pcr-alta-vhs-alta">PCR anormal o VHS anormal (1 punto)</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>D. Duración de síntomas</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="ar-duracion" id="ar-menos-6-sem" value="0"><label for="ar-menos-6-sem">&lt;6 semanas (0 puntos)</label></div>
+                                <div class="severity-item"><input type="radio" name="ar-duracion" id="ar-mas-6-sem" value="1"><label for="ar-mas-6-sem">≥6 semanas (1 punto)</label></div>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación total ACR/EULAR:</span>
+                            <span class="score-value" id="ar-score">0</span>
+                            <span>/10 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="ar-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Criterios de Fibromialgia ACR 2016</div>
+                    <div class="score-calculation">
+                        <h4>Criterios Modificados 2016</h4>
+                        <div class="exam-section">
+                            <h4>A. Índice de Dolor Generalizado (WPI)</h4>
+                            <div class="measurement">
+                                <label>Número de áreas con dolor (0-19):</label>
+                                <input type="number" class="input-field" id="fibro-wpi" min="0" max="19" onchange="calculateFibromyalgia()">
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>B. Escala de Severidad de Síntomas (SSS)</h4>
+                            <div class="measurement">
+                                <label>Fatiga (0-3):</label>
+                                <select id="fibro-fatiga" onchange="calculateFibromyalgia()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin problema (0)</option>
+                                    <option value="1">Problema leve (1)</option>
+                                    <option value="2">Problema moderado (2)</option>
+                                    <option value="3">Problema severo (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Sueño no reparador (0-3):</label>
+                                <select id="fibro-sueno" onchange="calculateFibromyalgia()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin problema (0)</option>
+                                    <option value="1">Problema leve (1)</option>
+                                    <option value="2">Problema moderado (2)</option>
+                                    <option value="3">Problema severo (3)</option>
+                                </select>
+                            </div>
+                            <div class="measurement">
+                                <label>Síntomas cognitivos (0-3):</label>
+                                <select id="fibro-cognitivo" onchange="calculateFibromyalgia()">
+                                    <option value="">Seleccionar</option>
+                                    <option value="0">Sin problema (0)</option>
+                                    <option value="1">Problema leve (1)</option>
+                                    <option value="2">Problema moderado (2)</option>
+                                    <option value="3">Problema severo (3)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>C. Síntomas somáticos (0-3)</h4>
+                            <div class="checkbox-grid">
+                                <div class="checkbox-item"><input type="checkbox" id="fibro-cefalea"><label for="fibro-cefalea">Cefalea</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="fibro-dolor-abdominal"><label for="fibro-dolor-abdominal">Dolor abdominal</label></div>
+                                <div class="checkbox-item"><input type="checkbox" id="fibro-depresion"><label for="fibro-depresion">Depresión</label></div>
+                            </div>
+                            <div class="measurement">
+                                <label>Número de síntomas somáticos:</label>
+                                <span id="fibro-somaticos-count">0</span>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>WPI Score:</span>
+                            <span class="score-value" id="fibro-wpi-score">0</span>
+                        </div>
+                        <div class="score-item">
+                            <span>SSS Score:</span>
+                            <span class="score-value" id="fibro-sss-score">0</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Cumple criterios:</span>
+                            <span class="score-value" id="fibro-diagnosis">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="conclusion">
+            <h3>Conclusión del Examen Reumatológico</h3>
+            <div class="conclusion-text" id="conclusion-text">Seleccione los parámetros del examen para generar la conclusión reumatológica...</div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-primary" onclick="generateConclusion()">Generar Conclusión</button>
+            <button class="btn btn-primary" onclick="printConclusion()">Imprimir Conclusión</button>
+            <button class="btn btn-secondary" onclick="clearForm()">Limpiar Formulario</button>
+            <button class="btn btn-secondary" onclick="expandAllSections()">Expandir Todo</button>
+            <button class="btn btn-secondary" onclick="collapseAllSections()">Contraer Todo</button>
+        </div>
+    </div>
+
+    <script>
+        function updateSectionHeight(contentElement) {
+            if (contentElement && contentElement.classList.contains('expanded')) {
+                setTimeout(() => {
+                    contentElement.style.maxHeight = contentElement.scrollHeight + 'px';
+                }, 50);
+            }
+        }
+
+        function toggleSection(headerElement) {
+            const content = headerElement.nextElementSibling;
+            const section = headerElement.parentElement;
+            
+            headerElement.classList.toggle('expanded');
+            section.classList.toggle('active');
+            
+            if (content.classList.toggle('expanded')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            } else {
+                content.style.maxHeight = '0';
+            }
+        }
+
+        function expandAllSections() {
+            document.querySelectorAll('.section-header:not(.expanded)').forEach(header => toggleSection(header));
+        }
+
+        function collapseAllSections() {
+            document.querySelectorAll('.section-header.expanded').forEach(header => toggleSection(header));
+        }
+        
+        function handleNoComplaints() {
+            const noComplaintsCheckbox = document.getElementById('sin-quejas-reuma');
+            const otherCheckboxes = document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-reuma)');
+            
+            otherCheckboxes.forEach(checkbox => {
+                checkbox.disabled = noComplaintsCheckbox.checked;
+                if (noComplaintsCheckbox.checked) checkbox.checked = false;
+            });
+            generateConclusion();
+        }
+        
+        function handleMutuallyExclusive(positiveId, negativeId, checkbox) {
+            if (checkbox.checked) {
+                const oppositeId = checkbox.id === positiveId ? negativeId : positiveId;
+                const oppositeCheckbox = document.getElementById(oppositeId);
+                if (oppositeCheckbox) oppositeCheckbox.checked = false;
+            }
+            generateConclusion();
+        }
+
+        function updateDolorValue(type, value) {
+            document.getElementById(`dolor-${type}-value`).textContent = value;
+            generateConclusion();
+        }
+
+        function evaluateStiffness() {
+            const duration = parseFloat(document.getElementById('rigidez-duracion').value);
+            const interpretEl = document.getElementById('interpretacion-rigidez');
+            
+            if (!duration) {
+                interpretEl.textContent = '--';
+                return;
+            }
+            
+            if (duration < 30) {
+                interpretEl.textContent = 'Normal';
+                interpretEl.style.color = '#27ae60';
+            } else if (duration < 60) {
+                interpretEl.textContent = 'Leve';
+                interpretEl.style.color = '#f39c12';
+            } else {
+                interpretEl.textContent = 'Sugestivo de proceso inflamatorio';
+                interpretEl.style.color = '#e74c3c';
+            }
+            generateConclusion();
+        }
+
+        function calculateDAS28() {
+            const tender = parseFloat(document.getElementById('das28-tender').value) || 0;
+            const swollen = parseFloat(document.getElementById('das28-swollen').value) || 0;
+            const esr = parseFloat(document.getElementById('das28-esr').value) || 0;
+            const vas = parseFloat(document.getElementById('das28-vas').value) || 0;
+            
+            if (tender === 0 && swollen === 0 && esr === 0 && vas === 0) {
+                document.getElementById('das28-score').textContent = '--';
+                document.getElementById('das28-interpretation').textContent = '--';
+                return;
+            }
+            
+            const das28 = 0.56 * Math.sqrt(tender) + 0.28 * Math.sqrt(swollen) + 0.70 * Math.log(esr) + 0.014 * vas;
+            
+            document.getElementById('das28-score').textContent = das28.toFixed(2);
+            
+            let interpretation = '';
+            if (das28 < 2.6) {
+                interpretation = 'Remisión';
+            } else if (das28 < 3.2) {
+                interpretation = 'Actividad baja';
+            } else if (das28 < 5.1) {
+                interpretation = 'Actividad moderada';
+            } else {
+                interpretation = 'Actividad alta';
+            }
+            
+            document.getElementById('das28-interpretation').textContent = interpretation;
+            generateConclusion();
+        }
+
+        function calculateHAQ() {
+            const categories = ['dressing', 'arising', 'eating', 'walking', 'hygiene', 'reach', 'grip', 'activities'];
+            let total = 0;
+            let count = 0;
+            
+            categories.forEach(category => {
+                const value = parseFloat(document.getElementById(`haq-${category}`).value);
+                if (!isNaN(value)) {
+                    total += value;
+                    count++;
+                }
+            });
+            
+            if (count === 0) {
+                document.getElementById('haq-score').textContent = '--';
+                document.getElementById('haq-interpretation').textContent = '--';
+                return;
+            }
+            
+            const haqScore = total / count;
+            document.getElementById('haq-score').textContent = haqScore.toFixed(2);
+            
+            let interpretation = '';
+            if (haqScore < 0.5) {
+                interpretation = 'Discapacidad leve/ninguna';
+            } else if (haqScore < 1.0) {
+                interpretation = 'Discapacidad leve a moderada';
+            } else if (haqScore < 2.0) {
+                interpretation = 'Discapacidad moderada a severa';
+            } else {
+                interpretation = 'Discapacidad severa';
+            }
+            
+            document.getElementById('haq-interpretation').textContent = interpretation;
+            generateConclusion();
+        }
+
+        function calculateTenderPoints() {
+            const tenderPointIds = [
+                'occipital-der', 'occipital-izq', 'cervical-bajo-der', 'cervical-bajo-izq',
+                'trapecio-der', 'trapecio-izq', 'supraespinoso-der', 'supraespinoso-izq',
+                'segunda-costilla-der', 'segunda-costilla-izq', 'epicondilo-lateral-der', 'epicondilo-lateral-izq',
+                'gluteo-der', 'gluteo-izq', 'trocanter-mayor-der', 'trocanter-mayor-izq',
+                'rodilla-der-fibro', 'rodilla-izq-fibro'
+            ];
+            
+            let count = 0;
+            tenderPointIds.forEach(id => {
+                if (document.getElementById(id) && document.getElementById(id).checked) {
+                    count++;
+                }
+            });
+            
+            document.getElementById('tender-points-count').textContent = count;
+            
+            let interpretation = '';
+            if (count >= 11) {
+                interpretation = 'Criterio de 1990 positivo (≥11/18)';
+            } else {
+                interpretation = 'Criterio de 1990 negativo (<11/18)';
+            }
+            
+            document.getElementById('tender-points-interpretation').textContent = interpretation;
+            generateConclusion();
+        }
+
+        function calculateFibromyalgia() {
+            const wpi = parseFloat(document.getElementById('fibro-wpi').value) || 0;
+            const fatiga = parseFloat(document.getElementById('fibro-fatiga').value) || 0;
+            const sueno = parseFloat(document.getElementById('fibro-sueno').value) || 0;
+            const cognitivo = parseFloat(document.getElementById('fibro-cognitivo').value) || 0;
+            
+            // Contar síntomas somáticos
+            let somaticos = 0;
+            if (document.getElementById('fibro-cefalea').checked) somaticos++;
+            if (document.getElementById('fibro-dolor-abdominal').checked) somaticos++;
+            if (document.getElementById('fibro-depresion').checked) somaticos++;
+            
+            document.getElementById('fibro-somaticos-count').textContent = somaticos;
+            
+            const sss = fatiga + sueno + cognitivo + Math.min(somaticos, 3);
+            
+            document.getElementById('fibro-wpi-score').textContent = wpi;
+            document.getElementById('fibro-sss-score').textContent = sss;
+            
+            // Criterios: WPI ≥7 y SSS ≥5, o WPI 4-6 y SSS ≥9
+            let cumpleCriterios = '';
+            if ((wpi >= 7 && sss >= 5) || (wpi >= 4 && wpi <= 6 && sss >= 9)) {
+                cumpleCriterios = 'SÍ - Cumple criterios ACR 2016';
+            } else {
+                cumpleCriterios = 'NO - No cumple criterios ACR 2016';
+            }
+            
+            document.getElementById('fibro-diagnosis').textContent = cumpleCriterios;
+            generateConclusion();
+        }
+
+        function calculateARCriteria() {
+            let total = 0;
+            
+            // Sumar puntos de cada categoría
+            const articulaciones = document.querySelector('input[name="ar-articulaciones"]:checked');
+            if (articulaciones) total += parseInt(articulaciones.value);
+            
+            const serologia = document.querySelector('input[name="ar-serologia"]:checked');
+            if (serologia) total += parseInt(serologia.value);
+            
+            const reactantes = document.querySelector('input[name="ar-reactantes"]:checked');
+            if (reactantes) total += parseInt(reactantes.value);
+            
+            const duracion = document.querySelector('input[name="ar-duracion"]:checked');
+            if (duracion) total += parseInt(duracion.value);
+            
+            document.getElementById('ar-score').textContent = total;
+            
+            let interpretation = '';
+            if (total >= 6) {
+                interpretation = 'Cumple criterios para Artritis Reumatoide';
+            } else {
+                interpretation = 'No cumple criterios para Artritis Reumatoide';
+            }
+            
+            document.getElementById('ar-interpretation').textContent = interpretation;
+            generateConclusion();
+        }
+
+        function calculateSchober() {
+            const inicial = parseFloat(document.getElementById('schober-inicial').value);
+            const final = parseFloat(document.getElementById('schober-final').value);
+            const resultEl = document.getElementById('schober-resultado');
+            
+            if (inicial && final) {
+                const diff = final - inicial;
+                if (!isNaN(diff)) {
+                    resultEl.textContent = `${diff.toFixed(1)} cm`;
+                    if (diff >= 5) {
+                        resultEl.style.color = '#27ae60';
+                        resultEl.textContent += ' (Normal)';
+                    } else {
+                        resultEl.style.color = '#e74c3c';
+                        resultEl.textContent += ' (Limitado)';
+                    }
+                } else {
+                    resultEl.textContent = '';
+                }
+            } else {
+                resultEl.textContent = '';
+            }
+            generateConclusion();
+        }
+
+        function generateConclusion() {
+            const conclusionEl = document.getElementById('conclusion-text');
+            let conclusion = 'EXAMEN REUMATOLÓGICO:\n\n';
+
+            // Obtener quejas principales
+            const complaints = [];
+            if (document.getElementById('sin-quejas-reuma').checked) {
+                complaints.push('Sin quejas reumatológicas');
+            } else {
+                document.querySelectorAll('#anamnesis input[type="checkbox"]:checked:not(#sin-quejas-reuma)').forEach(cb => {
+                    const label = document.querySelector(`label[for="${cb.id}"]`).textContent;
+                    complaints.push(label.toLowerCase());
+                });
+            }
+            
+            if (complaints.length > 0) {
+                conclusion += 'QUEJAS PRINCIPALES:\n';
+                complaints.forEach(complaint => conclusion += `• ${complaint}\n`);
+                conclusion += '\n';
+            }
+
+            // Intensidad del dolor
+            const dolorGeneral = document.getElementById('dolor-general-intensidad').value;
+            const dolorReposo = document.getElementById('dolor-reposo-intensidad').value;
+            const dolorMovimiento = document.getElementById('dolor-movimiento-intensidad').value;
+            
+            if (dolorGeneral > 0 || dolorReposo > 0 || dolorMovimiento > 0) {
+                conclusion += 'EVALUACIÓN DEL DOLOR (EVA):\n';
+                if (dolorGeneral > 0) conclusion += `• Dolor general: ${dolorGeneral}/10\n`;
+                if (dolorReposo > 0) conclusion += `• Dolor en reposo: ${dolorReposo}/10\n`;
+                if (dolorMovimiento > 0) conclusion += `• Dolor al movimiento: ${dolorMovimiento}/10\n`;
+                conclusion += '\n';
+            }
+
+            // Tipo de dolor y patrón
+            const tipoDolor = document.querySelector('input[name="tipo-dolor-articular"]:checked');
+            const patronAfectacion = document.querySelector('input[name="patron-afectacion"]:checked');
+            
+            if (tipoDolor || patronAfectacion) {
+                conclusion += 'CARACTERÍSTICAS DEL DOLOR:\n';
+                if (tipoDolor) conclusion += `• Tipo: ${document.querySelector(`label[for="${tipoDolor.id}"]`).textContent}\n`;
+                if (patronAfectacion) conclusion += `• Patrón: ${document.querySelector(`label[for="${patronAfectacion.id}"]`).textContent}\n`;
+                conclusion += '\n';
+            }
+
+            // Rigidez matutina
+            const rigidezDuracion = document.getElementById('rigidez-duracion').value;
+            const interpretacionRigidez = document.getElementById('interpretacion-rigidez').textContent;
+            
+            if (rigidezDuracion) {
+                conclusion += 'RIGIDEZ MATUTINA:\n';
+                conclusion += `• Duración: ${rigidezDuracion} minutos (${interpretacionRigidez})\n`;
+                conclusion += '\n';
+            }
+
+            // Síntomas sistémicos
+            const sistemicSymptoms = [];
+            document.querySelectorAll('.systemic-symptoms input[type="checkbox"]:checked').forEach(cb => {
+                const label = document.querySelector(`label[for="${cb.id}"]`).textContent;
+                sistemicSymptoms.push(label);
+            });
+
+            if (sistemicSymptoms.length > 0) {
+                conclusion += 'SÍNTOMAS SISTÉMICOS:\n';
+                sistemicSymptoms.forEach(symptom => conclusion += `• ${symptom}\n`);
+                conclusion += '\n';
+            }
+
+            // Examen articular - contar articulaciones afectadas
+            let articulacionesDolorosas = 0;
+            let articulacionesTumefactas = 0;
+            let articulacionesLimitadas = 0;
+            
+            document.querySelectorAll('input[id$="-dolor"]:checked').forEach(() => articulacionesDolorosas++);
+            document.querySelectorAll('input[id$="-tumefaccion"]:checked').forEach(() => articulacionesTumefactas++);
+            document.querySelectorAll('input[id$="-limitacion"]:checked').forEach(() => articulacionesLimitadas++);
+
+            if (articulacionesDolorosas > 0 || articulacionesTumefactas > 0 || articulacionesLimitadas > 0) {
+                conclusion += 'EXAMEN ARTICULAR:\n';
+                if (articulacionesDolorosas > 0) conclusion += `• Articulaciones dolorosas: ${articulacionesDolorosas}\n`;
+                if (articulacionesTumefactas > 0) conclusion += `• Articulaciones tumefactas: ${articulacionesTumefactas}\n`;
+                if (articulacionesLimitadas > 0) conclusion += `• Articulaciones con limitación: ${articulacionesLimitadas}\n`;
+                conclusion += '\n';
+            }
+
+            // Escalas de evaluación
+            const das28Score = document.getElementById('das28-score').textContent;
+            const das28Interpretation = document.getElementById('das28-interpretation').textContent;
+            const haqScore = document.getElementById('haq-score').textContent;
+            const haqInterpretation = document.getElementById('haq-interpretation').textContent;
+            
+            if (das28Score !== '--' || haqScore !== '--') {
+                conclusion += 'ESCALAS DE EVALUACIÓN:\n';
+                if (das28Score !== '--') conclusion += `• DAS28: ${das28Score} (${das28Interpretation})\n`;
+                if (haqScore !== '--') conclusion += `• HAQ: ${haqScore} (${haqInterpretation})\n`;
+                conclusion += '\n';
+            }
+
+            // Puntos gatillo de fibromialgia
+            const tenderPointsCount = document.getElementById('tender-points-count').textContent;
+            const tenderPointsInterpretation = document.getElementById('tender-points-interpretation').textContent;
+            
+            if (tenderPointsCount !== '0') {
+                conclusion += 'PUNTOS GATILLO:\n';
+                conclusion += `• Puntos positivos: ${tenderPointsCount}/18 (${tenderPointsInterpretation})\n`;
+                conclusion += '\n';
+            }
+
+            // Pruebas especiales
+            const positiveTests = [];
+            document.querySelectorAll('[id$="-pos"]:checked').forEach(cb => {
+                const testItem = cb.closest('.test-item');
+                if (testItem) {
+                    const testName = testItem.querySelector('label').textContent;
+                    positiveTests.push(testName);
+                }
+            });
+
+            if (positiveTests.length > 0) {
+                conclusion += 'PRUEBAS ESPECIALES POSITIVAS:\n';
+                positiveTests.forEach(test => conclusion += `• ${test}\n`);
+                conclusion += '\n';
+            }
+
+            // Pruebas de flexibilidad
+            const schoberResult = document.getElementById('schober-resultado').textContent;
+            const expansionToracica = document.getElementById('expansion-toracica').value;
+            const occipucioPared = document.getElementById('occipucio-pared').value;
+            
+            if (schoberResult || expansionToracica || occipucioPared) {
+                conclusion += 'EVALUACIÓN DE FLEXIBILIDAD:\n';
+                if (schoberResult) conclusion += `• Prueba de Schober: ${schoberResult}\n`;
+                if (expansionToracica) conclusion += `• Expansión torácica: ${expansionToracica} cm\n`;
+                if (occipucioPared) conclusion += `• Distancia occipucio-pared: ${occipucioPared} cm\n`;
+                conclusion += '\n';
+            }
+
+            // Criterios diagnósticos
+            const arScore = document.getElementById('ar-score').textContent;
+            const arInterpretation = document.getElementById('ar-interpretation').textContent;
+            const fibroDiagnosis = document.getElementById('fibro-diagnosis').textContent;
+            
+            if (arScore !== '0' || fibroDiagnosis !== '--') {
+                conclusion += 'CRITERIOS DIAGNÓSTICOS:\n';
+                if (arScore !== '0') conclusion += `• Criterios ACR/EULAR AR: ${arScore}/10 puntos (${arInterpretation})\n`;
+                if (fibroDiagnosis !== '--') conclusion += `• Criterios Fibromialgia: ${fibroDiagnosis}\n`;
+                conclusion += '\n';
+            }
+
+            if (conclusion === 'EXAMEN REUMATOLÓGICO:\n\n') {
+                conclusion = 'Seleccione los parámetros del examen para generar la conclusión reumatológica...';
+            } else {
+                conclusion += 'IMPRESIÓN DIAGNÓSTICA:\n';
+                conclusion += '[Pendiente de correlación clínica y estudios complementarios]\n\n';
+                conclusion += 'PLAN:\n';
+                conclusion += '[A determinar según hallazgos clínicos y laboratorio]\n\n';
+                conclusion += 'SEGUIMIENTO:\n';
+                conclusion += '[Control según evolución clínica]';
+            }
+
+            conclusionEl.textContent = conclusion;
+        }
+
+        function printConclusion() {
+            const conclusion = document.getElementById('conclusion-text').textContent;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Conclusión Examen Reumatológico</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        pre { white-space: pre-wrap; font-family: 'Courier New', monospace; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Examen Reumatológico - Conclusión</h1>
+                    <pre>${conclusion}</pre>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function clearForm() {
+            if (confirm('¿Está seguro de que desea limpiar todos los datos del formulario?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[type="radio"]').forEach(rb => rb.checked = false);
+                document.querySelectorAll('input[type="number"]').forEach(nb => nb.value = '');
+                document.querySelectorAll('input[type="range"]').forEach(rb => rb.value = 0);
+                document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+                
+                // Resetear valores específicos
+                document.getElementById('dolor-general-value').textContent = '0';
+                document.getElementById('dolor-reposo-value').textContent = '0';
+                document.getElementById('dolor-movimiento-value').textContent = '0';
+                document.getElementById('interpretacion-rigidez').textContent = '--';
+                document.getElementById('das28-score').textContent = '--';
+                document.getElementById('das28-interpretation').textContent = '--';
+                document.getElementById('haq-score').textContent = '--';
+                document.getElementById('haq-interpretation').textContent = '--';
+                document.getElementById('tender-points-count').textContent = '0';
+                document.getElementById('tender-points-interpretation').textContent = '--';
+                document.getElementById('ar-score').textContent = '0';
+                document.getElementById('ar-interpretation').textContent = '--';
+                document.getElementById('fibro-wpi-score').textContent = '0';
+                document.getElementById('fibro-sss-score').textContent = '0';
+                document.getElementById('fibro-diagnosis').textContent = '--';
+                document.getElementById('fibro-somaticos-count').textContent = '0';
+                document.getElementById('schober-resultado').textContent = '';
+                
+                // Habilitar checkboxes que podrían estar deshabilitados
+                document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-reuma)').forEach(cb => cb.disabled = false);
+                
+                generateConclusion();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event listeners para inputs generales
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                el.addEventListener('change', generateConclusion);
+                el.addEventListener('input', generateConclusion);
+            });
+             
+            // Event listeners específicos para cálculos
+            document.querySelectorAll('input[name="ar-articulaciones"], input[name="ar-serologia"], input[name="ar-reactantes"], input[name="ar-duracion"]').forEach(el => {
+                el.addEventListener('change', calculateARCriteria);
+            });
+
+            document.querySelectorAll('#fibro-cefalea, #fibro-dolor-abdominal, #fibro-depresion').forEach(el => {
+                el.addEventListener('change', calculateFibromyalgia);
+            });
+
+            document.querySelectorAll('[id^="occipital-"], [id^="cervical-bajo-"], [id^="trapecio-"], [id^="supraespinoso-"], [id^="segunda-costilla-"], [id^="epicondilo-lateral-"], [id^="gluteo-"], [id^="trocanter-mayor-"], [id^="rodilla-"][id$="-fibro"]').forEach(el => {
+                el.addEventListener('change', calculateTenderPoints);
+            });
+
+            document.getElementById('schober-inicial').addEventListener('input', calculateSchober);
+            document.getElementById('schober-final').addEventListener('input', calculateSchober);
+             
+            // Ajustar altura de secciones cuando cambian
+            document.querySelector('.main-container').addEventListener('change', (event) => {
+                const sectionContent = event.target.closest('.section-content.expanded');
+                if (sectionContent) {
+                    updateSectionHeight(sectionContent);
+                }
+            });
+             
+            // Expandir la primera sección por defecto
+            toggleSection(document.querySelector('.section-header'));
+            
+            // Inicializar evaluaciones
+            evaluateStiffness();
+            calculateDAS28();
+            calculateHAQ();
+            calculateTenderPoints();
+            calculateFibromyalgia();
+            calculateARCriteria();
+            generateConclusion();
+        });
+    </script>
+</body>
+</html>

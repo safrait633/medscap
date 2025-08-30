@@ -1,0 +1,2263 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Examen Neumológico - Algoritmo de Evaluación</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f8f9fa;
+            line-height: 1.6;
+        }
+        
+        .main-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            border-bottom: 3px solid #1abc9c;
+            padding-bottom: 15px;
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            border: 2px solid #ecf0f1;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .section.active {
+            border-color: #1abc9c;
+            box-shadow: 0 2px 8px rgba(26, 188, 156, 0.2);
+        }
+        
+        .section-header {
+            background: linear-gradient(135deg, #1abc9c, #16a085);
+            color: white;
+            padding: 15px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s ease;
+        }
+        
+        .section-header:hover {
+            background: linear-gradient(135deg, #16a085, #138d75);
+        }
+        
+        .section-header .arrow {
+            transition: transform 0.3s ease;
+            font-size: 18px;
+        }
+        
+        .section-header.expanded .arrow {
+            transform: rotate(180deg);
+        }
+        
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+            background: #fafbfc;
+        }
+        
+        .section-content.expanded {
+            padding: 20px;
+        }
+        
+        .exam-container {
+            background: white;
+            border: 1px solid #e1e8ed;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .exam-header {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1abc9c;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #f0f3f4;
+        }
+        
+        .exam-section {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .exam-section h4 {
+            color: #2c3e50;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .sub-header {
+            color: #16a085;
+            margin: 15px 0 8px 0;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px;
+        }
+        
+        .checkbox-item input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin: 0;
+        }
+        
+        .checkbox-item label {
+            font-size: 13px;
+            color: #2c3e50;
+            cursor: pointer;
+        }
+        
+        .measurement {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 5px 0;
+        }
+        
+        .measurement label {
+            font-size: 12px;
+            color: #5d6d7e;
+            flex-basis: 120px;
+            flex-shrink: 0;
+        }
+        
+        .input-field {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #1abc9c;
+            box-shadow: 0 0 0 2px rgba(26, 188, 156, 0.2);
+        }
+
+        .bilateral-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 10px;
+        }
+        
+        .side-container {
+            padding: 15px;
+            background: #ffffff;
+            border: 1px solid #e8ecef;
+            border-radius: 6px;
+        }
+        
+        .side-header {
+            font-weight: 600;
+            font-size: 14px;
+            color: #34495e;
+            margin-bottom: 12px;
+            text-align: center;
+            border-bottom: 1px solid #f0f3f4;
+            padding-bottom: 8px;
+        }
+
+        .respiratory-assessment {
+            background: #e8f8f5;
+            border: 1px solid #1abc9c;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .respiratory-assessment h4 {
+            color: #138d75;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .dyspnea-assessment {
+            background: #fff3e0;
+            border: 1px solid #f39c12;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .dyspnea-assessment h4 {
+            color: #e67e22;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .severity-section {
+            background: #fdf2f2;
+            border: 1px solid #e74c3c;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .severity-section h4 {
+            color: #c53030;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .severity-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 8px;
+        }
+
+        .severity-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px;
+        }
+
+        .severity-item input[type="radio"] {
+            width: 14px;
+            height: 14px;
+        }
+
+        .severity-item label {
+            font-size: 12px;
+            color: #c53030;
+            cursor: pointer;
+        }
+        
+        .lung-map {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .lung-side {
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            background: white;
+        }
+
+        .lung-side h5 {
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+            text-align: center;
+            color: #1abc9c;
+        }
+
+        .lung-zone {
+            background: #f8f9fa;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        .lung-zone h6 {
+            margin: 0 0 8px 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .lung-findings {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            font-size: 10px;
+        }
+
+        .lung-findings label {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            font-size: 10px;
+        }
+
+        .lung-findings input {
+            width: 12px;
+            height: 12px;
+        }
+
+        .score-calculation {
+            background: #e8f5e8;
+            border: 1px solid #4caf50;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .score-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+
+        .score-value {
+            font-weight: 600;
+            color: #2e7d32;
+        }
+
+        .cough-assessment {
+            background: #fef5e7;
+            border: 1px solid #f39c12;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .cough-assessment h4 {
+            color: #d68910;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .conclusion {
+            margin-top: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 8px;
+            border: 2px solid #dee2e6;
+        }
+        
+        .conclusion h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .conclusion-text {
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #dee2e6;
+            min-height: 200px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .control-buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-primary {
+            background-color: #1abc9c;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #16a085;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+        }
+
+        .respiratory-color { background-color: #1abc9c; }
+        .dyspnea-color { background-color: #e67e22; }
+        .cough-color { background-color: #d68910; }
+
+        .description-area {
+            width: 100%;
+            min-height: 60px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            resize: vertical;
+        }
+
+        .saturation-assessment {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .saturation-assessment h4 {
+            color: #1976d2;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .positive { color: #e74c3c !important; }
+        .negative { color: #27ae60 !important; }
+        .abnormal { color: #f39c12 !important; }
+
+        .test-results {
+            margin-top: 10px;
+        }
+        
+        .test-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            padding: 6px 10px;
+            margin: 4px 0;
+            background: white;
+            border: 1px solid #e8ecef;
+            border-radius: 4px;
+        }
+        
+        .test-item label {
+            font-size: 12px;
+            color: #2c3e50;
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        .test-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .test-checkbox input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .test-checkbox span {
+            font-size: 11px;
+            color: #7f8c8d;
+        }
+
+        .spirometry-assessment {
+            background: #f3e5f5;
+            border: 1px solid #9c27b0;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .spirometry-assessment h4 {
+            color: #7b1fa2;
+            margin: 0 0 10px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <h1>Examen Neumológico - Algoritmo de Evaluación</h1>
+        
+        <!-- Anamnesis y Quejas -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Anamnesis y Quejas Principales</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="anamnesis">
+                <div class="exam-container">
+                    <div class="exam-header">Quejas Respiratorias Principales</div>
+                    <div class="checkbox-grid">
+                        <div class="checkbox-item"><input type="checkbox" id="disnea"><label for="disnea">Disnea</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="tos"><label for="tos">Tos</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="expectoracion"><label for="expectoracion">Expectoración</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="dolor-toracico"><label for="dolor-toracico">Dolor torácico</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="hemoptisis"><label for="hemoptisis">Hemoptisis</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sibilancias"><label for="sibilancias">Sibilancias</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="ortopnea"><label for="ortopnea">Ortopnea</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="disnea-paroxistica"><label for="disnea-paroxistica">Disnea paroxística nocturna</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="cianosis"><label for="cianosis">Cianosis</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="ronquidos"><label for="ronquidos">Ronquidos</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="apneas"><label for="apneas">Pausas respiratorias</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="fiebre"><label for="fiebre">Fiebre</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sudoracion-nocturna"><label for="sudoracion-nocturna">Sudoración nocturna</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="perdida-peso"><label for="perdida-peso">Pérdida de peso</label></div>
+                        <div class="checkbox-item"><input type="checkbox" id="sin-quejas-neumo" onchange="handleNoComplaints()"><label for="sin-quejas-neumo">Sin quejas</label></div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Evaluación de la Disnea</div>
+                    <div class="dyspnea-assessment">
+                        <h4>Escala mMRC (Modified Medical Research Council)</h4>
+                        <div class="severity-grid">
+                            <div class="severity-item"><input type="radio" name="mmrc-dyspnea" id="mmrc-0" value="0"><label for="mmrc-0">Grado 0: Solo con ejercicio intenso</label></div>
+                            <div class="severity-item"><input type="radio" name="mmrc-dyspnea" id="mmrc-1" value="1"><label for="mmrc-1">Grado 1: Al caminar rápido o cuesta arriba</label></div>
+                            <div class="severity-item"><input type="radio" name="mmrc-dyspnea" id="mmrc-2" value="2"><label for="mmrc-2">Grado 2: Camina más lento que personas de su edad</label></div>
+                            <div class="severity-item"><input type="radio" name="mmrc-dyspnea" id="mmrc-3" value="3"><label for="mmrc-3">Grado 3: Se detiene al caminar ~100m o pocos minutos</label></div>
+                            <div class="severity-item"><input type="radio" name="mmrc-dyspnea" id="mmrc-4" value="4"><label for="mmrc-4">Grado 4: Demasiada disnea para salir de casa</label></div>
+                        </div>
+                        <div class="measurement">
+                            <label>Tiempo de evolución:</label>
+                            <input type="number" class="input-field" id="disnea-tiempo" min="0" max="120">
+                            <select id="disnea-unidad">
+                                <option value="días">días</option>
+                                <option value="semanas">semanas</option>
+                                <option value="meses">meses</option>
+                                <option value="años">años</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Características de la Disnea</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="tipo-disnea" id="disnea-reposo"><label for="disnea-reposo">En reposo</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tipo-disnea" id="disnea-esfuerzo"><label for="disnea-esfuerzo">De esfuerzo</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tipo-disnea" id="disnea-mixta"><label for="disnea-mixta">Mixta</label></div>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="disnea-progresiva"><label for="disnea-progresiva">Progresiva</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="disnea-episodica"><label for="disnea-episodica">Episódica</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="disnea-nocturna"><label for="disnea-nocturna">Nocturna</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Evaluación de la Tos</div>
+                    <div class="cough-assessment">
+                        <h4>Características de la Tos</h4>
+                        <div class="measurement">
+                            <label>Duración de la tos:</label>
+                            <input type="number" class="input-field" id="tos-duracion" min="0" max="24">
+                            <select id="tos-duracion-unidad">
+                                <option value="días">días</option>
+                                <option value="semanas">semanas</option>
+                                <option value="meses">meses</option>
+                            </select>
+                        </div>
+                        <div class="severity-grid">
+                            <div class="severity-item"><input type="radio" name="tipo-tos" id="tos-seca"><label for="tos-seca">Tos seca</label></div>
+                            <div class="severity-item"><input type="radio" name="tipo-tos" id="tos-productiva"><label for="tos-productiva">Tos productiva</label></div>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="tos-matutina"><label for="tos-matutina">Predominio matutino</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="tos-nocturna"><label for="tos-nocturna">Predominio nocturno</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="tos-persistente"><label for="tos-persistente">Persistente</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="tos-paroxistica"><label for="tos-paroxistica">Paroxística</label></div>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Características de la Expectoración</h4>
+                        <div class="measurement">
+                            <label>Volumen diario (ml):</label>
+                            <input type="number" class="input-field" id="expectoracion-volumen" min="0" max="500">
+                            <span>ml/día</span>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="color-expectoracion" id="expectoracion-blanca"><label for="expectoracion-blanca">Blanca/mucosa</label></div>
+                            <div class="checkbox-item"><input type="radio" name="color-expectoracion" id="expectoracion-amarilla"><label for="expectoracion-amarilla">Amarilla</label></div>
+                            <div class="checkbox-item"><input type="radio" name="color-expectoracion" id="expectoracion-verde"><label for="expectoracion-verde">Verde/purulenta</label></div>
+                            <div class="checkbox-item"><input type="radio" name="color-expectoracion" id="expectoracion-herrumbrosa"><label for="expectoracion-herrumbrosa">Herrumbrosa</label></div>
+                            <div class="checkbox-item"><input type="radio" name="color-expectoracion" id="expectoracion-rosada"><label for="expectoracion-rosada">Rosada/espumosa</label></div>
+                        </div>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="expectoracion-mal-olor"><label for="expectoracion-mal-olor">Mal olor</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="expectoracion-sangre"><label for="expectoracion-sangre">Con sangre</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Factores de Riesgo y Antecedentes</div>
+                    <div class="exam-section">
+                        <h4>Hábito Tabáquico</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="tabaquismo" id="no-fumador"><label for="no-fumador">No fumador</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tabaquismo" id="ex-fumador"><label for="ex-fumador">Ex fumador</label></div>
+                            <div class="checkbox-item"><input type="radio" name="tabaquismo" id="fumador-activo"><label for="fumador-activo">Fumador activo</label></div>
+                        </div>
+                        <div class="measurement">
+                            <label>Paquetes/año:</label>
+                            <input type="number" class="input-field" id="paquetes-ano" min="0" max="200" onchange="calculatePackYears()">
+                            <span>paq/año</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Cigarrillos/día:</label>
+                            <input type="number" class="input-field" id="cigarrillos-dia" min="0" max="60" onchange="calculatePackYears()">
+                        </div>
+                        <div class="measurement">
+                            <label>Años fumando:</label>
+                            <input type="number" class="input-field" id="anos-fumando" min="0" max="80" onchange="calculatePackYears()">
+                        </div>
+                        <div class="score-item">
+                            <span>Paquetes/año calculados:</span>
+                            <span class="score-value" id="paquetes-calculados">0</span>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Exposiciones Ocupacionales</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="asbesto"><label for="asbesto">Asbesto</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="silice"><label for="silice">Sílice</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="carbon"><label for="carbon">Carbón</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="polvos-organicos"><label for="polvos-organicos">Polvos orgánicos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="vapores-quimicos"><label for="vapores-quimicos">Vapores químicos</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="soldadura"><label for="soldadura">Soldadura</label></div>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Antecedentes Patológicos</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="asma"><label for="asma">Asma</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="epoc"><label for="epoc">EPOC</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="neumonia-previa"><label for="neumonia-previa">Neumonía previa</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="tuberculosis"><label for="tuberculosis">Tuberculosis</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="neumotorax"><label for="neumotorax">Neumotórax</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="tromboembolismo"><label for="tromboembolismo">Tromboembolismo pulmonar</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cancer-pulmon"><label for="cancer-pulmon">Cáncer de pulmón</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="fibrosis-pulmonar"><label for="fibrosis-pulmonar">Fibrosis pulmonar</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Inspección Torácica -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Inspección Torácica</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="thoracic-inspection">
+                <div class="legend">
+                    <div class="legend-item">
+                        <div class="legend-color respiratory-color"></div>
+                        <span>Evaluación Respiratoria</span>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Configuración Torácica</div>
+                    <div class="exam-section">
+                        <h4>Forma del Tórax</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="forma-torax" id="torax-normal"><label for="torax-normal">Normal</label></div>
+                            <div class="checkbox-item"><input type="radio" name="forma-torax" id="torax-en-tonel"><label for="torax-en-tonel">En tonel (EPOC)</label></div>
+                            <div class="checkbox-item"><input type="radio" name="forma-torax" id="torax-embudo"><label for="torax-embudo">Pectus excavatum (embudo)</label></div>
+                            <div class="checkbox-item"><input type="radio" name="forma-torax" id="torax-paloma"><label for="torax-paloma">Pectus carinatum (paloma)</label></div>
+                            <div class="checkbox-item"><input type="radio" name="forma-torax" id="torax-cifoescoliotico"><label for="torax-cifoescoliotico">Cifoescoliótico</label></div>
+                        </div>
+                    </div>
+
+                    <div class="exam-section">
+                        <h4>Simetría y Deformidades</h4>
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="torax-simetrico"><label for="torax-simetrico">Simétrico</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="torax-asimetrico"><label for="torax-asimetrico">Asimétrico</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="abombamiento"><label for="abombamiento">Abombamiento</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="retracciones"><label for="retracciones">Retracciones</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cicatrices"><label for="cicatrices">Cicatrices</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="masas-visibles"><label for="masas-visibles">Masas visibles</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Patrón Respiratorio</div>
+                    <div class="respiratory-assessment">
+                        <h4>Características de la Respiración</h4>
+                        <div class="measurement">
+                            <label>Frecuencia respiratoria:</label>
+                            <input type="number" class="input-field" id="frecuencia-respiratoria" min="5" max="60" onchange="evaluateRespiratoryRate()">
+                            <span>rpm</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación FR:</span>
+                            <span class="score-value" id="interpretacion-fr">--</span>
+                        </div>
+                        
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="radio" name="patron-respiratorio" id="respiracion-normal"><label for="respiracion-normal">Eupnea (normal)</label></div>
+                            <div class="checkbox-item"><input type="radio" name="patron-respiratorio" id="taquipnea"><label for="taquipnea">Taquipnea</label></div>
+                            <div class="checkbox-item"><input type="radio" name="patron-respiratorio" id="bradipnea"><label for="bradipnea">Bradipnea</label></div>
+                            <div class="checkbox-item"><input type="radio" name="patron-respiratorio" id="respiracion-kussmaul"><label for="respiracion-kussmaul">Kussmaul</label></div>
+                            <div class="checkbox-item"><input type="radio" name="patron-respiratorio" id="respiracion-cheyne-stokes"><label for="respiracion-cheyne-stokes">Cheyne-Stokes</label></div>
+                            <div class="checkbox-item"><input type="radio" name="patron-respiratorio" id="respiracion-biot"><label for="respiracion-biot">Biot</label></div>
+                        </div>
+                        
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="uso-musculos-accesorios"><label for="uso-musculos-accesorios">Uso de músculos accesorios</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="tiraje-intercostal"><label for="tiraje-intercostal">Tiraje intercostal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="tiraje-subcostal"><label for="tiraje-subcostal">Tiraje subcostal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="aleteo-nasal"><label for="aleteo-nasal">Aleteo nasal</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="respiracion-paradojica"><label for="respiracion-paradojica">Respiración paradójica</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Signos de Insuficiencia Respiratoria</div>
+                    <div class="saturation-assessment">
+                        <h4>Oximetría y Signos de Hipoxemia</h4>
+                        <div class="measurement">
+                            <label>Saturación O2 (%):</label>
+                            <input type="number" class="input-field" id="saturacion-o2" min="70" max="100" onchange="evaluateSaturation()">
+                            <span>%</span>
+                        </div>
+                        <div class="measurement">
+                            <label>FiO2:</label>
+                            <input type="number" class="input-field" id="fio2" min="21" max="100" step="1">
+                            <span>%</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación SatO2:</span>
+                            <span class="score-value" id="interpretacion-sat">--</span>
+                        </div>
+                        
+                        <div class="checkbox-grid">
+                            <div class="checkbox-item"><input type="checkbox" id="cianosis-central"><label for="cianosis-central">Cianosis central</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="cianosis-periferica"><label for="cianosis-periferica">Cianosis periférica</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="acropaquias"><label for="acropaquias">Acropaquias (dedos en palillo de tambor)</label></div>
+                            <div class="checkbox-item"><input type="checkbox" id="confusion"><label for="confusion">Confusión/agitación</label></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Palpación Torácica -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Palpación Torácica</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="thoracic-palpation">
+                <div class="exam-container">
+                    <div class="exam-header">Expansibilidad Torácica</div>
+                    <div class="bilateral-container">
+                        <div class="side-container">
+                            <div class="side-header">Evaluación Bilateral</div>
+                            <div class="test-results">
+                                <div class="test-item">
+                                    <label>Expansibilidad simétrica</label>
+                                    <div class="test-controls">
+                                        <div class="test-checkbox"><input type="checkbox" id="expansibilidad-normal" onchange="handleMutuallyExclusive('expansibilidad-normal', 'expansibilidad-asimetrica', this)"><span class="negative">Normal</span></div>
+                                        <div class="test-checkbox"><input type="checkbox" id="expansibilidad-asimetrica" onchange="handleMutuallyExclusive('expansibilidad-normal', 'expansibilidad-asimetrica', this)"><span class="positive">Asimétrica</span></div>
+                                    </div>
+                                </div>
+                                <div class="test-item">
+                                    <label>Amplitud de expansión</label>
+                                    <div class="test-controls">
+                                        <div class="test-checkbox"><input type="checkbox" id="amplitud-normal" onchange="handleMutuallyExclusive('amplitud-normal', 'amplitud-disminuida', this)"><span class="negative">Normal</span></div>
+                                        <div class="test-checkbox"><input type="checkbox" id="amplitud-disminuida" onchange="handleMutuallyExclusive('amplitud-normal', 'amplitud-disminuida', this)"><span class="positive">Disminuida</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="side-container">
+                            <div class="side-header">Mediciones</div>
+                            <div class="measurement">
+                                <label>Expansión torácica:</label>
+                                <input type="number" class="input-field" id="expansion-toracica" min="0" max="15" step="0.5">
+                                <span>cm (normal >5cm)</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Perímetro inspiratorio:</label>
+                                <input type="number" class="input-field" id="perimetro-inspiratorio" min="60" max="150">
+                                <span>cm</span>
+                            </div>
+                            <div class="measurement">
+                                <label>Perímetro espiratorio:</label>
+                                <input type="number" class="input-field" id="perimetro-espiratorio" min="60" max="150">
+                                <span>cm</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Frémito Vocal</div>
+                    <div class="lung-map">
+                        <div class="lung-side">
+                            <h5>Pulmón Derecho</h5>
+                            <div class="lung-zone">
+                                <h6>Ápice</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-apice" id="fremito-der-apice-normal" value="normal"><span class="negative">Normal</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-apice" id="fremito-der-apice-aumentado" value="aumentado"><span class="positive">Aumentado</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-apice" id="fremito-der-apice-disminuido" value="disminuido"><span class="abnormal">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-apice" id="fremito-der-apice-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Superior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-superior" id="fremito-der-superior-normal" value="normal"><span class="negative">Normal</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-superior" id="fremito-der-superior-aumentado" value="aumentado"><span class="positive">Aumentado</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-superior" id="fremito-der-superior-disminuido" value="disminuido"><span class="abnormal">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-superior" id="fremito-der-superior-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Medio</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-medio" id="fremito-der-medio-normal" value="normal"><span class="negative">Normal</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-medio" id="fremito-der-medio-aumentado" value="aumentado"><span class="positive">Aumentado</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-medio" id="fremito-der-medio-disminuido" value="disminuido"><span class="abnormal">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-medio" id="fremito-der-medio-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Inferior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-inferior" id="fremito-der-inferior-normal" value="normal"><span class="negative">Normal</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-inferior" id="fremito-der-inferior-aumentado" value="aumentado"><span class="positive">Aumentado</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-inferior" id="fremito-der-inferior-disminuido" value="disminuido"><span class="abnormal">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-der-inferior" id="fremito-der-inferior-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="lung-side">
+                            <h5>Pulmón Izquierdo</h5>
+                            <div class="lung-zone">
+                                <h6>Ápice</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-apice" id="fremito-izq-apice-normal" value="normal"><span class="negative">Normal</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-apice" id="fremito-izq-apice-aumentado" value="aumentado"><span class="positive">Aumentado</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-apice" id="fremito-izq-apice-disminuido" value="disminuido"><span class="abnormal">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-apice" id="fremito-izq-apice-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Superior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-superior" id="fremito-izq-superior-normal" value="normal"><span class="negative">Normal</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-superior" id="fremito-izq-superior-aumentado" value="aumentado"><span class="positive">Aumentado</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-superior" id="fremito-izq-superior-disminuido" value="disminuido"><span class="abnormal">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-superior" id="fremito-izq-superior-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Medio</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-medio" id="fremito-izq-medio-normal" value="normal"><span class="negative">Normal</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-medio" id="fremito-izq-medio-aumentado" value="aumentado"><span class="positive">Aumentado</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-medio" id="fremito-izq-medio-disminuido" value="disminuido"><span class="abnormal">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-medio" id="fremito-izq-medio-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Inferior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-inferior" id="fremito-izq-inferior-normal" value="normal"><span class="negative">Normal</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-inferior" id="fremito-izq-inferior-aumentado" value="aumentado"><span class="positive">Aumentado</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-inferior" id="fremito-izq-inferior-disminuido" value="disminuido"><span class="abnormal">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="fremito-izq-inferior" id="fremito-izq-inferior-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Percusión Torácica -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Percusión Torácica</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="thoracic-percussion">
+                <div class="exam-container">
+                    <div class="exam-header">Sonoridad Pulmonar</div>
+                    <div class="lung-map">
+                        <div class="lung-side">
+                            <h5>Pulmón Derecho</h5>
+                            <div class="lung-zone">
+                                <h6>Ápice</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-apice" id="percusion-der-apice-sonoro" value="sonoro"><span class="negative">Sonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-apice" id="percusion-der-apice-hipersonoro" value="hipersonoro"><span class="abnormal">Hipersonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-apice" id="percusion-der-apice-mate" value="mate"><span class="positive">Mate</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-apice" id="percusion-der-apice-submate" value="submate"><span class="positive">Submate</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Superior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-superior" id="percusion-der-superior-sonoro" value="sonoro"><span class="negative">Sonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-superior" id="percusion-der-superior-hipersonoro" value="hipersonoro"><span class="abnormal">Hipersonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-superior" id="percusion-der-superior-mate" value="mate"><span class="positive">Mate</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-superior" id="percusion-der-superior-submate" value="submate"><span class="positive">Submate</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Medio</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-medio" id="percusion-der-medio-sonoro" value="sonoro"><span class="negative">Sonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-medio" id="percusion-der-medio-hipersonoro" value="hipersonoro"><span class="abnormal">Hipersonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-medio" id="percusion-der-medio-mate" value="mate"><span class="positive">Mate</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-medio" id="percusion-der-medio-submate" value="submate"><span class="positive">Submate</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Inferior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-inferior" id="percusion-der-inferior-sonoro" value="sonoro"><span class="negative">Sonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-inferior" id="percusion-der-inferior-hipersonoro" value="hipersonoro"><span class="abnormal">Hipersonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-inferior" id="percusion-der-inferior-mate" value="mate"><span class="positive">Mate</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-der-inferior" id="percusion-der-inferior-submate" value="submate"><span class="positive">Submate</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="lung-side">
+                            <h5>Pulmón Izquierdo</h5>
+                            <div class="lung-zone">
+                                <h6>Ápice</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-apice" id="percusion-izq-apice-sonoro" value="sonoro"><span class="negative">Sonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-apice" id="percusion-izq-apice-hipersonoro" value="hipersonoro"><span class="abnormal">Hipersonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-apice" id="percusion-izq-apice-mate" value="mate"><span class="positive">Mate</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-apice" id="percusion-izq-apice-submate" value="submate"><span class="positive">Submate</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Superior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-superior" id="percusion-izq-superior-sonoro" value="sonoro"><span class="negative">Sonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-superior" id="percusion-izq-superior-hipersonoro" value="hipersonoro"><span class="abnormal">Hipersonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-superior" id="percusion-izq-superior-mate" value="mate"><span class="positive">Mate</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-superior" id="percusion-izq-superior-submate" value="submate"><span class="positive">Submate</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Medio</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-medio" id="percusion-izq-medio-sonoro" value="sonoro"><span class="negative">Sonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-medio" id="percusion-izq-medio-hipersonoro" value="hipersonoro"><span class="abnormal">Hipersonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-medio" id="percusion-izq-medio-mate" value="mate"><span class="positive">Mate</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-medio" id="percusion-izq-medio-submate" value="submate"><span class="positive">Submate</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Inferior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-inferior" id="percusion-izq-inferior-sonoro" value="sonoro"><span class="negative">Sonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-inferior" id="percusion-izq-inferior-hipersonoro" value="hipersonoro"><span class="abnormal">Hipersonoro</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-inferior" id="percusion-izq-inferior-mate" value="mate"><span class="positive">Mate</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="percusion-izq-inferior" id="percusion-izq-inferior-submate" value="submate"><span class="positive">Submate</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Excursión Diafragmática</div>
+                    <div class="bilateral-container">
+                        <div class="side-container">
+                            <div class="side-header">Hemidiafragma Derecho</div>
+                            <div class="measurement">
+                                <label>Excursión:</label>
+                                <input type="number" class="input-field" id="excursion-der" min="0" max="15" step="0.5">
+                                <span>cm (normal 3-5cm)</span>
+                            </div>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="diafragma-der-normal"><span class="negative">Normal</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="diafragma-der-elevado"><span class="positive">Elevado</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="diafragma-der-bajo"><span class="abnormal">Bajo</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="diafragma-der-paralitico"><span class="positive">Paralítico</span></div>
+                            </div>
+                        </div>
+                        
+                        <div class="side-container">
+                            <div class="side-header">Hemidiafragma Izquierdo</div>
+                            <div class="measurement">
+                                <label>Excursión:</label>
+                                <input type="number" class="input-field" id="excursion-izq" min="0" max="15" step="0.5">
+                                <span>cm (normal 3-5cm)</span>
+                            </div>
+                            <div class="test-controls">
+                                <div class="test-checkbox"><input type="checkbox" id="diafragma-izq-normal"><span class="negative">Normal</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="diafragma-izq-elevado"><span class="positive">Elevado</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="diafragma-izq-bajo"><span class="abnormal">Bajo</span></div>
+                                <div class="test-checkbox"><input type="checkbox" id="diafragma-izq-paralitico"><span class="positive">Paralítico</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Auscultación Pulmonar -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Auscultación Pulmonar</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="pulmonary-auscultation">
+                <div class="exam-container">
+                    <div class="exam-header">Ruidos Respiratorios Normales</div>
+                    <div class="lung-map">
+                        <div class="lung-side">
+                            <h5>Pulmón Derecho</h5>
+                            <div class="lung-zone">
+                                <h6>Ápice</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-apice" id="ruidos-der-apice-vesicular" value="vesicular"><span class="negative">Vesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-apice" id="ruidos-der-apice-bronquial" value="bronquial"><span class="positive">Bronquial</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-apice" id="ruidos-der-apice-broncovesicular" value="broncovesicular"><span class="abnormal">Broncovesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-apice" id="ruidos-der-apice-disminuido" value="disminuido"><span class="positive">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-apice" id="ruidos-der-apice-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Superior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-superior" id="ruidos-der-superior-vesicular" value="vesicular"><span class="negative">Vesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-superior" id="ruidos-der-superior-bronquial" value="bronquial"><span class="positive">Bronquial</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-superior" id="ruidos-der-superior-broncovesicular" value="broncovesicular"><span class="abnormal">Broncovesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-superior" id="ruidos-der-superior-disminuido" value="disminuido"><span class="positive">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-superior" id="ruidos-der-superior-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Medio</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-medio" id="ruidos-der-medio-vesicular" value="vesicular"><span class="negative">Vesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-medio" id="ruidos-der-medio-bronquial" value="bronquial"><span class="positive">Bronquial</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-medio" id="ruidos-der-medio-broncovesicular" value="broncovesicular"><span class="abnormal">Broncovesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-medio" id="ruidos-der-medio-disminuido" value="disminuido"><span class="positive">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-medio" id="ruidos-der-medio-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Inferior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-inferior" id="ruidos-der-inferior-vesicular" value="vesicular"><span class="negative">Vesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-inferior" id="ruidos-der-inferior-bronquial" value="bronquial"><span class="positive">Bronquial</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-inferior" id="ruidos-der-inferior-broncovesicular" value="broncovesicular"><span class="abnormal">Broncovesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-inferior" id="ruidos-der-inferior-disminuido" value="disminuido"><span class="positive">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-der-inferior" id="ruidos-der-inferior-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="lung-side">
+                            <h5>Pulmón Izquierdo</h5>
+                            <div class="lung-zone">
+                                <h6>Ápice</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-apice" id="ruidos-izq-apice-vesicular" value="vesicular"><span class="negative">Vesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-apice" id="ruidos-izq-apice-bronquial" value="bronquial"><span class="positive">Bronquial</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-apice" id="ruidos-izq-apice-broncovesicular" value="broncovesicular"><span class="abnormal">Broncovesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-apice" id="ruidos-izq-apice-disminuido" value="disminuido"><span class="positive">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-apice" id="ruidos-izq-apice-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Superior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-superior" id="ruidos-izq-superior-vesicular" value="vesicular"><span class="negative">Vesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-superior" id="ruidos-izq-superior-bronquial" value="bronquial"><span class="positive">Bronquial</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-superior" id="ruidos-izq-superior-broncovesicular" value="broncovesicular"><span class="abnormal">Broncovesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-superior" id="ruidos-izq-superior-disminuido" value="disminuido"><span class="positive">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-superior" id="ruidos-izq-superior-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Medio</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-medio" id="ruidos-izq-medio-vesicular" value="vesicular"><span class="negative">Vesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-medio" id="ruidos-izq-medio-bronquial" value="bronquial"><span class="positive">Bronquial</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-medio" id="ruidos-izq-medio-broncovesicular" value="broncovesicular"><span class="abnormal">Broncovesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-medio" id="ruidos-izq-medio-disminuido" value="disminuido"><span class="positive">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-medio" id="ruidos-izq-medio-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Inferior</h6>
+                                <div class="test-controls">
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-inferior" id="ruidos-izq-inferior-vesicular" value="vesicular"><span class="negative">Vesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-inferior" id="ruidos-izq-inferior-bronquial" value="bronquial"><span class="positive">Bronquial</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-inferior" id="ruidos-izq-inferior-broncovesicular" value="broncovesicular"><span class="abnormal">Broncovesicular</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-inferior" id="ruidos-izq-inferior-disminuido" value="disminuido"><span class="positive">Disminuido</span></div>
+                                    <div class="test-checkbox"><input type="radio" name="ruidos-izq-inferior" id="ruidos-izq-inferior-abolido" value="abolido"><span class="positive">Abolido</span></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Ruidos Adventicios</div>
+                    <div class="lung-map">
+                        <div class="lung-side">
+                            <h5>Pulmón Derecho</h5>
+                            <div class="lung-zone">
+                                <h6>Ápice</h6>
+                                <div class="lung-findings">
+                                    <label><input type="checkbox" id="crepitantes-der-apice">Crepitantes</label>
+                                    <label><input type="checkbox" id="subcrepitantes-der-apice">Subcrepitantes</label>
+                                    <label><input type="checkbox" id="sibilancias-der-apice">Sibilancias</label>
+                                    <label><input type="checkbox" id="roncus-der-apice">Roncus</label>
+                                    <label><input type="checkbox" id="estridor-der-apice">Estridor</label>
+                                    <label><input type="checkbox" id="roce-der-apice">Roce pleural</label>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Superior</h6>
+                                <div class="lung-findings">
+                                    <label><input type="checkbox" id="crepitantes-der-superior">Crepitantes</label>
+                                    <label><input type="checkbox" id="subcrepitantes-der-superior">Subcrepitantes</label>
+                                    <label><input type="checkbox" id="sibilancias-der-superior">Sibilancias</label>
+                                    <label><input type="checkbox" id="roncus-der-superior">Roncus</label>
+                                    <label><input type="checkbox" id="estridor-der-superior">Estridor</label>
+                                    <label><input type="checkbox" id="roce-der-superior">Roce pleural</label>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Medio</h6>
+                                <div class="lung-findings">
+                                    <label><input type="checkbox" id="crepitantes-der-medio">Crepitantes</label>
+                                    <label><input type="checkbox" id="subcrepitantes-der-medio">Subcrepitantes</label>
+                                    <label><input type="checkbox" id="sibilancias-der-medio">Sibilancias</label>
+                                    <label><input type="checkbox" id="roncus-der-medio">Roncus</label>
+                                    <label><input type="checkbox" id="estridor-der-medio">Estridor</label>
+                                    <label><input type="checkbox" id="roce-der-medio">Roce pleural</label>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Inferior</h6>
+                                <div class="lung-findings">
+                                    <label><input type="checkbox" id="crepitantes-der-inferior">Crepitantes</label>
+                                    <label><input type="checkbox" id="subcrepitantes-der-inferior">Subcrepitantes</label>
+                                    <label><input type="checkbox" id="sibilancias-der-inferior">Sibilancias</label>
+                                    <label><input type="checkbox" id="roncus-der-inferior">Roncus</label>
+                                    <label><input type="checkbox" id="estridor-der-inferior">Estridor</label>
+                                    <label><input type="checkbox" id="roce-der-inferior">Roce pleural</label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="lung-side">
+                            <h5>Pulmón Izquierdo</h5>
+                            <div class="lung-zone">
+                                <h6>Ápice</h6>
+                                <div class="lung-findings">
+                                    <label><input type="checkbox" id="crepitantes-izq-apice">Crepitantes</label>
+                                    <label><input type="checkbox" id="subcrepitantes-izq-apice">Subcrepitantes</label>
+                                    <label><input type="checkbox" id="sibilancias-izq-apice">Sibilancias</label>
+                                    <label><input type="checkbox" id="roncus-izq-apice">Roncus</label>
+                                    <label><input type="checkbox" id="estridor-izq-apice">Estridor</label>
+                                    <label><input type="checkbox" id="roce-izq-apice">Roce pleural</label>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Superior</h6>
+                                <div class="lung-findings">
+                                    <label><input type="checkbox" id="crepitantes-izq-superior">Crepitantes</label>
+                                    <label><input type="checkbox" id="subcrepitantes-izq-superior">Subcrepitantes</label>
+                                    <label><input type="checkbox" id="sibilancias-izq-superior">Sibilancias</label>
+                                    <label><input type="checkbox" id="roncus-izq-superior">Roncus</label>
+                                    <label><input type="checkbox" id="estridor-izq-superior">Estridor</label>
+                                    <label><input type="checkbox" id="roce-izq-superior">Roce pleural</label>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Medio</h6>
+                                <div class="lung-findings">
+                                    <label><input type="checkbox" id="crepitantes-izq-medio">Crepitantes</label>
+                                    <label><input type="checkbox" id="subcrepitantes-izq-medio">Subcrepitantes</label>
+                                    <label><input type="checkbox" id="sibilancias-izq-medio">Sibilancias</label>
+                                    <label><input type="checkbox" id="roncus-izq-medio">Roncus</label>
+                                    <label><input type="checkbox" id="estridor-izq-medio">Estridor</label>
+                                    <label><input type="checkbox" id="roce-izq-medio">Roce pleural</label>
+                                </div>
+                            </div>
+                            <div class="lung-zone">
+                                <h6>Campo Inferior</h6>
+                                <div class="lung-findings">
+                                    <label><input type="checkbox" id="crepitantes-izq-inferior">Crepitantes</label>
+                                    <label><input type="checkbox" id="subcrepitantes-izq-inferior">Subcrepitantes</label>
+                                    <label><input type="checkbox" id="sibilancias-izq-inferior">Sibilancias</label>
+                                    <label><input type="checkbox" id="roncus-izq-inferior">Roncus</label>
+                                    <label><input type="checkbox" id="estridor-izq-inferior">Estridor</label>
+                                    <label><input type="checkbox" id="roce-izq-inferior">Roce pleural</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Escalas de Evaluación -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Escalas de Evaluación Respiratoria</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="respiratory-scales">
+                <div class="exam-container">
+                    <div class="exam-header">Escala CAT (COPD Assessment Test)</div>
+                    <div class="score-calculation">
+                        <h4>Evaluación de Impacto de la EPOC</h4>
+                        <div class="exam-section">
+                            <h4>Tos</h4>
+                            <div class="measurement">
+                                <label>Nunca toso (0) ← → Toso todo el tiempo (5):</label>
+                                <input type="range" id="cat-tos" min="0" max="5" value="0" oninput="updateCATValue('tos', this.value)">
+                                <span id="cat-tos-value">0</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Flemas/secreciones</h4>
+                            <div class="measurement">
+                                <label>No tengo flemas (0) ← → Pecho lleno de flemas (5):</label>
+                                <input type="range" id="cat-flemas" min="0" max="5" value="0" oninput="updateCATValue('flemas', this.value)">
+                                <span id="cat-flemas-value">0</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Opresión en el pecho</h4>
+                            <div class="measurement">
+                                <label>No siento opresión (0) ← → Siento mucha opresión (5):</label>
+                                <input type="range" id="cat-opresion" min="0" max="5" value="0" oninput="updateCATValue('opresion', this.value)">
+                                <span id="cat-opresion-value">0</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Disnea al subir cuestas/escaleras</h4>
+                            <div class="measurement">
+                                <label>Sin falta de aire (0) ← → Mucha falta de aire (5):</label>
+                                <input type="range" id="cat-disnea" min="0" max="5" value="0" oninput="updateCATValue('disnea', this.value)">
+                                <span id="cat-disnea-value">0</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Limitación de actividades en casa</h4>
+                            <div class="measurement">
+                                <label>No limitado (0) ← → Muy limitado (5):</label>
+                                <input type="range" id="cat-limitacion" min="0" max="5" value="0" oninput="updateCATValue('limitacion', this.value)">
+                                <span id="cat-limitacion-value">0</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Confianza para salir de casa</h4>
+                            <div class="measurement">
+                                <label>Muy confiado (0) ← → Nada confiado (5):</label>
+                                <input type="range" id="cat-confianza" min="0" max="5" value="0" oninput="updateCATValue('confianza', this.value)">
+                                <span id="cat-confianza-value">0</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Sueño</h4>
+                            <div class="measurement">
+                                <label>Duermo perfectamente (0) ← → No duermo bien (5):</label>
+                                <input type="range" id="cat-sueno" min="0" max="5" value="0" oninput="updateCATValue('sueno', this.value)">
+                                <span id="cat-sueno-value">0</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>Energía</h4>
+                            <div class="measurement">
+                                <label>Lleno de energía (0) ← → Sin energía (5):</label>
+                                <input type="range" id="cat-energia" min="0" max="5" value="0" oninput="updateCATValue('energia', this.value)">
+                                <span id="cat-energia-value">0</span>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación CAT:</span>
+                            <span class="score-value" id="cat-total">0</span>
+                            <span>/40 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="cat-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Índice BODE (EPOC)</div>
+                    <div class="score-calculation">
+                        <h4>Componentes del índice BODE</h4>
+                        <div class="exam-section">
+                            <h4>B - IMC (Body Mass Index)</h4>
+                            <div class="measurement">
+                                <label>IMC:</label>
+                                <input type="number" class="input-field" id="bode-imc" min="10" max="50" step="0.1" onchange="calculateBODE()">
+                                <span>kg/m²</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>O - Obstrucción (FEV1)</h4>
+                            <div class="measurement">
+                                <label>FEV1 (% predicho):</label>
+                                <input type="number" class="input-field" id="bode-fev1" min="0" max="150" onchange="calculateBODE()">
+                                <span>%</span>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>D - Disnea (mMRC)</h4>
+                            <div class="severity-grid">
+                                <div class="severity-item"><input type="radio" name="bode-disnea" id="bode-disnea-0" value="0" onchange="calculateBODE()"><label for="bode-disnea-0">mMRC 0-1</label></div>
+                                <div class="severity-item"><input type="radio" name="bode-disnea" id="bode-disnea-1" value="1" onchange="calculateBODE()"><label for="bode-disnea-1">mMRC 2</label></div>
+                                <div class="severity-item"><input type="radio" name="bode-disnea" id="bode-disnea-2" value="2" onchange="calculateBODE()"><label for="bode-disnea-2">mMRC 3</label></div>
+                                <div class="severity-item"><input type="radio" name="bode-disnea" id="bode-disnea-3" value="3" onchange="calculateBODE()"><label for="bode-disnea-3">mMRC 4</label></div>
+                            </div>
+                        </div>
+                        <div class="exam-section">
+                            <h4>E - Ejercicio (Test marcha 6 min)</h4>
+                            <div class="measurement">
+                                <label>Distancia caminada:</label>
+                                <input type="number" class="input-field" id="bode-ejercicio" min="0" max="800" onchange="calculateBODE()">
+                                <span>metros</span>
+                            </div>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación BODE:</span>
+                            <span class="score-value" id="bode-total">0</span>
+                            <span>/10 puntos</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Supervivencia a 4 años:</span>
+                            <span class="score-value" id="bode-prognosis">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Escala de Borg Modificada</div>
+                    <div class="score-calculation">
+                        <h4>Intensidad de Disnea durante Ejercicio</h4>
+                        <div class="severity-grid">
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-0" value="0"><label for="borg-0">0 - Sin disnea</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-0.5" value="0.5"><label for="borg-0.5">0.5 - Muy, muy leve</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-1" value="1"><label for="borg-1">1 - Muy leve</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-2" value="2"><label for="borg-2">2 - Leve</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-3" value="3"><label for="borg-3">3 - Moderada</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-4" value="4"><label for="borg-4">4 - Algo severa</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-5" value="5"><label for="borg-5">5 - Severa</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-6" value="6"><label for="borg-6">6 - Severa</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-7" value="7"><label for="borg-7">7 - Muy severa</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-8" value="8"><label for="borg-8">8 - Muy severa</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-9" value="9"><label for="borg-9">9 - Muy, muy severa</label></div>
+                            <div class="severity-item"><input type="radio" name="borg-scale" id="borg-10" value="10"><label for="borg-10">10 - Máxima</label></div>
+                        </div>
+                        <div class="score-item">
+                            <span>Puntuación Borg:</span>
+                            <span class="score-value" id="borg-score">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Espirometría y Pruebas Funcionales -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>Espirometría y Pruebas Funcionales</span>
+                <span class="arrow">▼</span>
+            </div>
+            <div class="section-content" id="spirometry">
+                <div class="exam-container">
+                    <div class="exam-header">Volúmenes y Capacidades Pulmonares</div>
+                    <div class="spirometry-assessment">
+                        <h4>Parámetros Espirométricos</h4>
+                        <div class="bilateral-container">
+                            <div class="side-container">
+                                <div class="side-header">Pre-broncodilatador</div>
+                                <div class="measurement">
+                                    <label>FVC (L):</label>
+                                    <input type="number" class="input-field" id="fvc-pre" min="0" max="8" step="0.01" onchange="calculateSpirometry()">
+                                    <span>L</span>
+                                </div>
+                                <div class="measurement">
+                                    <label>FEV1 (L):</label>
+                                    <input type="number" class="input-field" id="fev1-pre" min="0" max="6" step="0.01" onchange="calculateSpirometry()">
+                                    <span>L</span>
+                                </div>
+                                <div class="measurement">
+                                    <label>FEV1/FVC (%):</label>
+                                    <input type="number" class="input-field" id="fev1-fvc-pre" min="20" max="100" onchange="calculateSpirometry()">
+                                    <span>%</span>
+                                </div>
+                                <div class="measurement">
+                                    <label>FEF25-75 (L/s):</label>
+                                    <input type="number" class="input-field" id="fef25-75-pre" min="0" max="8" step="0.01" onchange="calculateSpirometry()">
+                                    <span>L/s</span>
+                                </div>
+                                <div class="measurement">
+                                    <label>PEF (L/min):</label>
+                                    <input type="number" class="input-field" id="pef-pre" min="0" max="800" onchange="calculateSpirometry()">
+                                    <span>L/min</span>
+                                </div>
+                            </div>
+                            
+                            <div class="side-container">
+                                <div class="side-header">Post-broncodilatador</div>
+                                <div class="measurement">
+                                    <label>FVC (L):</label>
+                                    <input type="number" class="input-field" id="fvc-post" min="0" max="8" step="0.01" onchange="calculateSpirometry()">
+                                    <span>L</span>
+                                </div>
+                                <div class="measurement">
+                                    <label>FEV1 (L):</label>
+                                    <input type="number" class="input-field" id="fev1-post" min="0" max="6" step="0.01" onchange="calculateSpirometry()">
+                                    <span>L</span>
+                                </div>
+                                <div class="measurement">
+                                    <label>FEV1/FVC (%):</label>
+                                    <input type="number" class="input-field" id="fev1-fvc-post" min="20" max="100" onchange="calculateSpirometry()">
+                                    <span>%</span>
+                                </div>
+                                <div class="measurement">
+                                    <label>FEF25-75 (L/s):</label>
+                                    <input type="number" class="input-field" id="fef25-75-post" min="0" max="8" step="0.01" onchange="calculateSpirometry()">
+                                    <span>L/s</span>
+                                </div>
+                                <div class="measurement">
+                                    <label>PEF (L/min):</label>
+                                    <input type="number" class="input-field" id="pef-post" min="0" max="800" onchange="calculateSpirometry()">
+                                    <span>L/min</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="score-item">
+                            <span>Patrón espirométrico:</span>
+                            <span class="score-value" id="spirometry-pattern">--</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Reversibilidad FEV1:</span>
+                            <span class="score-value" id="reversibility-fev1">--</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Reversibilidad FVC:</span>
+                            <span class="score-value" id="reversibility-fvc">--</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación:</span>
+                            <span class="score-value" id="spirometry-interpretation">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Clasificación GOLD para EPOC</div>
+                    <div class="score-calculation">
+                        <h4>Gravedad de Limitación del Flujo Aéreo</h4>
+                        <div class="measurement">
+                            <label>FEV1 post-BD (% predicho):</label>
+                            <input type="number" class="input-field" id="gold-fev1" min="0" max="150" onchange="calculateGOLD()">
+                            <span>%</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Clasificación GOLD:</span>
+                            <span class="score-value" id="gold-classification">--</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Gravedad:</span>
+                            <span class="score-value" id="gold-severity">--</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="exam-container">
+                    <div class="exam-header">Test de Marcha de 6 Minutos</div>
+                    <div class="exam-section">
+                        <h4>Parámetros de la Prueba</h4>
+                        <div class="measurement">
+                            <label>Distancia total:</label>
+                            <input type="number" class="input-field" id="marcha-distancia" min="0" max="800" onchange="evaluateWalkTest()">
+                            <span>metros</span>
+                        </div>
+                        <div class="measurement">
+                            <label>SpO2 inicial:</label>
+                            <input type="number" class="input-field" id="marcha-spo2-inicial" min="70" max="100">
+                            <span>%</span>
+                        </div>
+                        <div class="measurement">
+                            <label>SpO2 final:</label>
+                            <input type="number" class="input-field" id="marcha-spo2-final" min="70" max="100" onchange="evaluateWalkTest()">
+                            <span>%</span>
+                        </div>
+                        <div class="measurement">
+                            <label>FC inicial:</label>
+                            <input type="number" class="input-field" id="marcha-fc-inicial" min="40" max="200">
+                            <span>lpm</span>
+                        </div>
+                        <div class="measurement">
+                            <label>FC final:</label>
+                            <input type="number" class="input-field" id="marcha-fc-final" min="40" max="200">
+                            <span>lpm</span>
+                        </div>
+                        <div class="measurement">
+                            <label>Borg inicial:</label>
+                            <select id="marcha-borg-inicial">
+                                <option value="">Seleccionar</option>
+                                <option value="0">0 - Sin disnea</option>
+                                <option value="1">1 - Muy leve</option>
+                                <option value="2">2 - Leve</option>
+                                <option value="3">3 - Moderada</option>
+                                <option value="4">4 - Algo severa</option>
+                                <option value="5">5 - Severa</option>
+                                <option value="6">6 - Severa</option>
+                                <option value="7">7 - Muy severa</option>
+                                <option value="8">8 - Muy severa</option>
+                                <option value="9">9 - Muy, muy severa</option>
+                                <option value="10">10 - Máxima</option>
+                            </select>
+                        </div>
+                        <div class="measurement">
+                            <label>Borg final:</label>
+                            <select id="marcha-borg-final">
+                                <option value="">Seleccionar</option>
+                                <option value="0">0 - Sin disnea</option>
+                                <option value="1">1 - Muy leve</option>
+                                <option value="2">2 - Leve</option>
+                                <option value="3">3 - Moderada</option>
+                                <option value="4">4 - Algo severa</option>
+                                <option value="5">5 - Severa</option>
+                                <option value="6">6 - Severa</option>
+                                <option value="7">7 - Muy severa</option>
+                                <option value="8">8 - Muy severa</option>
+                                <option value="9">9 - Muy, muy severa</option>
+                                <option value="10">10 - Máxima</option>
+                            </select>
+                        </div>
+                        <div class="score-item">
+                            <span>Interpretación distancia:</span>
+                            <span class="score-value" id="marcha-interpretation">--</span>
+                        </div>
+                        <div class="score-item">
+                            <span>Desaturación:</span>
+                            <span class="score-value" id="marcha-desaturacion">--</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="conclusion">
+            <h3>Conclusión del Examen Neumológico</h3>
+            <div class="conclusion-text" id="conclusion-text">Seleccione los parámetros del examen para generar la conclusión neumológica...</div>
+        </div>
+        
+        <div class="control-buttons">
+            <button class="btn btn-primary" onclick="generateConclusion()">Generar Conclusión</button>
+            <button class="btn btn-primary" onclick="printConclusion()">Imprimir Conclusión</button>
+            <button class="btn btn-secondary" onclick="clearForm()">Limpiar Formulario</button>
+            <button class="btn btn-secondary" onclick="expandAllSections()">Expandir Todo</button>
+            <button class="btn btn-secondary" onclick="collapseAllSections()">Contraer Todo</button>
+        </div>
+    </div>
+
+    <script>
+        function updateSectionHeight(contentElement) {
+            if (contentElement && contentElement.classList.contains('expanded')) {
+                setTimeout(() => {
+                    contentElement.style.maxHeight = contentElement.scrollHeight + 'px';
+                }, 50);
+            }
+        }
+
+        function toggleSection(headerElement) {
+            const content = headerElement.nextElementSibling;
+            const section = headerElement.parentElement;
+            
+            headerElement.classList.toggle('expanded');
+            section.classList.toggle('active');
+            
+            if (content.classList.toggle('expanded')) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+            } else {
+                content.style.maxHeight = '0';
+            }
+        }
+
+        function expandAllSections() {
+            document.querySelectorAll('.section-header:not(.expanded)').forEach(header => toggleSection(header));
+        }
+
+        function collapseAllSections() {
+            document.querySelectorAll('.section-header.expanded').forEach(header => toggleSection(header));
+        }
+        
+        function handleNoComplaints() {
+            const noComplaintsCheckbox = document.getElementById('sin-quejas-neumo');
+            const otherCheckboxes = document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-neumo)');
+            
+            otherCheckboxes.forEach(checkbox => {
+                checkbox.disabled = noComplaintsCheckbox.checked;
+                if (noComplaintsCheckbox.checked) checkbox.checked = false;
+            });
+            generateConclusion();
+        }
+        
+        function handleMutuallyExclusive(positiveId, negativeId, checkbox) {
+            if (checkbox.checked) {
+                const oppositeId = checkbox.id === positiveId ? negativeId : positiveId;
+                const oppositeCheckbox = document.getElementById(oppositeId);
+                if (oppositeCheckbox) oppositeCheckbox.checked = false;
+            }
+            generateConclusion();
+        }
+
+        function calculatePackYears() {
+            const cigarrillosDia = parseFloat(document.getElementById('cigarrillos-dia').value) || 0;
+            const anosFumando = parseFloat(document.getElementById('anos-fumando').value) || 0;
+            
+            const paquetesAno = (cigarrillosDia * anosFumando) / 20;
+            document.getElementById('paquetes-calculados').textContent = paquetesAno.toFixed(1);
+            
+            // Actualizar el campo manual si existe
+            if (document.getElementById('paquetes-ano').value === '') {
+                document.getElementById('paquetes-ano').value = paquetesAno.toFixed(1);
+            }
+            
+            generateConclusion();
+        }
+
+        function evaluateRespiratoryRate() {
+            const fr = parseFloat(document.getElementById('frecuencia-respiratoria').value);
+            const interpretEl = document.getElementById('interpretacion-fr');
+            
+            if (!fr) {
+                interpretEl.textContent = '--';
+                return;
+            }
+            
+            if (fr < 12) {
+                interpretEl.textContent = 'Bradipnea';
+                interpretEl.style.color = '#f39c12';
+            } else if (fr > 20) {
+                interpretEl.textContent = 'Taquipnea';
+                interpretEl.style.color = '#e74c3c';
+            } else {
+                interpretEl.textContent = 'Normal';
+                interpretEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+        function evaluateSaturation() {
+            const sat = parseFloat(document.getElementById('saturacion-o2').value);
+            const interpretEl = document.getElementById('interpretacion-sat');
+            
+            if (!sat) {
+                interpretEl.textContent = '--';
+                return;
+            }
+            
+            if (sat < 88) {
+                interpretEl.textContent = 'Hipoxemia severa';
+                interpretEl.style.color = '#e74c3c';
+            } else if (sat < 92) {
+                interpretEl.textContent = 'Hipoxemia moderada';
+                interpretEl.style.color = '#e74c3c';
+            } else if (sat < 95) {
+                interpretEl.textContent = 'Hipoxemia leve';
+                interpretEl.style.color = '#f39c12';
+            } else {
+                interpretEl.textContent = 'Normal';
+                interpretEl.style.color = '#27ae60';
+            }
+            generateConclusion();
+        }
+
+        function updateCATValue(category, value) {
+            document.getElementById(`cat-${category}-value`).textContent = value;
+            calculateCAT();
+        }
+
+        function calculateCAT() {
+            const categories = ['tos', 'flemas', 'opresion', 'disnea', 'limitacion', 'confianza', 'sueno', 'energia'];
+            let total = 0;
+            
+            categories.forEach(category => {
+                const value = parseFloat(document.getElementById(`cat-${category}`).value) || 0;
+                total += value;
+            });
+            
+            document.getElementById('cat-total').textContent = total;
+            
+            let interpretation = '';
+            if (total < 10) {
+                interpretation = 'Impacto bajo';
+            } else if (total < 20) {
+                interpretation = 'Impacto medio';
+            } else if (total < 30) {
+                interpretation = 'Impacto alto';
+            } else {
+                interpretation = 'Impacto muy alto';
+            }
+            
+            document.getElementById('cat-interpretation').textContent = interpretation;
+            generateConclusion();
+        }
+
+        function calculateBODE() {
+            let total = 0;
+            
+            // IMC
+            const imc = parseFloat(document.getElementById('bode-imc').value);
+            if (imc) {
+                if (imc <= 21) total += 1;
+            }
+            
+            // FEV1
+            const fev1 = parseFloat(document.getElementById('bode-fev1').value);
+            if (fev1) {
+                if (fev1 >= 65) total += 0;
+                else if (fev1 >= 50) total += 1;
+                else if (fev1 >= 36) total += 2;
+                else total += 3;
+            }
+            
+            // Disnea mMRC
+            const disnea = document.querySelector('input[name="bode-disnea"]:checked');
+            if (disnea) total += parseInt(disnea.value);
+            
+            // Ejercicio
+            const ejercicio = parseFloat(document.getElementById('bode-ejercicio').value);
+            if (ejercicio) {
+                if (ejercicio >= 350) total += 0;
+                else if (ejercicio >= 250) total += 1;
+                else if (ejercicio >= 150) total += 2;
+                else total += 3;
+            }
+            
+            document.getElementById('bode-total').textContent = total;
+            
+            let prognosis = '';
+            if (total <= 2) {
+                prognosis = '80% supervivencia';
+            } else if (total <= 4) {
+                prognosis = '67% supervivencia';
+            } else if (total <= 6) {
+                prognosis = '57% supervivencia';
+            } else {
+                prognosis = '18% supervivencia';
+            }
+            
+            document.getElementById('bode-prognosis').textContent = prognosis;
+            generateConclusion();
+        }
+
+        function calculateSpirometry() {
+            const fvcPre = parseFloat(document.getElementById('fvc-pre').value);
+            const fev1Pre = parseFloat(document.getElementById('fev1-pre').value);
+            const fev1FvcPre = parseFloat(document.getElementById('fev1-fvc-pre').value);
+            const fvcPost = parseFloat(document.getElementById('fvc-post').value);
+            const fev1Post = parseFloat(document.getElementById('fev1-post').value);
+            const fev1FvcPost = parseFloat(document.getElementById('fev1-fvc-post').value);
+            
+            // Calcular reversibilidad
+            if (fev1Pre && fev1Post) {
+                const reversibilityFEV1 = ((fev1Post - fev1Pre) / fev1Pre) * 100;
+                document.getElementById('reversibility-fev1').textContent = `${reversibilityFEV1.toFixed(1)}%`;
+            }
+            
+            if (fvcPre && fvcPost) {
+                const reversibilityFVC = ((fvcPost - fvcPre) / fvcPre) * 100;
+                document.getElementById('reversibility-fvc').textContent = `${reversibilityFVC.toFixed(1)}%`;
+            }
+            
+            // Determinar patrón
+            let pattern = '';
+            let interpretation = '';
+            
+            if (fev1FvcPost || fev1FvcPre) {
+                const ratio = fev1FvcPost || fev1FvcPre;
+                if (ratio < 70) {
+                    pattern = 'Obstructivo';
+                    interpretation = 'Patrón obstructivo compatible con EPOC/Asma';
+                } else {
+                    pattern = 'Normal o Restrictivo';
+                    interpretation = 'Patrón normal. Evaluar volúmenes pulmonares si sospecha restrictivo';
+                }
+            }
+            
+            document.getElementById('spirometry-pattern').textContent = pattern;
+            document.getElementById('spirometry-interpretation').textContent = interpretation;
+            generateConclusion();
+        }
+
+        function calculateGOLD() {
+            const fev1 = parseFloat(document.getElementById('gold-fev1').value);
+            
+            if (!fev1) {
+                document.getElementById('gold-classification').textContent = '--';
+                document.getElementById('gold-severity').textContent = '--';
+                return;
+            }
+            
+            let classification = '';
+            let severity = '';
+            
+            if (fev1 >= 80) {
+                classification = 'GOLD 1';
+                severity = 'Leve';
+            } else if (fev1 >= 50) {
+                classification = 'GOLD 2';
+                severity = 'Moderada';
+            } else if (fev1 >= 30) {
+                classification = 'GOLD 3';
+                severity = 'Severa';
+            } else {
+                classification = 'GOLD 4';
+                severity = 'Muy severa';
+            }
+            
+            document.getElementById('gold-classification').textContent = classification;
+            document.getElementById('gold-severity').textContent = severity;
+            generateConclusion();
+        }
+
+        function evaluateWalkTest() {
+            const distancia = parseFloat(document.getElementById('marcha-distancia').value);
+            const spo2Inicial = parseFloat(document.getElementById('marcha-spo2-inicial').value);
+            const spo2Final = parseFloat(document.getElementById('marcha-spo2-final').value);
+            
+            if (distancia) {
+                let interpretation = '';
+                if (distancia >= 400) {
+                    interpretation = 'Normal';
+                } else if (distancia >= 300) {
+                    interpretation = 'Levemente reducida';
+                } else if (distancia >= 200) {
+                    interpretation = 'Moderadamente reducida';
+                } else {
+                    interpretation = 'Severamente reducida';
+                }
+                document.getElementById('marcha-interpretation').textContent = interpretation;
+            }
+            
+            if (spo2Inicial && spo2Final) {
+                const desaturacion = spo2Inicial - spo2Final;
+                let desatInterpretation = '';
+                if (desaturacion >= 4) {
+                    desatInterpretation = `Sí (${desaturacion.toFixed(1)}%)`;
+                } else {
+                    desatInterpretation = `No (${desaturacion.toFixed(1)}%)`;
+                }
+                document.getElementById('marcha-desaturacion').textContent = desatInterpretation;
+            }
+            
+            generateConclusion();
+        }
+
+        function updateBorgScore() {
+            const borgSelected = document.querySelector('input[name="borg-scale"]:checked');
+            if (borgSelected) {
+                document.getElementById('borg-score').textContent = borgSelected.value;
+            } else {
+                document.getElementById('borg-score').textContent = '--';
+            }
+            generateConclusion();
+        }
+
+        function generateConclusion() {
+            const conclusionEl = document.getElementById('conclusion-text');
+            let conclusion = 'EXAMEN NEUMOLÓGICO:\n\n';
+
+            // Obtener quejas principales
+            const complaints = [];
+            if (document.getElementById('sin-quejas-neumo').checked) {
+                complaints.push('Sin quejas respiratorias');
+            } else {
+                document.querySelectorAll('#anamnesis input[type="checkbox"]:checked:not(#sin-quejas-neumo)').forEach(cb => {
+                    const label = document.querySelector(`label[for="${cb.id}"]`).textContent;
+                    complaints.push(label.toLowerCase());
+                });
+            }
+            
+            if (complaints.length > 0) {
+                conclusion += 'QUEJAS PRINCIPALES:\n';
+                complaints.forEach(complaint => conclusion += `• ${complaint}\n`);
+                conclusion += '\n';
+            }
+
+            // Evaluación de disnea
+            const mmrcSelected = document.querySelector('input[name="mmrc-dyspnea"]:checked');
+            const disneaTiempo = document.getElementById('disnea-tiempo').value;
+            const disneaUnidad = document.getElementById('disnea-unidad').value;
+            
+            if (mmrcSelected || disneaTiempo) {
+                conclusion += 'EVALUACIÓN DE DISNEA:\n';
+                if (mmrcSelected) {
+                    const mmrcLabel = document.querySelector(`label[for="${mmrcSelected.id}"]`).textContent;
+                    conclusion += `• Escala mMRC: ${mmrcLabel}\n`;
+                }
+                if (disneaTiempo) conclusion += `• Tiempo de evolución: ${disneaTiempo} ${disneaUnidad}\n`;
+                conclusion += '\n';
+            }
+
+            // Evaluación de tos y expectoración
+            const tosSelected = document.querySelector('input[name="tipo-tos"]:checked');
+            const tosDuracion = document.getElementById('tos-duracion').value;
+            const expectoracionVolumen = document.getElementById('expectoracion-volumen').value;
+            const expectoracionColor = document.querySelector('input[name="color-expectoracion"]:checked');
+            
+            if (tosSelected || tosDuracion || expectoracionVolumen || expectoracionColor) {
+                conclusion += 'EVALUACIÓN DE TOS Y EXPECTORACIÓN:\n';
+                if (tosSelected) {
+                    const tosLabel = document.querySelector(`label[for="${tosSelected.id}"]`).textContent;
+                    conclusion += `• Tipo de tos: ${tosLabel}\n`;
+                }
+                if (tosDuracion) conclusion += `• Duración: ${tosDuracion} ${document.getElementById('tos-duracion-unidad').value}\n`;
+                if (expectoracionVolumen) conclusion += `• Volumen expectoración: ${expectoracionVolumen} ml/día\n`;
+                if (expectoracionColor) {
+                    const colorLabel = document.querySelector(`label[for="${expectoracionColor.id}"]`).textContent;
+                    conclusion += `• Color expectoración: ${colorLabel}\n`;
+                }
+                conclusion += '\n';
+            }
+
+            // Tabaquismo
+            const tabacSelected = document.querySelector('input[name="tabaquismo"]:checked');
+            const paquetesAno = document.getElementById('paquetes-calculados').textContent;
+            
+            if (tabacSelected) {
+                conclusion += 'HÁBITO TABÁQUICO:\n';
+                const tabacLabel = document.querySelector(`label[for="${tabacSelected.id}"]`).textContent;
+                conclusion += `• Estado: ${tabacLabel}\n`;
+                if (paquetesAno !== '0') conclusion += `• Paquetes/año: ${paquetesAno}\n`;
+                conclusion += '\n';
+            }
+
+            // Signos vitales y oximetría
+            const fr = document.getElementById('frecuencia-respiratoria').value;
+            const frInterpretacion = document.getElementById('interpretacion-fr').textContent;
+            const sat = document.getElementById('saturacion-o2').value;
+            const satInterpretacion = document.getElementById('interpretacion-sat').textContent;
+            const fio2 = document.getElementById('fio2').value;
+            
+            if (fr || sat) {
+                conclusion += 'SIGNOS VITALES Y OXIMETRÍA:\n';
+                if (fr) conclusion += `• Frecuencia respiratoria: ${fr} rpm (${frInterpretacion})\n`;
+                if (sat) {
+                    conclusion += `• SatO2: ${sat}%`;
+                    if (fio2) conclusion += ` con FiO2 ${fio2}%`;
+                    conclusion += ` (${satInterpretacion})\n`;
+                }
+                conclusion += '\n';
+            }
+
+            // Configuración torácica
+            const formaTorax = document.querySelector('input[name="forma-torax"]:checked');
+            const patronRespiratorio = document.querySelector('input[name="patron-respiratorio"]:checked');
+            
+            if (formaTorax || patronRespiratorio) {
+                conclusion += 'INSPECCIÓN TORÁCICA:\n';
+                if (formaTorax) {
+                    const formaLabel = document.querySelector(`label[for="${formaTorax.id}"]`).textContent;
+                    conclusion += `• Forma del tórax: ${formaLabel}\n`;
+                }
+                if (patronRespiratorio) {
+                    const patronLabel = document.querySelector(`label[for="${patronRespiratorio.id}"]`).textContent;
+                    conclusion += `• Patrón respiratorio: ${patronLabel}\n`;
+                }
+                conclusion += '\n';
+            }
+
+            // Hallazgos en auscultación
+            const ruidosAnormales = [];
+            document.querySelectorAll('input[id*="crepitantes"]:checked, input[id*="subcrepitantes"]:checked, input[id*="sibilancias"]:checked, input[id*="roncus"]:checked, input[id*="estridor"]:checked, input[id*="roce"]:checked').forEach(cb => {
+                const parts = cb.id.split('-');
+                const tipo = parts[0];
+                const lado = parts[1];
+                const zona = parts[2];
+                ruidosAnormales.push(`${tipo} en ${lado} ${zona}`);
+            });
+
+            if (ruidosAnormales.length > 0) {
+                conclusion += 'RUIDOS ADVENTICIOS:\n';
+                ruidosAnormales.forEach(ruido => conclusion += `• ${ruido}\n`);
+                conclusion += '\n';
+            }
+
+            // Escalas de evaluación
+            const catTotal = document.getElementById('cat-total').textContent;
+            const catInterpretation = document.getElementById('cat-interpretation').textContent;
+            const bodeTotal = document.getElementById('bode-total').textContent;
+            const bodePrognosis = document.getElementById('bode-prognosis').textContent;
+            
+            if (catTotal !== '0' || bodeTotal !== '0') {
+                conclusion += 'ESCALAS DE EVALUACIÓN:\n';
+                if (catTotal !== '0') conclusion += `• Test CAT: ${catTotal}/40 puntos (${catInterpretation})\n`;
+                if (bodeTotal !== '0') conclusion += `• Índice BODE: ${bodeTotal}/10 puntos (${bodePrognosis})\n`;
+                conclusion += '\n';
+            }
+
+            // Espirometría
+            const spirometryPattern = document.getElementById('spirometry-pattern').textContent;
+            const spirometryInterpretation = document.getElementById('spirometry-interpretation').textContent;
+            const goldClassification = document.getElementById('gold-classification').textContent;
+            const goldSeverity = document.getElementById('gold-severity').textContent;
+            
+            if (spirometryPattern !== '--' || goldClassification !== '--') {
+                conclusion += 'PRUEBAS FUNCIONALES:\n';
+                if (spirometryPattern !== '--') conclusion += `• Patrón espirométrico: ${spirometryPattern}\n`;
+                if (spirometryInterpretation !== '--') conclusion += `• Interpretación: ${spirometryInterpretation}\n`;
+                if (goldClassification !== '--') conclusion += `• Clasificación GOLD: ${goldClassification} (${goldSeverity})\n`;
+                conclusion += '\n';
+            }
+
+            // Test de marcha
+            const marchaDistancia = document.getElementById('marcha-distancia').value;
+            const marchaInterpretation = document.getElementById('marcha-interpretation').textContent;
+            const marchaDesaturacion = document.getElementById('marcha-desaturacion').textContent;
+            
+            if (marchaDistancia) {
+                conclusion += 'TEST DE MARCHA 6 MINUTOS:\n';
+                conclusion += `• Distancia: ${marchaDistancia} metros (${marchaInterpretation})\n`;
+                if (marchaDesaturacion !== '--') conclusion += `• Desaturación: ${marchaDesaturacion}\n`;
+                conclusion += '\n';
+            }
+
+            // Exposiciones y antecedentes relevantes
+            const exposiciones = [];
+            document.querySelectorAll('#asbesto:checked, #silice:checked, #carbon:checked, #polvos-organicos:checked, #vapores-quimicos:checked, #soldadura:checked').forEach(cb => {
+                const label = document.querySelector(`label[for="${cb.id}"]`).textContent;
+                exposiciones.push(label);
+            });
+
+            const antecedentes = [];
+            document.querySelectorAll('#asma:checked, #epoc:checked, #neumonia-previa:checked, #tuberculosis:checked, #neumotorax:checked, #tromboembolismo:checked, #cancer-pulmon:checked, #fibrosis-pulmonar:checked').forEach(cb => {
+                const label = document.querySelector(`label[for="${cb.id}"]`).textContent;
+                antecedentes.push(label);
+            });
+
+            if (exposiciones.length > 0 || antecedentes.length > 0) {
+                conclusion += 'EXPOSICIONES Y ANTECEDENTES:\n';
+                if (exposiciones.length > 0) {
+                    conclusion += '• Exposiciones ocupacionales: ';
+                    exposiciones.forEach((exp, index) => {
+                        conclusion += exp;
+                        if (index < exposiciones.length - 1) conclusion += ', ';
+                    });
+                    conclusion += '\n';
+                }
+                if (antecedentes.length > 0) {
+                    conclusion += '• Antecedentes patológicos: ';
+                    antecedentes.forEach((ant, index) => {
+                        conclusion += ant;
+                        if (index < antecedentes.length - 1) conclusion += ', ';
+                    });
+                    conclusion += '\n';
+                }
+                conclusion += '\n';
+            }
+
+            if (conclusion === 'EXAMEN NEUMOLÓGICO:\n\n') {
+                conclusion = 'Seleccione los parámetros del examen para generar la conclusión neumológica...';
+            } else {
+                conclusion += 'IMPRESIÓN DIAGNÓSTICA:\n';
+                conclusion += '[Pendiente de correlación clínica y estudios complementarios]\n\n';
+                conclusion += 'PLAN:\n';
+                conclusion += '[A determinar según hallazgos clínicos e imagenológicos]\n\n';
+                conclusion += 'SEGUIMIENTO:\n';
+                conclusion += '[Control según patología respiratoria sospechada]';
+            }
+
+            conclusionEl.textContent = conclusion;
+        }
+
+        function printConclusion() {
+            const conclusion = document.getElementById('conclusion-text').textContent;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Conclusión Examen Neumológico</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 20px; }
+                        pre { white-space: pre-wrap; font-family: 'Courier New', monospace; }
+                    </style>
+                </head>
+                <body>
+                    <h1>Examen Neumológico - Conclusión</h1>
+                    <pre>${conclusion}</pre>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function clearForm() {
+            if (confirm('¿Está seguro de que desea limpiar todos los datos del formulario?')) {
+                document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+                document.querySelectorAll('input[type="radio"]').forEach(rb => rb.checked = false);
+                document.querySelectorAll('input[type="number"]').forEach(nb => nb.value = '');
+                document.querySelectorAll('input[type="range"]').forEach(rb => rb.value = 0);
+                document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
+                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
+                
+                // Resetear valores específicos de CAT
+                ['tos', 'flemas', 'opresion', 'disnea', 'limitacion', 'confianza', 'sueno', 'energia'].forEach(cat => {
+                    document.getElementById(`cat-${cat}-value`).textContent = '0';
+                });
+                
+                // Resetear valores calculados
+                document.getElementById('paquetes-calculados').textContent = '0';
+                document.getElementById('interpretacion-fr').textContent = '--';
+                document.getElementById('interpretacion-sat').textContent = '--';
+                document.getElementById('cat-total').textContent = '0';
+                document.getElementById('cat-interpretation').textContent = '--';
+                document.getElementById('bode-total').textContent = '0';
+                document.getElementById('bode-prognosis').textContent = '--';
+                document.getElementById('borg-score').textContent = '--';
+                document.getElementById('spirometry-pattern').textContent = '--';
+                document.getElementById('spirometry-interpretation').textContent = '--';
+                document.getElementById('reversibility-fev1').textContent = '--';
+                document.getElementById('reversibility-fvc').textContent = '--';
+                document.getElementById('gold-classification').textContent = '--';
+                document.getElementById('gold-severity').textContent = '--';
+                document.getElementById('marcha-interpretation').textContent = '--';
+                document.getElementById('marcha-desaturacion').textContent = '--';
+                
+                // Habilitar checkboxes que podrían estar deshabilitados
+                document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-quejas-neumo)').forEach(cb => cb.disabled = false);
+                
+                generateConclusion();
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Event listeners para inputs generales
+            document.querySelectorAll('input, select, textarea').forEach(el => {
+                el.addEventListener('change', generateConclusion);
+                el.addEventListener('input', generateConclusion);
+            });
+             
+            // Event listeners específicos para cálculos
+            document.querySelectorAll('input[name="borg-scale"]').forEach(el => {
+                el.addEventListener('change', updateBorgScore);
+            });
+
+            // Event listeners para CAT sliders
+            ['tos', 'flemas', 'opresion', 'disnea', 'limitacion', 'confianza', 'sueno', 'energia'].forEach(category => {
+                document.getElementById(`cat-${category}`).addEventListener('input', () => {
+                    updateCATValue(category, document.getElementById(`cat-${category}`).value);
+                });
+            });
+             
+            // Ajustar altura de secciones cuando cambian
+            document.querySelector('.main-container').addEventListener('change', (event) => {
+                const sectionContent = event.target.closest('.section-content.expanded');
+                if (sectionContent) {
+                    updateSectionHeight(sectionContent);
+                }
+            });
+             
+            // Expandir la primera sección por defecto
+            toggleSection(document.querySelector('.section-header'));
+            
+            // Inicializar evaluaciones
+            evaluateRespiratoryRate();
+            evaluateSaturation();
+            calculatePackYears();
+            calculateCAT();
+            calculateBODE();
+            calculateSpirometry();
+            calculateGOLD();
+            evaluateWalkTest();
+            updateBorgScore();
+            generateConclusion();
+        });
+    </script>
+</body>
+</html>
