@@ -1,3321 +1,478 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Examen Infectológico - Algoritmo de Evaluación</title>
-    <!-- Fuentes y Font Awesome -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>Examen de Enfermedades Infecciosas - Portal Médico</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Variables CSS para el tema y colores */
         :root {
-            --primary-gradient: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            --secondary-gradient: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            --alert-gradient: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-            --warning-gradient: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-            --normal-color: #27ae60;
-            --warning-color: #f39c12;
-            --alert-color: #e74c3c;
-            --info-color: #3498db;
-            --sepsis-color: #8e44ad;
-            --light-bg: #f8f9fa;
-            --card-bg: #ffffff;
-            --dark-bg: #1a1a1a;
-            --dark-card: #3d3d3d;
-            --text-color-light: #2c3e50;
-            --text-color-dark: #ffffff;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --hover-bg: rgba(255, 255, 255, 0.05);
         }
 
-        /* Modo Oscuro */
-        [data-theme="dark"] {
-            --light-bg: var(--dark-bg);
-            --card-bg: var(--dark-card);
-            color: var(--text-color-dark);
-        }
-
-        /* Estilos generales del cuerpo */
         body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1600px;
-            margin: 0 auto;
-            padding-top: 160px;
-            background-color: var(--light-bg);
-            line-height: 1.6;
-            transition: all 0.3s ease;
-            color: var(--text-color-light);
-        }
-        
-        /* 🎪 DASHBOARD SUPERIOR FIJO */
-        .dashboard-fixed {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            background: var(--primary-gradient);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #1e293b 50%, #1e3a8a 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
         }
 
-        .dashboard-content {
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 15px 20px;
-        }
-
-        .dashboard-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 10px;
-            justify-content: center;
-        }
-
-        .dashboard-item {
-            background: rgba(255,255,255,0.1);
-            border-radius: 8px;
-            padding: 6px 10px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: all 0.3s ease;
-            color: white;
-            text-align: center;
-            font-size: 11px;
-            flex: 1 1 auto;
-            min-width: 80px;
-            max-width: 150px;
-        }
-
-        .dashboard-item:hover {
-            background: rgba(255,255,255,0.2);
-            transform: translateY(-2px);
-        }
-
-        .dashboard-item i {
-            font-size: 16px;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .dashboard-alert {
-            color: #ff6b6b !important;
-            animation: pulse 2s infinite;
-        }
-
-        .dashboard-warning {
-            color: #feca57 !important;
-        }
-
-        .dashboard-normal {
-            color: #06d6a0 !important;
-        }
-
-        .dashboard-sepsis {
-            color: #ff9ff3 !important;
-            animation: pulse 1.5s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.5; }
-        }
-
-        /* 🎛️ CONTROLES SUPERIORES */
-        .control-bar {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .control-btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .control-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-        }
-
-        .btn-primary { background: var(--primary-gradient); }
-        .btn-success { background: var(--secondary-gradient); }
-        .btn-warning { background: var(--warning-gradient); }
-        .btn-danger { background: var(--alert-gradient); }
-
-        /* 🎯 PANEL LATERAL DE NAVEGACIÓN */
-        .nav-panel {
-            position: fixed;
-            left: 20px;
-            top: 160px;
-            width: 250px;
+        .glassmorphism {
             background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .exam-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
             border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            padding: 20px;
-            max-height: calc(100vh - 180px);
-            overflow-y: auto;
-            z-index: 998;
-            transform: translateX(-280px);
-            transition: transform 0.3s ease;
-        }
-
-        .nav-panel.open {
-            transform: translateX(0);
-        }
-
-        .nav-panel h3 {
-            margin: 0 0 15px 0;
-            color: var(--info-color);
-            font-size: 16px;
-            border-bottom: 2px solid var(--info-color);
-            padding-bottom: 8px;
-        }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            margin: 4px 0;
-            border-radius: 6px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 13px;
-        }
-
-        .nav-item:hover {
-            background: rgba(231, 76, 60, 0.1);
-        }
-
-        .nav-item.completed {
-            background: rgba(40, 167, 69, 0.1);
-            color: var(--normal-color);
-        }
-
-        .nav-item.completed i {
-            color: var(--normal-color);
-        }
-
-        .nav-item i {
-            width: 16px;
-            text-align: center;
-        }
-
-        /* 📊 PANEL LATERAL STICKY */
-        .sticky-panel {
-            position: fixed;
-            top: 160px;
-            right: -420px;
-            width: 400px;
-            height: calc(100vh - 180px);
-            background: var(--card-bg);
-            border-radius: 12px 0 0 12px;
-            box-shadow: -4px 0 20px rgba(0,0,0,0.15);
-            z-index: 997;
-            transition: right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            margin-bottom: 1rem;
             overflow: hidden;
-            border: 2px solid var(--primary-gradient);
-        }
-
-        .sticky-panel.active {
-            right: 0;
-        }
-
-        .sticky-header {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .sticky-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .sticky-btn {
-            background: rgba(255,255,255,0.2);
-            border: none;
-            color: white;
-            border-radius: 4px;
-            padding: 6px 10px;
-            cursor: pointer;
-            font-size: 12px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .sticky-btn:hover {
-            background: rgba(255,255,255,0.3);
-            transform: scale(1.05);
-        }
-
-        .sticky-content {
-            padding: 20px;
-            height: calc(100% - 70px);
-            overflow-y: auto;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            line-height: 1.4;
-            white-space: pre-wrap;
-            background: var(--light-bg);
-        }
-
-        .update-indicator {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: var(--primary-gradient);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            display: none;
-            align-items: center;
-            gap: 8px;
-            font-size: 12px;
-            z-index: 10;
-        }
-
-        .update-indicator.active {
-            display: flex;
-        }
-
-        .spinner {
-            width: 16px;
-            height: 16px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-top: 2px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Notificación de copia */
-        .copy-notification {
-            position: fixed;
-            top: 200px;
-            right: 20px;
-            background: var(--normal-color);
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 12px;
-            font-weight: 500;
-            opacity: 0;
-            transform: translateX(100px);
-            transition: all 0.3s ease;
-            z-index: 1002;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .copy-notification.show {
-            opacity: 1;
-            transform: translateX(0);
-        }
-
-        /* Ajustar contenido principal cuando panel está activo */
-        body.split-view-active .main-container {
-            margin-right: 420px;
-            transition: margin-right 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-        }
-        body.split-view .main-container {
-            margin-left: 290px;
-            margin-right: 20px;
-            transition: margin-left 0.3s ease, margin-right 0.3s ease;
-        }
-
-        /* Contenedor principal */
-        .main-container {
-            background: var(--card-bg);
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 30px;
-            margin: 0 20px;
-            transition: all 0.3s ease;
-        }
-        
-        /* Título principal */
-        h1 {
-            color: var(--text-color-light);
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-            background: var(--primary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            padding-bottom: 15px;
-        }
-        
-        /* Secciones */
-        .section {
-            margin-bottom: 25px;
-            border: 2px solid #ecf0f1;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            background: var(--card-bg);
-        }
-        
-        .section.active {
-            border-color: var(--primary-gradient);
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.15);
         }
 
         .section-header {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 15px 20px;
+            padding: 1rem;
             cursor: pointer;
-            font-weight: 600;
-            font-size: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             transition: all 0.3s ease;
         }
-        
+
         .section-header:hover {
-            box-shadow: inset 0 0 20px rgba(255,255,255,0.1);
-        }
-        
-        .section-header .arrow {
-            transition: transform 0.3s ease;
-            font-size: 18px;
-        }
-        
-        .section-header.expanded .arrow {
-            transform: rotate(180deg);
+            background: var(--hover-bg);
         }
 
-        .section-header .completion-badge {
-            background: rgba(255,255,255,0.2);
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            margin-left: 10px;
-        }
-
-        .section-header .completion-badge.completed {
-            background: var(--normal-color);
-        }
-        
         .section-content {
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-            background: var(--light-bg);
-        }
-        
-        .section-content.expanded {
-            padding: 20px;
-        }
-        
-        /* Contenedores de examen */
-        .exam-container {
-            background: var(--card-bg);
-            border: 1px solid #e1e8ed;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            transition: all 0.3s ease;
-        }
-        .exam-container:hover {
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-        }
-        
-        .exam-header {
-            font-size: 18px;
-            font-weight: 600;
-            background: var(--secondary-gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin: -20px -20px 15px -20px;
-            padding: 12px 20px;
-            border-radius: 8px 8px 0 0;
-            border-bottom: none;
-        }
-        
-        .exam-section {
-            background: var(--light-bg);
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
-        
-        .exam-section h4 {
-            color: var(--text-color-light);
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            font-weight: 600;
+            padding: 1.5rem;
+            border-top: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        .sub-header {
-            color: var(--primary-gradient);
-            margin: 15px 0 8px 0;
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-        
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 8px;
-            border-radius: 4px;
+        .symptom-card {
+            padding: 0.5rem;
+            border-radius: 8px;
             transition: all 0.3s ease;
-        }
-        .checkbox-item:hover {
-            background: rgba(231, 76, 60, 0.05);
-        }
-        
-        .checkbox-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            margin: 0;
-            accent-color: var(--normal-color);
-        }
-        .checkbox-item input[type="radio"] {
-            width: 16px;
-            height: 16px;
-            margin: 0;
-            accent-color: var(--normal-color);
-        }
-        
-        .checkbox-item label {
-            font-size: 13px;
-            color: var(--text-color-light);
             cursor: pointer;
-            transition: color 0.3s ease;
         }
-        .checkbox-item input:checked + label {
-            color: var(--normal-color);
-            font-weight: 500;
+
+        .symptom-card:hover {
+            background: rgba(255, 255, 255, 0.05);
         }
-        
-        .measurement {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 5px 0;
+
+        .symptom-card.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgb(59, 130, 246);
         }
-        
-        .measurement label {
-            font-size: 12px;
-            color: #5d6d7e;
-            flex-basis: 120px;
-            flex-shrink: 0;
+
+        .progress-bar {
+            width: 4rem;
+            height: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            overflow: hidden;
         }
-        
-        .input-field {
-            width: 80px;
-            padding: 6px 10px;
-            border: 2px solid #e9ecef;
-            border-radius: 6px;
-            font-size: 12px;
-            text-align: center;
-            transition: all 0.3s ease;
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+            transition: width 0.3s ease;
+            width: 0%;
         }
-        
-        .input-field:focus {
+
+        .medical-input {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: white;
+            width: 100%;
+        }
+
+        .medical-input:focus {
             outline: none;
-            border-color: var(--primary-gradient);
-            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        .score-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background-color: var(--light-bg);
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 0.9rem;
-        }
-
-        .score-value {
-            font-weight: 700;
-            color: var(--normal-color);
-        }
-
-        .legend {
-            display: flex;
-            gap: 20px;
-            margin: 15px;
-            flex-wrap: wrap;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-color-light);
-        }
-
-        .legend-color {
-            width: 16px;
-            height: 16px;
-            border-radius: 3px;
-        }
-
-        .infection-color { background-color: var(--alert-color); }
-        .fever-color { background-color: var(--warning-color); }
-        .sepsis-color { background-color: var(--sepsis-color); }
-        .respiratory-color { background-color: var(--info-color); }
-
-        /* Clases específicas de infectología */
-        .fever-assessment {
-            background-color: rgba(243, 156, 18, 0.08);
-            border: 1px solid var(--warning-color);
+        .medical-select {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
             border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
+            padding: 0.75rem;
+            color: white;
+            width: 100%;
         }
 
-        .fever-assessment h4 {
-            color: var(--warning-color);
-            margin-bottom: 15px;
-        }
-
-        .sepsis-assessment {
-            background-color: rgba(142, 68, 173, 0.08);
-            border: 1px solid var(--sepsis-color);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .sepsis-assessment h4 {
-            color: var(--sepsis-color);
-            margin-bottom: 15px;
-        }
-
-        .infection-source {
-            background-color: rgba(231, 76, 60, 0.08);
-            border: 1px solid var(--alert-color);
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .bilateral-container {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 15px;
-        }
-
-        .side-container {
-            background-color: var(--card-bg);
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 15px;
-            transition: all 0.3s ease;
-        }
-        .side-container:hover {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .side-header {
-            background-color: var(--light-bg);
-            color: var(--text-color-light);
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            text-align: center;
-            font-size: 0.9rem;
-            border-bottom: 2px solid var(--primary-gradient);
-        }
-
-        .test-results {
-            margin-top: 15px;
-        }
-
-        .test-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 8px 12px;
-            background-color: var(--light-bg);
-            border-radius: 6px;
-            margin-bottom: 8px;
-            font-size: 0.85rem;
-            border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-        }
-        .test-item:hover {
-            border-color: var(--primary-gradient);
-            box-shadow: 0 2px 8px rgba(231, 76, 60, 0.1);
-        }
-
-        .test-controls {
-            display: flex;
-            gap: 15px;
-        }
-
-        .test-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .test-checkbox input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
-            accent-color: var(--normal-color);
-        }
-
-        .positive {
-            color: var(--alert-color);
-            font-weight: 600;
-        }
-
-        .negative {
-            color: var(--normal-color);
-            font-weight: 600;
-        }
-
-        .score-calculation {
-            background-color: rgba(52, 152, 219, 0.08);
-            border: 1px solid #b3d7ff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .severity-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 8px;
-            margin-bottom: 15px;
-        }
-
-        .severity-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px;
-            background-color: var(--card-bg);
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-            transition: all 0.3s ease;
-        }
-        .severity-item:hover {
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
-        }
-
-        .severity-item input[type="radio"] {
-            accent-color: var(--normal-color);
-        }
-
-        .severity-item label {
-            font-size: 0.85rem;
-            cursor: pointer;
-            color: var(--text-color-light);
-        }
-
-        /* Conclusión */
-        .conclusion {
-            margin-top: 30px;
-            padding: 25px;
-            background: var(--card-bg);
-            border-radius: 12px;
-            border: 2px solid #dee2e6;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .conclusion::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: var(--primary-gradient);
-        }
-        
-        .conclusion h3 {
-            color: var(--text-color-light);
-            margin-bottom: 15px;
-        }
-        
-        .conclusion-text {
-            padding: 20px;
-            background: var(--light-bg);
-            border-radius: 8px;
-            border: 1px solid #dee2e6;
-            min-height: 200px;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            font-size: 13px;
-            line-height: 1.5;
-        }
-
-        /* Botones de control */
-        .control-buttons {
-            margin-top: 25px;
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        .medical-select:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
         }
 
         .btn-primary {
-            background: var(--primary-gradient);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.8) 0%, rgba(99, 102, 241, 0.8) 100%);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--card-border);
             color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .btn-primary:hover {
-            box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
         }
 
-        .btn-secondary {
-            background-color: var(--info-color);
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #2980b9;
-            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
-        }
-
-        /* TOGGLE DE TEMA */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            background: var(--primary-gradient);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 1001;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        }
-
-        .theme-toggle:hover {
-            transform: scale(1.1);
-        }
-
-        /* BOTÓN HOME */
-        .home-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--normal-color);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-decoration: none;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1001;
-            transition: all 0.3s ease;
-        }
-        
-        .home-button:hover {
-            background-color: #229954;
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-        }
-
-        /* Animaciones */
-        @keyframes slideIn {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .slide-in {
-            animation: slideIn 0.3s ease forwards;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .sticky-panel {
-                width: 350px;
-            }
-            
-            body.split-view-active .main-container {
-                margin-right: 370px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            body { padding-top: 120px; }
-            
-            .control-bar {
-                position: relative;
-                top: auto;
-                right: auto;
-                justify-content: center;
-                margin: 10px 0;
-            }
-            
-            .nav-panel {
-                transform: translateX(-100%);
-                width: calc(100vw - 40px);
-            }
-            
-            .main-container {
-                margin: 0 10px;
-            }
-            
-            body.split-view .main-container {
-                margin-left: 10px;
-            }
-
-            .sticky-panel {
-                width: calc(100vw - 20px);
-                right: -100vw;
-                left: 10px;
-                border-radius: 12px;
-            }
-            
-            .sticky-panel.active {
-                right: auto;
-                left: 10px;
-            }
-            
-            body.split-view-active .main-container {
-                margin-right: 10px;
-            }
-            
-            .checkbox-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .bilateral-container {
-                grid-template-columns: 1fr;
-            }
-            .severity-grid {
-                grid-template-columns: 1fr;
-            }
+        .results-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
         }
     </style>
 </head>
 <body>
-    <!-- 🌙 TOGGLE DE TEMA -->
-    <button class="theme-toggle" onclick="toggleTheme()" title="Cambiar tema">
-        <i class="fas fa-moon" id="theme-icon"></i>
-    </button>
-
-    <!-- 🏠 BOTÓN HOME -->
-    <a href="index.html" class="home-button" title="Inicio">
-        <i class="fas fa-home"></i>
-    </a>
-    
-    <!-- 🎪 DASHBOARD SUPERIOR FIJO -->
-    <div class="dashboard-fixed">
-        <div class="dashboard-content">
-            <div class="dashboard-grid">
-                <div class="dashboard-item">
-                    <i class="fas fa-user-md"></i>
-                    <div>Examen</div>
-                    <div id="exam-progress">0%</div>
-                </div>
-                <div class="dashboard-item">
-                    <i class="fas fa-clipboard-list"></i>
-                    <div>Secciones</div>
-                    <div id="sections-completed">0/6</div>
-                </div>
-                <div class="dashboard-item dashboard-alert" id="alerts-item">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <div>Alertas</div>
-                    <div id="alert-count">0</div>
-                </div>
-                <div class="dashboard-item dashboard-warning" id="warnings-item">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <div>Avisos</div>
-                    <div id="warning-count">0</div>
-                </div>
-                <div class="dashboard-item dashboard-normal" id="findings-item">
-                    <i class="fas fa-search"></i>
-                    <div>Hallazgos</div>
-                    <div id="findings-count">0</div>
-                </div>
-                <div class="dashboard-item" id="sepsis-status-item">
-                    <i class="fas fa-heartbeat"></i>
-                    <div>Sepsis/SIRS</div>
-                    <div id="sepsis-status">Normal</div>
-                </div>
-            </div>
-            <div class="control-bar">
-                <button class="control-btn btn-primary" onclick="toggleNavPanel()">
-                    <i class="fas fa-bars"></i> Navegación
-                </button>
-                <button class="control-btn btn-primary" onclick="toggleStickyPanel()" id="sticky-toggle-btn">
-                    <i class="fas fa-columns"></i> Vista Dividida
-                </button>
-                <button class="control-btn btn-success" onclick="generateConclusion()">
-                    <i class="fas fa-file-medical"></i> Generar
-                </button>
-                <button class="control-btn btn-warning" onclick="expandAllSections()">
-                    <i class="fas fa-expand-alt"></i> Expandir
-                </button>
-                <button class="control-btn btn-danger" onclick="clearForm()">
-                    <i class="fas fa-trash"></i> Limpiar
-                </button>
-            </div>
-        </div>
+    <!-- Botón de volver -->
+    <div class="absolute top-4 left-4 z-10">
+        <a href="index.html" class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border hover:text-accent-foreground h-9 rounded-md px-3 bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-md">
+            <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
+            Volver
+        </a>
     </div>
 
-    <!-- 🎯 PANEL LATERAL DE NAVEGACIÓN -->
-    <div class="nav-panel" id="nav-panel">
-        <h3><i class="fas fa-map"></i> Navegación Rápida</h3>
-        <div class="nav-item" onclick="scrollToSection('anamnesis')">
-            <i class="fas fa-user-edit"></i>
-            <span>Anamnesis Infecciosa</span>
-            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-anamnesis"></i>
-        </div>
-        <div class="nav-item" onclick="scrollToSection('physical-exam')">
-            <i class="fas fa-stethoscope"></i>
-            <span>Examen Físico</span>
-            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-physical-exam"></i>
-        </div>
-        <div class="nav-item" onclick="scrollToSection('fever-evaluation')">
-            <i class="fas fa-thermometer-three-quarters"></i>
-            <span>Evaluación Febril</span>
-            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-fever-evaluation"></i>
-        </div>
-        <div class="nav-item" onclick="scrollToSection('sepsis-evaluation')">
-            <i class="fas fa-heartbeat"></i>
-            <span>Evaluación Sepsis</span>
-            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-sepsis-evaluation"></i>
-        </div>
-        <div class="nav-item" onclick="scrollToSection('risk-scales')">
-            <i class="fas fa-calculator"></i>
-            <span>Escalas de Riesgo</span>
-            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-risk-scales"></i>
-        </div>
-        <div class="nav-item" onclick="scrollToSection('source-evaluation')">
-            <i class="fas fa-search-location"></i>
-            <span>Foco Infeccioso</span>
-            <i class="fas fa-check" style="margin-left: auto; opacity: 0;" id="nav-source-evaluation"></i>
-        </div>
-    </div>
-
-    <!-- 📊 PANEL LATERAL STICKY -->
-    <div class="sticky-panel" id="stickyConclusion">
-        <div class="sticky-header">
-            <span><i class="fas fa-file-medical-alt"></i> Informe en Tiempo Real</span>
-            <div class="sticky-controls">
-                <button class="sticky-btn" onclick="copyStickyToClipboard()" title="Copiar informe">
-                    <i class="fas fa-copy"></i>
-                </button>
-                <button class="sticky-btn" onclick="printStickyConclusion()" title="Imprimir informe">
-                    <i class="fas fa-print"></i>
-                </button>
-                <button class="sticky-btn" onclick="generateStickyConclusion()" title="Actualizar informe">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-            </div>
-        </div>
-        <div class="sticky-content" id="stickyContent">
-            Seleccione los parámetros del examen para generar el informe en tiempo real...
-        </div>
-        <div class="update-indicator" id="updateIndicator">
-            <div class="spinner"></div>
-            <span>Actualizando informe...</span>
-        </div>
-    </div>
-
-    <!-- Notificación de copia -->
-    <div class="copy-notification" id="copyNotification">
-        <i class="fas fa-check-circle"></i>
-        <span>¡Informe copiado al portapapeles!</span>
-    </div>
-
-    <div class="main-container">
-        <h1><i class="fas fa-virus"></i> Examen Infectológico - Algoritmo de Evaluación</h1>
-        
-        <!-- Anamnesis Infecciosa -->
-        <div class="section" id="section-anamnesis">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span><i class="fas fa-user-edit"></i> Anamnesis y Síntomas Infecciosos</span>
-                <div style="display: flex; align-items: center;">
-                    <div class="completion-badge" id="badge-anamnesis">
-                        <i class="fas fa-circle"></i>
-                    </div>
-                    <span class="arrow">▼</span>
-                </div>
-            </div>
-            <div class="section-content" id="anamnesis">
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-thermometer-half"></i> Síndrome Febril</div>
-                    <div class="exam-section">
-                        <h4>Características de la Fiebre</h4>
-                        <div class="measurement">
-                            <label>Temperatura máxima:</label>
-                            <input type="number" class="input-field" id="temperatura-maxima" min="35" max="45" step="0.1" onchange="evaluateFever()">
-                            <span>°C</span>
+    <div class="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-blue-800">
+        <!-- Header -->
+        <div class="backdrop-blur-md bg-black/30 border-b border-white/10 p-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-red-500/20 rounded-full border border-red-500/30">
+                            <i class="fas fa-virus h-8 w-8 text-red-300"></i>
                         </div>
-                        <div class="measurement">
-                            <label>Duración de la fiebre:</label>
-                            <input type="number" class="input-field" id="duracion-fiebre" min="0" max="365" onchange="evaluateFever()">
-                            <span>días</span>
-                        </div>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="fiebre-continua"><label for="fiebre-continua">Fiebre continua</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="fiebre-intermitente"><label for="fiebre-intermitente">Fiebre intermitente</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="fiebre-remitente"><label for="fiebre-remitente">Fiebre remitente</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="escalofrios"><label for="escalofrios">Escalofríos</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="sudoracion"><label for="sudoracion">Sudoración profusa</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="sin-fiebre" onchange="handleNoFever()"><label for="sin-fiebre">Sin fiebre</label></div>
-                        </div>
-                        <div class="score-item">
-                            <span>Clasificación febril:</span>
-                            <span class="score-value" id="fever-classification">--</span>
+                        <div>
+                            <h1 class="text-3xl font-bold text-white">Enfermedades Infecciosas</h1>
+                            <p class="text-white/70">Framework Universal - Principio ZERO-TYPING</p>
                         </div>
                     </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-lungs"></i> Síntomas Respiratorios</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="tos-seca"><label for="tos-seca">Tos seca</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="tos-productiva"><label for="tos-productiva">Tos productiva</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="expectoracion-purulenta"><label for="expectoracion-purulenta">Expectoración purulenta</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="hemoptisis"><label for="hemoptisis">Hemoptisis</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="disnea"><label for="disnea">Disnea</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="dolor-toracico"><label for="dolor-toracico">Dolor torácico</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="dolor-pleuritico"><label for="dolor-pleuritico">Dolor pleurítico</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="odinofagia"><label for="odinofagia">Odinofagia</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="rinorrea"><label for="rinorrea">Rinorrea</label></div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-stomach"></i> Síntomas Gastrointestinales</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="nauseas"><label for="nauseas">Náuseas</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="vomitos"><label for="vomitos">Vómitos</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="diarrea"><label for="diarrea">Diarrea</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="diarrea-sanguinolenta"><label for="diarrea-sanguinolenta">Diarrea sanguinolenta</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="dolor-abdominal"><label for="dolor-abdominal">Dolor abdominal</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="distension-abdominal"><label for="distension-abdominal">Distensión abdominal</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="tenesmo"><label for="tenesmo">Tenesmo</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="ictericia"><label for="ictericia">Ictericia</label></div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-brain"></i> Síntomas Neurológicos</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="cefalea"><label for="cefalea">Cefalea</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="cefalea-intensa"><label for="cefalea-intensa">Cefalea intensa</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="fotofobia"><label for="fotofobia">Fotofobia</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="rigidez-nuca"><label for="rigidez-nuca">Rigidez de nuca</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="confusion"><label for="confusion">Confusión</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="alteracion-conciencia"><label for="alteracion-conciencia">Alteración de la conciencia</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="convulsiones"><label for="convulsiones">Convulsiones</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="deficit-focal"><label for="deficit-focal">Déficit neurológico focal</label></div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-tint"></i> Síntomas Genitourinarios</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="disuria"><label for="disuria">Disuria</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="poliaquiuria"><label for="poliaquiuria">Poliaquiuria</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="urgencia-miccional"><label for="urgencia-miccional">Urgencia miccional</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="hematuria"><label for="hematuria">Hematuria</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="dolor-lumbar"><label for="dolor-lumbar">Dolor lumbar</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="dolor-suprapubico"><label for="dolor-suprapubico">Dolor suprapúbico</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="secrecion-uretral"><label for="secrecion-uretral">Secreción uretral</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="dolor-pelvico"><label for="dolor-pelvico">Dolor pélvico</label></div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-hand-paper"></i> Síntomas Cutáneos</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="exantema"><label for="exantema">Exantema</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="petequias"><label for="petequias">Petequias</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="purpura"><label for="purpura">Púrpura</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="celulitis"><label for="celulitis">Celulitis</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="abscesos"><label for="abscesos">Abscesos</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="ulceras-cutaneas"><label for="ulceras-cutaneas">Úlceras cutáneas</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="lesiones-vesiculares"><label for="lesiones-vesiculares">Lesiones vesiculares</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="adenopatias-cutaneas"><label for="adenopatias-cutaneas">Adenopatías regionales</label></div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-globe-americas"></i> Factores Epidemiológicos</div>
-                    <div class="exam-section">
-                        <h4>Viajes y Exposiciones</h4>
-                        <div class="measurement">
-                            <label>Viajes recientes (últimos 30 días):</label>
-                            <input type="text" class="input-field" id="viajes-recientes" style="width: 200px;" onchange="updateDashboard()">
-                        </div>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="zona-endemica"><label for="zona-endemica">Zona endémica tropical</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="contacto-animales"><label for="contacto-animales">Contacto con animales</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="agua-contaminada"><label for="agua-contaminada">Ingesta agua no tratada</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="alimentos-riesgo"><label for="alimentos-riesgo">Alimentos de riesgo</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="actividad-sexual-riesgo"><label for="actividad-sexual-riesgo">Actividad sexual de riesgo</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="picaduras-insectos"><label for="picaduras-insectos">Picaduras de insectos</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="contacto-enfermos"><label for="contacto-enfermos">Contacto con enfermos</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="brote-comunitario"><label for="brote-comunitario">Brote comunitario</label></div>
-                        </div>
-                    </div>
-                    <div class="exam-section">
-                        <h4>Estado Inmunológico</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="inmunocompetente"><label for="inmunocompetente">Inmunocompetente</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="vih-positivo"><label for="vih-positivo">VIH positivo</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="diabetes-mellitus"><label for="diabetes-mellitus">Diabetes mellitus</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="inmunosupresion-farmacologica"><label for="inmunosupresion-farmacologica">Inmunosupresión farmacológica</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="neoplasia-activa"><label for="neoplasia-activa">Neoplasia activa</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="transplante-organos"><label for="transplante-organos">Transplante de órganos</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="esplenectomia"><label for="esplenectomia">Esplenectomía</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="cirrosis-hepatica"><label for="cirrosis-hepatica">Cirrosis hepática</label></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Examen Físico Infectológico -->
-        <div class="section" id="section-physical-exam">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span><i class="fas fa-stethoscope"></i> Examen Físico Infectológico</span>
-                <div style="display: flex; align-items: center;">
-                    <div class="completion-badge" id="badge-physical-exam">
-                        <i class="fas fa-circle"></i>
-                    </div>
-                    <span class="arrow">▼</span>
-                </div>
-            </div>
-            <div class="section-content" id="physical-exam">
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color infection-color"></div>
-                        <span>Signos Infecciosos</span>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-thermometer-half"></i> Signos Vitales</div>
-                    <div class="exam-section">
-                        <h4>Mediciones Básicas</h4>
-                        <div class="measurement">
-                            <label>Temperatura:</label>
-                            <input type="number" class="input-field" id="temperatura-actual" min="35" max="45" step="0.1" onchange="evaluateVitalSigns()">
-                            <span>°C</span>
-                        </div>
-                        <div class="measurement">
-                            <label>Presión arterial sistólica:</label>
-                            <input type="number" class="input-field" id="pas" min="50" max="250" onchange="evaluateVitalSigns()">
-                            <span>mmHg</span>
-                        </div>
-                        <div class="measurement">
-                            <label>Presión arterial diastólica:</label>
-                            <input type="number" class="input-field" id="pad" min="30" max="150" onchange="evaluateVitalSigns()">
-                            <span>mmHg</span>
-                        </div>
-                        <div class="measurement">
-                            <label>Frecuencia cardíaca:</label>
-                            <input type="number" class="input-field" id="frecuencia-cardiaca" min="40" max="200" onchange="evaluateVitalSigns()">
-                            <span>lpm</span>
-                        </div>
-                        <div class="measurement">
-                            <label>Frecuencia respiratoria:</label>
-                            <input type="number" class="input-field" id="frecuencia-respiratoria" min="8" max="50" onchange="evaluateVitalSigns()">
-                            <span>rpm</span>
-                        </div>
-                        <div class="measurement">
-                            <label>Saturación O2:</label>
-                            <input type="number" class="input-field" id="saturacion-o2" min="70" max="100" onchange="evaluateVitalSigns()">
-                            <span>%</span>
-                        </div>
-                        <div class="score-item">
-                            <span>Estado hemodinámico:</span>
-                            <span class="score-value" id="hemodynamic-status">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-eye"></i> Inspección General</div>
-                    <div class="exam-section">
-                        <h4>Estado General</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="buen-estado-general"><label for="buen-estado-general">Buen estado general</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="regular-estado-general"><label for="regular-estado-general">Regular estado general</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="mal-estado-general"><label for="mal-estado-general">Mal estado general</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="aspecto-toxico"><label for="aspecto-toxico">Aspecto tóxico</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="palidez"><label for="palidez">Palidez</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="cianosis"><label for="cianosis">Cianosis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="ictericia-fisica"><label for="ictericia-fisica">Ictericia</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="deshidratacion"><label for="deshidratacion">Deshidratación</label></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-lungs"></i> Examen Respiratorio</div>
-                    <div class="bilateral-container">
-                        <div class="side-container">
-                            <div class="side-header">Hemitórax Derecho</div>
-                            <div class="checkbox-grid">
-                                <div class="checkbox-item"><input type="checkbox" id="mvr-normal-der"><label for="mvr-normal-der">MV normal</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="mvr-disminuido-der"><label for="mvr-disminuido-der">MV disminuido</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="crepitantes-der"><label for="crepitantes-der">Crepitantes</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="roncus-der"><label for="roncus-der">Roncus</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="sibilancias-der"><label for="sibilancias-der">Sibilancias</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="roce-pleural-der"><label for="roce-pleural-der">Roce pleural</label></div>
-                            </div>
-                        </div>
-                        
-                        <div class="side-container">
-                            <div class="side-header">Hemitórax Izquierdo</div>
-                            <div class="checkbox-grid">
-                                <div class="checkbox-item"><input type="checkbox" id="mvr-normal-izq"><label for="mvr-normal-izq">MV normal</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="mvr-disminuido-izq"><label for="mvr-disminuido-izq">MV disminuido</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="crepitantes-izq"><label for="crepitantes-izq">Crepitantes</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="roncus-izq"><label for="roncus-izq">Roncus</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="sibilancias-izq"><label for="sibilancias-izq">Sibilancias</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="roce-pleural-izq"><label for="roce-pleural-izq">Roce pleural</label></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-heartbeat"></i> Examen Cardiovascular</div>
-                    <div class="exam-section">
-                        <h4>Auscultación Cardíaca</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="ruidos-cardiacos-normales"><label for="ruidos-cardiacos-normales">Ruidos cardíacos normales</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="taquicardia"><label for="taquicardia">Taquicardia</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="bradicardia"><label for="bradicardia">Bradicardia</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="soplo-cardiaco"><label for="soplo-cardiaco">Soplo cardíaco</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="galope"><label for="galope">Galope</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="roce-pericardico"><label for="roce-pericardico">Roce pericárdico</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="edema-mmii"><label for="edema-mmii">Edema MMII</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="ingurgitacion-yugular"><label for="ingurgitacion-yugular">Ingurgitación yugular</label></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-stomach"></i> Examen Abdominal</div>
-                    <div class="exam-section">
-                        <h4>Abdomen</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="abdomen-normal"><label for="abdomen-normal">Abdomen normal</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="abdomen-distendido"><label for="abdomen-distendido">Distensión abdominal</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="dolor-abdominal-palpacion"><label for="dolor-abdominal-palpacion">Dolor a la palpación</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="defensa-abdominal"><label for="defensa-abdominal">Defensa abdominal</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="rebote-positivo"><label for="rebote-positivo">Rebote positivo</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="hepatomegalia"><label for="hepatomegalia">Hepatomegalia</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="esplenomegalia"><label for="esplenomegalia">Esplenomegalia</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="ascitis"><label for="ascitis">Ascitis</label></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-brain"></i> Examen Neurológico</div>
-                    <div class="exam-section">
-                        <h4>Estado Mental y Signos Meníngeos</h4>
-                        <div class="measurement">
-                            <label>Escala de Glasgow:</label>
-                            <input type="number" class="input-field" id="glasgow" min="3" max="15" onchange="evaluateGlasgow()">
-                            <span>/15</span>
-                        </div>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="conciencia-normal"><label for="conciencia-normal">Conciencia normal</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="desorientacion"><label for="desorientacion">Desorientación</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="somnolencia"><label for="somnolencia">Somnolencia</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="estupor"><label for="estupor">Estupor</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="kernig-positivo"><label for="kernig-positivo">Signo de Kernig +</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="brudzinski-positivo"><label for="brudzinski-positivo">Signo de Brudzinski +</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="rigidez-nuca-fisica"><label for="rigidez-nuca-fisica">Rigidez de nuca</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="fotofobia-fisica"><label for="fotofobia-fisica">Fotofobia</label></div>
-                        </div>
-                        <div class="score-item">
-                            <span>Interpretación Glasgow:</span>
-                            <span class="score-value" id="glasgow-interpretation">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-hand-paper"></i> Examen de Piel y Faneras</div>
-                    <div class="exam-section">
-                        <h4>Lesiones Cutáneas</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="piel-normal"><label for="piel-normal">Piel sin lesiones</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="exantema-maculopapular"><label for="exantema-maculopapular">Exantema maculopapular</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="exantema-vesicular"><label for="exantema-vesicular">Exantema vesicular</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="petequias-fisica"><label for="petequias-fisica">Petequias</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="purpura-fisica"><label for="purpura-fisica">Púrpura</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="equimosis"><label for="equimosis">Equimosis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="celulitis-fisica"><label for="celulitis-fisica">Celulitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="abscesos-fisica"><label for="abscesos-fisica">Abscesos</label></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-circle-notch"></i> Adenopatías</div>
-                    <div class="exam-section">
-                        <h4>Territorios Ganglionares</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="adenopatias-ausentes"><label for="adenopatias-ausentes">Adenopatías ausentes</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="adenopatias-cervicales"><label for="adenopatias-cervicales">Adenopatías cervicales</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="adenopatias-supraclaviculares"><label for="adenopatias-supraclaviculares">Adenopatías supraclaviculares</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="adenopatias-axilares"><label for="adenopatias-axilares">Adenopatías axilares</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="adenopatias-inguinales"><label for="adenopatias-inguinales">Adenopatías inguinales</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="adenopatias-generalizadas"><label for="adenopatias-generalizadas">Adenopatías generalizadas</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="adenopatias-dolorosas"><label for="adenopatias-dolorosas">Adenopatías dolorosas</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="adenopatias-adheridas"><label for="adenopatias-adheridas">Adenopatías adheridas</label></div>
-                        </div>
+                    <div class="flex items-center gap-3">
+                        <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-red-500/20 text-red-200 border border-red-500/30">0% Completado</div>
+                        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border hover:text-accent-foreground h-10 px-4 py-2 bg-white/10 border-white/20 text-white hover:bg-white/20">
+                            <i class="fas fa-file-text w-4 h-4 mr-2"></i>
+                            Ver Informe
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Evaluación Febril -->
-        <div class="section" id="section-fever-evaluation">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span><i class="fas fa-thermometer-three-quarters"></i> Evaluación del Síndrome Febril</span>
-                <div style="display: flex; align-items: center;">
-                    <div class="completion-badge" id="badge-fever-evaluation">
-                        <i class="fas fa-circle"></i>
-                    </div>
-                    <span class="arrow">▼</span>
-                </div>
-            </div>
-            <div class="section-content" id="fever-evaluation">
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color fever-color"></div>
-                        <span>Evaluación Febril</span>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-thermometer-half"></i> Características del Patrón Febril</div>
-                    <div class="fever-assessment">
-                        <h4>Clasificación de la Fiebre</h4>
-                        <div class="measurement">
-                            <label>Temperatura de presentación:</label>
-                            <input type="number" class="input-field" id="temp-presentacion" min="35" max="45" step="0.1" onchange="evaluateFeverPattern()">
-                            <span>°C</span>
-                        </div>
-                        <div class="exam-section">
-                            <h4>Tipo de Fiebre</h4>
-                            <div class="severity-grid">
-                                <div class="severity-item"><input type="radio" name="tipo-fiebre" id="febricula" value="febricula" onchange="evaluateFeverPattern()"><label for="febricula">Febrícula (37.2-37.9°C)</label></div>
-                                <div class="severity-item"><input type="radio" name="tipo-fiebre" id="fiebre-moderada" value="moderada" onchange="evaluateFeverPattern()"><label for="fiebre-moderada">Fiebre moderada (38-38.9°C)</label></div>
-                                <div class="severity-item"><input type="radio" name="tipo-fiebre" id="fiebre-alta" value="alta" onchange="evaluateFeverPattern()"><label for="fiebre-alta">Fiebre alta (39-40°C)</label></div>
-                                <div class="severity-item"><input type="radio" name="tipo-fiebre" id="hipertermia" value="hipertermia" onchange="evaluateFeverPattern()"><label for="hipertermia">Hipertermia (>40°C)</label></div>
-                            </div>
-                        </div>
-                        <div class="exam-section">
-                            <h4>Duración de la Fiebre</h4>
-                            <div class="severity-grid">
-                                <div class="severity-item"><input type="radio" name="duracion-fiebre-radio" id="fiebre-aguda" value="aguda" onchange="evaluateFeverPattern()"><label for="fiebre-aguda">Fiebre aguda (&lt;14 días)</label></div>
-                                <div class="severity-item"><input type="radio" name="duracion-fiebre-radio" id="fiebre-subaguda" value="subaguda" onchange="evaluateFeverPattern()"><label for="fiebre-subaguda">Fiebre subaguda (14-28 días)</label></div>
-                                <div class="severity-item"><input type="radio" name="duracion-fiebre-radio" id="fiebre-cronica" value="cronica" onchange="evaluateFeverPattern()"><label for="fiebre-cronica">Fiebre crónica (>28 días)</label></div>
-                                <div class="severity-item"><input type="radio" name="duracion-fiebre-radio" id="fuo" value="fuo" onchange="evaluateFeverPattern()"><label for="fuo">Fiebre de origen desconocido</label></div>
-                            </div>
-                        </div>
-                        <div class="score-item">
-                            <span>Clasificación del síndrome febril:</span>
-                            <span class="score-value" id="fever-syndrome-classification">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-search"></i> Evaluación del Foco Infeccioso</div>
-                    <div class="exam-section">
-                        <h4>Foco Respiratorio</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="neumonia-probable"><label for="neumonia-probable">Neumonía probable</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="bronquitis"><label for="bronquitis">Bronquitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="faringitis"><label for="faringitis">Faringitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="sinusitis"><label for="sinusitis">Sinusitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="otitis"><label for="otitis">Otitis</label></div>
-                        </div>
-                    </div>
-                    <div class="exam-section">
-                        <h4>Foco Urinario</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="itu-baja"><label for="itu-baja">ITU baja/cistitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="pielonefritis"><label for="pielonefritis">Pielonefritis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="uretritis"><label for="uretritis">Uretritis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="prostatitis"><label for="prostatitis">Prostatitis</label></div>
-                        </div>
-                    </div>
-                    <div class="exam-section">
-                        <h4>Foco Gastrointestinal</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="gastroenteritis"><label for="gastroenteritis">Gastroenteritis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="colitis"><label for="colitis">Colitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="apendicitis"><label for="apendicitis">Apendicitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="colangitis"><label for="colangitis">Colangitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="absceso-abdominal"><label for="absceso-abdominal">Absceso abdominal</label></div>
-                        </div>
-                    </div>
-                    <div class="exam-section">
-                        <h4>Foco Neurológico</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-probable"><label for="meningitis-probable">Meningitis probable</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="encefalitis"><label for="encefalitis">Encefalitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="absceso-cerebral"><label for="absceso-cerebral">Absceso cerebral</label></div>
-                        </div>
-                    </div>
-                    <div class="exam-section">
-                        <h4>Foco Cutáneo</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="celulitis-foco"><label for="celulitis-foco">Celulitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="erisipela"><label for="erisipela">Erisipela</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="absceso-cutaneo"><label for="absceso-cutaneo">Absceso cutáneo</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="impetigo"><label for="impetigo">Impétigo</label></div>
-                        </div>
-                    </div>
-                    <div class="exam-section">
-                        <h4>Otros Focos</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="endocarditis-probable"><label for="endocarditis-probable">Endocarditis probable</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="artritis-septica"><label for="artritis-septica">Artritis séptica</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="osteomielitis"><label for="osteomielitis">Osteomielitis</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="foco-desconocido"><label for="foco-desconocido">Foco desconocido</label></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Evaluación de Sepsis -->
-        <div class="section" id="section-sepsis-evaluation">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span><i class="fas fa-heartbeat"></i> Evaluación de Sepsis y SIRS</span>
-                <div style="display: flex; align-items: center;">
-                    <div class="completion-badge" id="badge-sepsis-evaluation">
-                        <i class="fas fa-circle"></i>
-                    </div>
-                    <span class="arrow">▼</span>
-                </div>
-            </div>
-            <div class="section-content" id="sepsis-evaluation">
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color sepsis-color"></div>
-                        <span>Evaluación Sepsis</span>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-exclamation-triangle"></i> Criterios qSOFA</div>
-                    <div class="sepsis-assessment">
-                        <h4>Quick SOFA (qSOFA)</h4>
-                        <div class="test-item">
-                            <label>Frecuencia respiratoria ≥22 rpm</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="qsofa-fr" onchange="calculateQSOFA()"><span class="positive">Presente</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Alteración del estado mental</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="qsofa-mental" onchange="calculateQSOFA()"><span class="positive">Presente</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Presión arterial sistólica ≤100 mmHg</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="qsofa-pas" onchange="calculateQSOFA()"><span class="positive">Presente</span></div>
-                            </div>
-                        </div>
-                        <div class="score-item">
-                            <span>Puntuación qSOFA:</span>
-                            <span class="score-value" id="qsofa-score">0</span>
-                            <span>/3 puntos</span>
-                        </div>
-                        <div class="score-item">
-                            <span>Riesgo de mortalidad:</span>
-                            <span class="score-value" id="qsofa-risk">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-thermometer-empty"></i> Criterios SIRS</div>
-                    <div class="exam-section">
-                        <h4>Síndrome de Respuesta Inflamatoria Sistémica</h4>
-                        <div class="test-item">
-                            <label>Temperatura >38°C o &lt;36°C</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="sirs-temp" onchange="calculateSIRS()"><span class="positive">Presente</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Frecuencia cardíaca >90 lpm</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="sirs-fc" onchange="calculateSIRS()"><span class="positive">Presente</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Frecuencia respiratoria >20 rpm o PaCO2 &lt;32 mmHg</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="sirs-fr" onchange="calculateSIRS()"><span class="positive">Presente</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Leucocitos >12,000 o &lt;4,000 o >10% cayados</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="sirs-leuco" onchange="calculateSIRS()"><span class="positive">Presente</span></div>
-                            </div>
-                        </div>
-                        <div class="score-item">
-                            <span>Criterios SIRS cumplidos:</span>
-                            <span class="score-value" id="sirs-criterios">0</span>
-                            <span>/4</span>
-                        </div>
-                        <div class="score-item">
-                            <span>Diagnóstico SIRS:</span>
-                            <span class="score-value" id="sirs-diagnosis">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-exclamation-circle"></i> Criterios de Sepsis Severa y Shock Séptico</div>
-                    <div class="exam-section">
-                        <h4>Disfunción Orgánica</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="hipotension-refractaria"><label for="hipotension-refractaria">Hipotensión refractaria</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="oliguria"><label for="oliguria">Oliguria (&lt;0.5 mL/kg/h)</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="lactato-elevado"><label for="lactato-elevado">Lactato elevado (>2 mmol/L)</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="bilirrubina-elevada"><label for="bilirrubina-elevada">Bilirrubina >2 mg/dL</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="plaquetopenia"><label for="plaquetopenia">Plaquetopenia (&lt;100,000)</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="coagulopatia"><label for="coagulopatia">Coagulopatía (INR >1.5)</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="hipoxemia"><label for="hipoxemia">Hipoxemia (PaO2/FiO2 &lt;300)</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="acidosis-metabolica"><label for="acidosis-metabolica">Acidosis metabólica</label></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Escalas de Riesgo -->
-        <div class="section" id="section-risk-scales">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span><i class="fas fa-calculator"></i> Escalas de Riesgo Infectológicas</span>
-                <div style="display: flex; align-items: center;">
-                    <div class="completion-badge" id="badge-risk-scales">
-                        <i class="fas fa-circle"></i>
-                    </div>
-                    <span class="arrow">▼</span>
-                </div>
-            </div>
-            <div class="section-content" id="risk-scales">
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-lungs"></i> CURB-65 - Neumonía</div>
-                    <div class="score-calculation">
-                        <h4>Criterios CURB-65</h4>
-                        <div class="test-item">
-                            <label>Confusión mental</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="curb-confusion" onchange="calculateCURB65()"><span class="positive">Presente (1 punto)</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Urea >7 mmol/L (20 mg/dL)</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="curb-urea" onchange="calculateCURB65()"><span class="positive">Presente (1 punto)</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Frecuencia respiratoria ≥30 rpm</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="curb-respiratoria" onchange="calculateCURB65()"><span class="positive">Presente (1 punto)</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Presión arterial sistólica &lt;90 o diastólica ≤60 mmHg</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="curb-presion" onchange="calculateCURB65()"><span class="positive">Presente (1 punto)</span></div>
-                            </div>
-                        </div>
-                        <div class="test-item">
-                            <label>Edad ≥65 años</label>
-                            <div class="test-controls">
-                                <div class="test-checkbox"><input type="checkbox" id="curb-edad" onchange="calculateCURB65()"><span class="positive">Presente (1 punto)</span></div>
-                            </div>
-                        </div>
-                        <div class="score-item">
-                            <span>Puntuación CURB-65:</span>
-                            <span class="score-value" id="curb65-score">0</span>
-                            <span>/5 puntos</span>
-                        </div>
-                        <div class="score-item">
-                            <span>Riesgo de mortalidad:</span>
-                            <span class="score-value" id="curb65-risk">--</span>
-                        </div>
-                        <div class="score-item">
-                            <span>Recomendación:</span>
-                            <span class="score-value" id="curb65-recommendation">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-flask"></i> Escala PSI/PORT - Neumonía</div>
-                    <div class="score-calculation">
-                        <h4>Pneumonia Severity Index (Simplificado)</h4>
-                        <div class="exam-section">
-                            <h4>Factores Demográficos</h4>
-                            <div class="measurement">
-                                <label>Edad (años):</label>
-                                <input type="number" class="input-field" id="psi-edad" min="0" max="120" onchange="calculatePSI()">
-                                <span>años</span>
-                            </div>
-                            <div class="test-item">
-                                <label>Sexo masculino</label>
-                                <div class="test-controls">
-                                    <div class="test-checkbox"><input type="checkbox" id="psi-masculino" onchange="calculatePSI()"><span class="positive">Presente</span></div>
+        <!-- Contenido principal -->
+        <div class="flex gap-6 p-6">
+            <!-- Lista de secciones -->
+            <div class="transition-all duration-300 w-full max-w-4xl mx-auto">
+                <div class="space-y-4">
+                    <!-- Síndrome Febril -->
+                    <div class="exam-section glassmorphism">
+                        <div class="section-header">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-thermometer-full w-5 h-5 text-red-500"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-white">Síndrome Febril</h3>
+                                        <p class="text-sm text-white/70">Evaluación de fiebre y síntomas asociados</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill"></div>
+                                        </div>
+                                        <span class="text-xs text-white/70">0%</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70"></i>
                                 </div>
                             </div>
                         </div>
-                        <div class="exam-section">
-                            <h4>Comorbilidades (10 puntos c/u)</h4>
-                            <div class="checkbox-grid">
-                                <div class="checkbox-item"><input type="checkbox" id="psi-neoplasia" onchange="calculatePSI()"><label for="psi-neoplasia">Neoplasia</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="psi-hepatopatia" onchange="calculatePSI()"><label for="psi-hepatopatia">Hepatopatía</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="psi-icc" onchange="calculatePSI()"><label for="psi-icc">Insuf. cardíaca congestiva</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="psi-enfermedad-cerebrovascular" onchange="calculatePSI()"><label for="psi-enfermedad-cerebrovascular">Enfermedad cerebrovascular</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="psi-nefropatia" onchange="calculatePSI()"><label for="psi-nefropatia">Nefropatía</label></div>
-                            </div>
-                        </div>
-                        <div class="score-item">
-                            <span>Puntuación PSI estimada:</span>
-                            <span class="score-value" id="psi-score">0</span>
-                            <span>puntos</span>
-                        </div>
-                        <div class="score-item">
-                            <span>Clase de riesgo:</span>
-                            <span class="score-value" id="psi-class">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-tint"></i> Escala de Riesgo ITU</div>
-                    <div class="score-calculation">
-                        <h4>Factores de Riesgo para ITU Complicada</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="itu-embarazo" onchange="calculateITURisk()"><label for="itu-embarazo">Embarazo</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="itu-diabetes" onchange="calculateITURisk()"><label for="itu-diabetes">Diabetes mellitus</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="itu-inmunosupresion" onchange="calculateITURisk()"><label for="itu-inmunosupresion">Inmunosupresión</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="itu-uropatia" onchange="calculateITURisk()"><label for="itu-uropatia">Uropatía obstructiva</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="itu-cateter" onchange="calculateITURisk()"><label for="itu-cateter">Catéter urinario</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="itu-instrumentacion" onchange="calculateITURisk()"><label for="itu-instrumentacion">Instrumentación reciente</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="itu-masculino" onchange="calculateITURisk()"><label for="itu-masculino">Sexo masculino</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="itu-anciano" onchange="calculateITURisk()"><label for="itu-anciano">Edad >65 años</label></div>
-                        </div>
-                        <div class="score-item">
-                            <span>Factores de riesgo:</span>
-                            <span class="score-value" id="itu-risk-count">0</span>
-                        </div>
-                        <div class="score-item">
-                            <span>Clasificación:</span>
-                            <span class="score-value" id="itu-classification">--</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Evaluación del Foco Infeccioso -->
-        <div class="section" id="section-source-evaluation">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span><i class="fas fa-search-location"></i> Evaluación Específica del Foco Infeccioso</span>
-                <div style="display: flex; align-items: center;">
-                    <div class="completion-badge" id="badge-source-evaluation">
-                        <i class="fas fa-circle"></i>
-                    </div>
-                    <span class="arrow">▼</span>
-                </div>
-            </div>
-            <div class="section-content" id="source-evaluation">
-                <div class="legend">
-                    <div class="legend-item">
-                        <div class="legend-color respiratory-color"></div>
-                        <span>Foco Específico</span>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-lungs"></i> Evaluación Respiratoria Específica</div>
-                    <div class="infection-source">
-                        <h4>Neumonía Adquirida en la Comunidad</h4>
-                        <div class="exam-section">
-                            <h4>Criterios Clínicos</h4>
-                            <div class="checkbox-grid">
-                                <div class="checkbox-item"><input type="checkbox" id="neumonia-tos"><label for="neumonia-tos">Tos productiva</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="neumonia-disnea"><label for="neumonia-disnea">Disnea</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="neumonia-dolor"><label for="neumonia-dolor">Dolor torácico pleurítico</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="neumonia-crepitantes"><label for="neumonia-crepitantes">Crepitantes focales</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="neumonia-matidez"><label for="neumonia-matidez">Matidez a la percusión</label></div>
-                                <div class="checkbox-item"><input type="checkbox" id="neumonia-mvr-disminuido"><label for="neumonia-mvr-disminuido">MV disminuido</label></div>
-                            </div>
-                        </div>
-                        <div class="exam-section">
-                            <h4>Clasificación de Severidad</h4>
-                            <div class="severity-grid">
-                                <div class="severity-item"><input type="radio" name="neumonia-severidad" id="neumonia-leve" value="leve" onchange="updateDashboard()"><label for="neumonia-leve">Neumonía leve (ambulatoria)</label></div>
-                                <div class="severity-item"><input type="radio" name="neumonia-severidad" id="neumonia-moderada" value="moderada" onchange="updateDashboard()"><label for="neumonia-moderada">Neumonía moderada (hospitalaria)</label></div>
-                                <div class="severity-item"><input type="radio" name="neumonia-severidad" id="neumonia-severa" value="severa" onchange="updateDashboard()"><label for="neumonia-severa">Neumonía severa (UCI)</label></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-tint"></i> Evaluación Urinaria Específica</div>
-                    <div class="exam-section">
-                        <h4>Infección del Tracto Urinario</h4>
-                        <div class="bilateral-container">
-                            <div class="side-container">
-                                <div class="side-header">ITU Baja</div>
-                                <div class="checkbox-grid">
-                                    <div class="checkbox-item"><input type="checkbox" id="cistitis-disuria"><label for="cistitis-disuria">Disuria</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="cistitis-poliaquiuria"><label for="cistitis-poliaquiuria">Poliaquiuria</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="cistitis-urgencia"><label for="cistitis-urgencia">Urgencia miccional</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="cistitis-suprapubico"><label for="cistitis-suprapubico">Dolor suprapúbico</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="cistitis-sin-fiebre"><label for="cistitis-sin-fiebre">Sin fiebre/mínima</label></div>
+                        <div class="section-content">
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div>
+                                        <label class="text-white text-sm mb-2 block">Temperatura (°C)</label>
+                                        <input type="number" id="temperatura" min="35" max="45" step="0.1" class="medical-input" placeholder="36.5-37.5°C">
+                                    </div>
+                                    <div>
+                                        <label class="text-white text-sm mb-2 block">Duración de la fiebre</label>
+                                        <select id="duracion-fiebre" class="medical-select">
+                                            <option value="">Seleccionar</option>
+                                            <option value="aguda">Aguda (< 7 días)</option>
+                                            <option value="subaguda">Subaguda (7-21 días)</option>
+                                            <option value="cronica">Crónica (> 21 días)</option>
+                                        </select>
+                                    </div>
                                 </div>
-                            </div>
-                            
-                            <div class="side-container">
-                                <div class="side-header">ITU Alta (Pielonefritis)</div>
-                                <div class="checkbox-grid">
-                                    <div class="checkbox-item"><input type="checkbox" id="pielonefritis-fiebre"><label for="pielonefritis-fiebre">Fiebre >38°C</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="pielonefritis-escalofrios"><label for="pielonefritis-escalofrios">Escalofríos</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="pielonefritis-lumbar"><label for="pielonefritis-lumbar">Dolor lumbar</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="pielonefritis-puño-percusion"><label for="pielonefritis-puño-percusion">Puño-percusión +</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="pielonefritis-nauseas"><label for="pielonefritis-nauseas">Náuseas/vómitos</label></div>
+
+                                <div class="border-t border-white/20 pt-6">
+                                    <label class="text-white font-semibold text-lg mb-3 flex items-center gap-2">
+                                        <i class="fas fa-exclamation-triangle w-4 h-4 text-yellow-400"></i>
+                                        Síntomas Asociados
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="infec-escalofrios" name="sintomas_infecciosos" value="escalofrios" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="infec-escalofrios">Escalofríos</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="infec-sudoracion" name="sintomas_infecciosos" value="sudoracion" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="infec-sudoracion">Sudoración</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="infec-malestar" name="sintomas_infecciosos" value="malestar" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="infec-malestar">Malestar general</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="infec-cefalea" name="sintomas_infecciosos" value="cefalea" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="infec-cefalea">Cefalea</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="infec-mialgias" name="sintomas_infecciosos" value="mialgias" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="infec-mialgias">Mialgias</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="infec-artralgias" name="sintomas_infecciosos" value="artralgias" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="infec-artralgias">Artralgias</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-stomach"></i> Evaluación Gastrointestinal Específica</div>
-                    <div class="exam-section">
-                        <h4>Gastroenteritis Infecciosa</h4>
-                        <div class="measurement">
-                            <label>Número de deposiciones/día:</label>
-                            <input type="number" class="input-field" id="deposiciones-dia" min="0" max="30" onchange="evaluateGastroenteritis()">
-                            <span>deposiciones</span>
-                        </div>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="gastro-acuosa" onchange="evaluateGastroenteritis()"><label for="gastro-acuosa">Diarrea acuosa</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="gastro-sanguinolenta" onchange="evaluateGastroenteritis()"><label for="gastro-sanguinolenta">Diarrea sanguinolenta</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="gastro-moco" onchange="evaluateGastroenteritis()"><label for="gastro-moco">Diarrea con moco</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="gastro-vomitos" onchange="evaluateGastroenteritis()"><label for="gastro-vomitos">Vómitos</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="gastro-dolor-colico" onchange="evaluateGastroenteritis()"><label for="gastro-dolor-colico">Dolor cólico</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="gastro-deshidratacion" onchange="evaluateGastroenteritis()"><label for="gastro-deshidratacion">Deshidratación</label></div>
-                        </div>
-                        <div class="score-item">
-                            <span>Severidad de gastroenteritis:</span>
-                            <span class="score-value" id="gastroenteritis-severity">--</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-brain"></i> Evaluación Neurológica Específica</div>
-                    <div class="exam-section">
-                        <h4>Sospecha de Meningitis</h4>
-                        <div class="checkbox-grid">
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-triada"><label for="meningitis-triada">Tríada clásica completa</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-cefalea-intensa"><label for="meningitis-cefalea-intensa">Cefalea intensa</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-fotofobia"><label for="meningitis-fotofobia">Fotofobia</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-rigidez"><label for="meningitis-rigidez">Rigidez de nuca</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-kernig"><label for="meningitis-kernig">Signo de Kernig +</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-brudzinski"><label for="meningitis-brudzinski">Signo de Brudzinski +</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-petequias"><label for="meningitis-petequias">Exantema petequial</label></div>
-                            <div class="checkbox-item"><input type="checkbox" id="meningitis-confusion"><label for="meningitis-confusion">Confusión/AEM</label></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="exam-container">
-                    <div class="exam-header"><i class="fas fa-hand-paper"></i> Evaluación Cutánea Específica</div>
-                    <div class="exam-section">
-                        <h4>Infecciones de Piel y Tejidos Blandos</h4>
-                        <div class="bilateral-container">
-                            <div class="side-container">
-                                <div class="side-header">Celulitis</div>
-                                <div class="checkbox-grid">
-                                    <div class="checkbox-item"><input type="checkbox" id="celulitis-eritema"><label for="celulitis-eritema">Eritema</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="celulitis-edema"><label for="celulitis-edema">Edema</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="celulitis-calor"><label for="celulitis-calor">Calor local</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="celulitis-dolor"><label for="celulitis-dolor">Dolor</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="celulitis-bordes-difusos"><label for="celulitis-bordes-difusos">Bordes difusos</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="celulitis-adenopatias"><label for="celulitis-adenopatias">Adenopatías</label></div>
+                    <!-- Marcadores Inflamatorios -->
+                    <div class="exam-section glassmorphism">
+                        <div class="section-header">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-flask w-5 h-5 text-purple-500"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-white">Marcadores Inflamatorios</h3>
+                                        <p class="text-sm text-white/70">Laboratorio y biomarcadores</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill"></div>
+                                        </div>
+                                        <span class="text-xs text-white/70">0%</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70"></i>
                                 </div>
                             </div>
-                            
-                            <div class="side-container">
-                                <div class="side-header">Erisipela</div>
-                                <div class="checkbox-grid">
-                                    <div class="checkbox-item"><input type="checkbox" id="erisipela-placa-eritematosa"><label for="erisipela-placa-eritematosa">Placa eritematosa</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="erisipela-bordes-elevados"><label for="erisipela-bordes-elevados">Bordes elevados</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="erisipela-superficie-lisa"><label for="erisipela-superficie-lisa">Superficie lisa</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="erisipela-caliente"><label for="erisipela-caliente">Muy caliente</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="erisipela-dolorosa"><label for="erisipela-dolorosa">Muy dolorosa</label></div>
-                                    <div class="checkbox-item"><input type="checkbox" id="erisipela-vesiculas"><label for="erisipela-vesiculas">Vesículas/bulas</label></div>
+                        </div>
+                        <div class="section-content">
+                            <div class="space-y-6">
+                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <div>
+                                        <label class="text-white text-sm mb-2 block">Leucocitos (×10³/μL)</label>
+                                        <input type="number" id="leucocitos-infec" min="1" max="50" step="0.1" class="medical-input" placeholder="4.5-11.0">
+                                    </div>
+                                    <div>
+                                        <label class="text-white text-sm mb-2 block">PCR (mg/L)</label>
+                                        <input type="number" id="pcr-infec" min="0" max="500" step="0.1" class="medical-input" placeholder="< 3.0">
+                                    </div>
+                                    <div>
+                                        <label class="text-white text-sm mb-2 block">Procalcitonina (ng/mL)</label>
+                                        <input type="number" id="procalcitonina" min="0" max="100" step="0.01" class="medical-input" placeholder="< 0.25">
+                                    </div>
+                                </div>
+
+                                <div class="border-t border-white/20 pt-6">
+                                    <label class="text-white font-semibold text-lg mb-3 flex items-center gap-2">
+                                        <i class="fas fa-bug w-4 h-4 text-green-400"></i>
+                                        Factores de Riesgo
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="riesgo-inmunosupresion" name="factores_riesgo" value="inmunosupresion" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="riesgo-inmunosupresion">Inmunosupresión</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="riesgo-diabetes" name="factores_riesgo" value="diabetes" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="riesgo-diabetes">Diabetes</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="riesgo-hospitalizacion" name="factores_riesgo" value="hospitalizacion_reciente" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="riesgo-hospitalizacion">Hospitalización reciente</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="riesgo-antibioticos" name="factores_riesgo" value="antibioticos_recientes" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="riesgo-antibioticos">Antibióticos recientes</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="riesgo-viajes" name="factores_riesgo" value="viajes_recientes" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="riesgo-viajes">Viajes recientes</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="riesgo-contacto-enfermo" name="factores_riesgo" value="contacto_enfermo" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="riesgo-contacto-enfermo">Contacto con enfermo</label>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-            
-        <!-- Conclusión Principal -->
-        <div class="conclusion" id="traditionalConclusion">
-            <h3><i class="fas fa-file-medical-alt"></i> Conclusión del Examen Infectológico</h3>
-            <div class="conclusion-text" id="conclusion-text-traditional">Seleccione los parámetros del examen para generar la conclusión infectológica...</div>
-        </div>
-        
-        <div class="control-buttons">
-            <button class="btn btn-primary" onclick="generateConclusion()">
-                <i class="fas fa-file-medical"></i> Generar Conclusión
-            </button>
-            <button class="btn btn-primary" onclick="copyToClipboard()">
-                <i class="fas fa-copy"></i> Copiar Texto
-            </button>
-            <button class="btn btn-primary" onclick="printConclusion()">
-                <i class="fas fa-print"></i> Imprimir Conclusión
-            </button>
-            <button class="btn btn-secondary" onclick="clearForm()">
-                <i class="fas fa-trash"></i> Limpiar Formulario
-            </button>
-            <button class="btn btn-secondary" onclick="expandAllSections()">
-                <i class="fas fa-expand-alt"></i> Expandir Todo
-            </button>
-            <button class="btn btn-secondary" onclick="collapseAllSections()">
-                <i class="fas fa-compress-alt"></i> Contraer Todo
-            </button>
+
+            <!-- Sidebar -->
+            <div class="w-80 space-y-4">
+                <!-- Búsqueda y filtros -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl">
+                    <div class="p-4">
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-200 w-4 h-4"></i>
+                                <input type="text" class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl pl-10 pr-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 w-full" placeholder="Buscar síntomas..." id="global-search">
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="filter-button active px-3 py-1 rounded-lg text-xs transition-colors bg-blue-500/30 text-blue-200 border border-blue-400/30" data-filter="all">Todos</button>
+                                <button class="filter-button px-3 py-1 rounded-lg text-xs transition-colors bg-white/10 text-white/60 border border-white/20 hover:bg-white/20" data-filter="critical">Críticas</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Alertas activas -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl">
+                    <div class="p-6 pb-3">
+                        <div class="font-semibold text-white text-sm flex items-center gap-2">
+                            <i class="fas fa-triangle-exclamation h-4 w-4 text-red-400"></i>
+                            Alertas Activas
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0 space-y-3" id="alerts-container">
+                        <div class="relative w-full border p-4 rounded-xl backdrop-blur-sm border-orange-400/50 bg-orange-500/20">
+                            <div class="text-xs text-orange-200">⚠️ 0 parámetros evaluados</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progreso del examen -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl">
+                    <div class="p-6 pb-3">
+                        <div class="font-semibold text-white text-sm flex items-center gap-2">
+                            <i class="fas fa-chart-line h-4 w-4 text-blue-400"></i>
+                            Progreso del Examen
+                            <div class="ml-auto">
+                                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-blue-500/30 text-blue-200 border border-blue-400/30 text-xs">0%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-blue-200 text-xs">Completado</span>
+                                <span class="text-white text-sm font-bold">0%</span>
+                            </div>
+                            <div class="relative w-full overflow-hidden h-3 bg-white/20 rounded-xl">
+                                <div class="h-full w-full flex-1 bg-gradient-to-r from-red-400 to-orange-500 transition-all" style="transform: translateX(-100%);"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón finalizar -->
+                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary hover:bg-primary/90 h-11 px-8 w-full bg-gradient-to-r from-red-500/80 to-orange-600/80 hover:from-red-600/90 hover:to-orange-700/90 backdrop-blur-xl border border-white/20 text-white font-bold py-4 shadow-2xl transform transition-all duration-300 hover:scale-105 rounded-2xl">
+                    <i class="fas fa-circle-check h-5 w-5 mr-2"></i>
+                    Finalizar Infectología
+                </button>
+            </div>
         </div>
     </div>
 
+    <script src="medical-unified.js"></script>
     <script>
-        // ========== VARIABLES GLOBALES ==========
-        let examProgress = 0;
-        let sectionsCompleted = 0;
-        let alertCount = 0;
-        let warningCount = 0;
-        let findingsCount = 0;
-        let sepsisStatus = 'Normal';
-
-        // 🌙 Toggle de tema
-        function toggleTheme() {
-            const body = document.body;
-            const themeIcon = document.getElementById('theme-icon');
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funcionalidad de expansión de secciones
+            const sectionHeaders = document.querySelectorAll('.section-header');
             
-            if (body.hasAttribute('data-theme')) {
-                body.removeAttribute('data-theme');
-                themeIcon.className = 'fas fa-moon';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                themeIcon.className = 'fas fa-sun';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-
-        // 🎯 Toggle panel de navegación
-        function toggleNavPanel() {
-            const navPanel = document.getElementById('nav-panel');
-            const body = document.body;
-            
-            navPanel.classList.toggle('open');
-            body.classList.toggle('split-view');
-        }
-
-        // 📊 FUNCIONES DEL PANEL STICKY
-
-        // Toggle panel lateral sticky
-        function toggleStickyPanel() {
-            const stickyPanel = document.getElementById('stickyConclusion');
-            const body = document.body;
-            const btn = document.getElementById('sticky-toggle-btn');
-            
-            stickyPanel.classList.toggle('active');
-            body.classList.toggle('split-view-active');
-            
-            if (stickyPanel.classList.contains('active')) {
-                btn.innerHTML = '<i class="fas fa-window-restore"></i> Vista Normal';
-                btn.classList.add('btn-warning');
-                btn.classList.remove('btn-primary');
-                generateStickyConclusion();
-            } else {
-                btn.innerHTML = '<i class="fas fa-columns"></i> Vista Dividida';
-                btn.classList.add('btn-primary');
-                btn.classList.remove('btn-warning');
-            }
-        }
-
-        // Generar conclusión para panel sticky
-        function generateStickyConclusion() {
-            const stickyContent = document.getElementById('stickyContent');
-            const updateIndicator = document.getElementById('updateIndicator');
-            
-            updateIndicator.classList.add('active');
-            
-            setTimeout(() => {
-                const originalConclusionEl = document.getElementById('conclusion-text-traditional');
-                const originalContent = originalConclusionEl.textContent;
-                
-                stickyContent.textContent = originalContent;
-                
-                updateIndicator.classList.remove('active');
-            }, 300);
-        }
-
-        // Copiar contenido del panel sticky
-        function copyStickyToClipboard() {
-            const stickyContent = document.getElementById('stickyContent').textContent;
-            
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(stickyContent).then(() => {
-                    showCopyNotification();
-                }).catch(err => {
-                    console.error('Error al copiar con la API del portapapeles: ', err);
-                    fallbackCopyToClipboard(stickyContent);
-                });
-            } else {
-                fallbackCopyToClipboard(stickyContent);
-            }
-        }
-
-        // Fallback para copiar
-        function fallbackCopyToClipboard(text) {
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            textArea.style.position = 'fixed';
-            textArea.style.opacity = '0';
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-
-            try {
-                document.execCommand('copy');
-                showCopyNotification();
-            } catch (err) {
-                console.error('Error al usar el método de respaldo para copiar: ', err);
-                alert('No se pudo copiar el texto. Por favor, cópielo manualmente.');
-            }
-
-            document.body.removeChild(textArea);
-        }
-
-        // Mostrar notificación de copia
-        function showCopyNotification() {
-            const notification = document.getElementById('copyNotification');
-            notification.classList.add('show');
-            setTimeout(() => {
-                notification.classList.remove('show');
-            }, 2500);
-        }
-
-        // Imprimir desde panel sticky
-        function printStickyConclusion() {
-            const conclusion = document.getElementById('stickyContent').textContent;
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Informe Infectológico</title>
-                    <style>
-                        body { 
-                            font-family: Arial, sans-serif; 
-                            margin: 20px; 
-                            line-height: 1.6;
-                        }
-                        pre { 
-                            white-space: pre-wrap; 
-                            font-family: 'Courier New', monospace; 
-                            font-size: 12px;
-                        }
-                        .header {
-                            text-align: center;
-                            border-bottom: 2px solid #e74c3c;
-                            padding-bottom: 10px;
-                            margin-bottom: 20px;
-                        }
-                        .footer {
-                            text-align: center;
-                            font-size: 10px;
-                            color: #666;
-                            margin-top: 20px;
-                            border-top: 1px solid #ddd;
-                            padding-top: 10px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>Informe Infectológico</h1>
-                        <p>Fecha: ${new Date().toLocaleDateString()}</p>
-                        <p>Hora: ${new Date().toLocaleTimeString()}</p>
-                    </div>
-                    <pre>${conclusion}</pre>
-                    <div class="footer">
-                        <p>Generado por Sistema de Evaluación Infectológica Premium</p>
-                    </div>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
-
-        // 🧭 Navegación a secciones
-        function scrollToSection(sectionId) {
-            const section = document.getElementById(`section-${sectionId}`);
-            if (section) {
-                section.scrollIntoView({ 
-                    behavior: 'smooth', 
-                    block: 'start',
-                    inline: 'nearest'
-                });
-                
-                const header = section.querySelector('.section-header');
-                if (header && !header.classList.contains('expanded')) {
-                    toggleSection(header);
-                }
-            }
-        }
-
-        // ✅ Actualizar altura de sección
-        function updateSectionHeight(contentElement) {
-            if (contentElement && contentElement.classList.contains('expanded')) {
-                setTimeout(() => {
-                    contentElement.style.maxHeight = contentElement.scrollHeight + 'px';
-                }, 50);
-            }
-        }
-
-        // 📂 Toggle de secciones mejorado
-        function toggleSection(headerElement) {
-            const content = headerElement.nextElementSibling;
-            const section = headerElement.parentElement;
-            
-            headerElement.classList.toggle('expanded');
-            section.classList.toggle('active');
-            
-            if (content.classList.toggle('expanded')) {
-                content.style.maxHeight = content.scrollHeight + 'px';
-                content.classList.add('slide-in');
-            } else {
-                content.style.maxHeight = '0';
-                content.classList.remove('slide-in');
-            }
-        }
-
-        // 🔄 Expandir/contraer todas las secciones
-        function expandAllSections() {
-            document.querySelectorAll('.section-header:not(.expanded)').forEach(header => {
-                toggleSection(header);
-            });
-        }
-
-        function collapseAllSections() {
-            document.querySelectorAll('.section-header.expanded').forEach(header => {
-                toggleSection(header);
-            });
-        }
-        
-        // 🚫 Manejo de "Sin fiebre"
-        function handleNoFever() {
-            const noFeverCheckbox = document.getElementById('sin-fiebre');
-            const otherFeverCheckboxes = document.querySelectorAll('#anamnesis input[type="checkbox"]:not(#sin-fiebre)');
-            
-            if (noFeverCheckbox.checked) {
-                document.getElementById('temperatura-maxima').value = '';
-                document.getElementById('duracion-fiebre').value = '';
-                document.getElementById('fiebre-continua').checked = false;
-                document.getElementById('fiebre-intermitente').checked = false;
-                document.getElementById('fiebre-remitente').checked = false;
-                document.getElementById('escalofrios').checked = false;
-                document.getElementById('sudoracion').checked = false;
-            }
-            updateDashboard();
-        }
-        
-        // ⚖️ Manejo de checkboxes mutuamente excluyentes
-        function handleMutuallyExclusive(positiveId, negativeId, checkbox) {
-            if (checkbox.checked) {
-                const oppositeId = checkbox.id === positiveId ? negativeId : positiveId;
-                const oppositeCheckbox = document.getElementById(oppositeId);
-                if (oppositeCheckbox) oppositeCheckbox.checked = false;
-            }
-            updateDashboard();
-        }
-
-        // Funciones de evaluación específicas para infectología
-        function evaluateFever() {
-            const tempMax = parseFloat(document.getElementById('temperatura-maxima').value) || 0;
-            const duracion = parseFloat(document.getElementById('duracion-fiebre').value) || 0;
-            const classificationEl = document.getElementById('fever-classification');
-            
-            if (tempMax === 0) {
-                classificationEl.textContent = '--';
-                classificationEl.style.color = '';
-                updateDashboard();
-                return;
-            }
-            
-            let classification = '';
-            let color = '';
-            if (tempMax >= 40) {
-                classification = 'Hipertermia'; color = 'var(--alert-color)';
-            } else if (tempMax >= 39) {
-                classification = 'Fiebre alta'; color = 'var(--warning-color)';
-            } else if (tempMax >= 38) {
-                classification = 'Fiebre moderada'; color = 'var(--warning-color)';
-            } else if (tempMax >= 37.2) {
-                classification = 'Febrícula'; color = 'var(--normal-color)';
-            } else {
-                classification = 'Normal'; color = 'var(--normal-color)';
-            }
-            
-            classificationEl.textContent = classification;
-            classificationEl.style.color = color;
-            updateDashboard();
-        }
-
-        function evaluateVitalSigns() {
-            const temp = parseFloat(document.getElementById('temperatura-actual').value) || 0;
-            const pas = parseFloat(document.getElementById('pas').value) || 0;
-            const fc = parseFloat(document.getElementById('frecuencia-cardiaca').value) || 0;
-            const fr = parseFloat(document.getElementById('frecuencia-respiratoria').value) || 0;
-            const sat = parseFloat(document.getElementById('saturacion-o2').value) || 0;
-            const statusEl = document.getElementById('hemodynamic-status');
-            
-            let status = 'Estable';
-            let color = 'var(--normal-color)';
-            
-            if (pas < 90 || fc > 120 || fr > 30 || sat < 90) {
-                status = 'Inestable'; color = 'var(--alert-color)';
-            } else if (pas < 100 || fc > 100 || fr > 24 || sat < 95) {
-                status = 'Vigilancia'; color = 'var(--warning-color)';
-            }
-            
-            statusEl.textContent = status;
-            statusEl.style.color = color;
-            updateDashboard();
-        }
-
-        function evaluateGlasgow() {
-            const glasgow = parseFloat(document.getElementById('glasgow').value) || 0;
-            const interpretEl = document.getElementById('glasgow-interpretation');
-            
-            if (glasgow === 0) {
-                interpretEl.textContent = '--';
-                interpretEl.style.color = '';
-                updateDashboard();
-                return;
-            }
-            
-            let interpretation = '';
-            let color = '';
-            if (glasgow >= 14) {
-                interpretation = 'Leve'; color = 'var(--normal-color)';
-            } else if (glasgow >= 9) {
-                interpretation = 'Moderado'; color = 'var(--warning-color)';
-            } else {
-                interpretation = 'Severo'; color = 'var(--alert-color)';
-            }
-            
-            interpretEl.textContent = interpretation;
-            interpretEl.style.color = color;
-            updateDashboard();
-        }
-
-        function evaluateFeverPattern() {
-            const temp = parseFloat(document.getElementById('temp-presentacion').value) || 0;
-            const tipoFiebre = document.querySelector('input[name="tipo-fiebre"]:checked');
-            const duracionFiebre = document.querySelector('input[name="duracion-fiebre-radio"]:checked');
-            const classificationEl = document.getElementById('fever-syndrome-classification');
-            
-            if (!tipoFiebre || !duracionFiebre) {
-                classificationEl.textContent = '--';
-                classificationEl.style.color = '';
-                updateDashboard();
-                return;
-            }
-            
-            const tipo = tipoFiebre.value;
-            const duracion = duracionFiebre.value;
-            
-            let classification = `${tipo} ${duracion}`;
-            let color = 'var(--warning-color)';
-            
-            if (tipo === 'hipertermia' || duracion === 'fuo') {
-                color = 'var(--alert-color)';
-            } else if (tipo === 'febricula' && duracion === 'aguda') {
-                color = 'var(--normal-color)';
-            }
-            
-            classificationEl.textContent = classification;
-            classificationEl.style.color = color;
-            updateDashboard();
-        }
-
-        function calculateQSOFA() {
-            let score = 0;
-            
-            if (document.getElementById('qsofa-fr').checked) score++;
-            if (document.getElementById('qsofa-mental').checked) score++;
-            if (document.getElementById('qsofa-pas').checked) score++;
-            
-            document.getElementById('qsofa-score').textContent = score;
-            
-            let risk = '';
-            let color = '';
-            if (score >= 2) {
-                risk = 'Alto riesgo (>10% mortalidad)'; color = 'var(--alert-color)';
-            } else if (score === 1) {
-                risk = 'Riesgo moderado'; color = 'var(--warning-color)';
-            } else {
-                risk = 'Bajo riesgo (<3% mortalidad)'; color = 'var(--normal-color)';
-            }
-            
-            document.getElementById('qsofa-risk').textContent = risk;
-            document.getElementById('qsofa-risk').style.color = color;
-            updateDashboard();
-        }
-
-        function calculateSIRS() {
-            let criterios = 0;
-            
-            if (document.getElementById('sirs-temp').checked) criterios++;
-            if (document.getElementById('sirs-fc').checked) criterios++;
-            if (document.getElementById('sirs-fr').checked) criterios++;
-            if (document.getElementById('sirs-leuco').checked) criterios++;
-            
-            document.getElementById('sirs-criterios').textContent = criterios;
-            
-            let diagnosis = '';
-            let color = '';
-            if (criterios >= 2) {
-                diagnosis = 'SÍ - Cumple criterios SIRS'; color = 'var(--alert-color)';
-            } else {
-                diagnosis = 'NO - No cumple criterios SIRS'; color = 'var(--normal-color)';
-            }
-            
-            document.getElementById('sirs-diagnosis').textContent = diagnosis;
-            document.getElementById('sirs-diagnosis').style.color = color;
-            updateDashboard();
-        }
-
-        function calculateCURB65() {
-            let score = 0;
-            
-            if (document.getElementById('curb-confusion').checked) score++;
-            if (document.getElementById('curb-urea').checked) score++;
-            if (document.getElementById('curb-respiratoria').checked) score++;
-            if (document.getElementById('curb-presion').checked) score++;
-            if (document.getElementById('curb-edad').checked) score++;
-            
-            document.getElementById('curb65-score').textContent = score;
-            
-            let risk = '';
-            let recommendation = '';
-            let color = '';
-            
-            if (score === 0) {
-                risk = 'Muy bajo (0.7%)'; recommendation = 'Ambulatorio'; color = 'var(--normal-color)';
-            } else if (score === 1) {
-                risk = 'Bajo (2.1%)'; recommendation = 'Ambulatorio vigilado'; color = 'var(--normal-color)';
-            } else if (score === 2) {
-                risk = 'Moderado (9.2%)'; recommendation = 'Hospitalización'; color = 'var(--warning-color)';
-            } else if (score >= 3) {
-                risk = 'Alto (14.5-57%)'; recommendation = 'Hospitalización/UCI'; color = 'var(--alert-color)';
-            }
-            
-            document.getElementById('curb65-risk').textContent = risk;
-            document.getElementById('curb65-risk').style.color = color;
-            document.getElementById('curb65-recommendation').textContent = recommendation;
-            document.getElementById('curb65-recommendation').style.color = color;
-            updateDashboard();
-        }
-
-        function calculatePSI() {
-            let score = 0;
-            
-            const edad = parseFloat(document.getElementById('psi-edad').value) || 0;
-            const masculino = document.getElementById('psi-masculino').checked;
-            
-            score += edad;
-            if (!masculino) score -= 10; // Ajuste por sexo femenino
-            
-            // Comorbilidades (10 puntos cada una)
-            ['psi-neoplasia', 'psi-hepatopatia', 'psi-icc', 'psi-enfermedad-cerebrovascular', 'psi-nefropatia'].forEach(id => {
-                if (document.getElementById(id).checked) score += 10;
-            });
-            
-            document.getElementById('psi-score').textContent = score;
-            
-            let riskClass = '';
-            let color = '';
-            if (score <= 70) {
-                riskClass = 'Clase I-II (Bajo riesgo)'; color = 'var(--normal-color)';
-            } else if (score <= 90) {
-                riskClass = 'Clase III (Riesgo moderado)'; color = 'var(--warning-color)';
-            } else if (score <= 130) {
-                riskClass = 'Clase IV (Alto riesgo)'; color = 'var(--alert-color)';
-            } else {
-                riskClass = 'Clase V (Muy alto riesgo)'; color = 'var(--alert-color)';
-            }
-            
-            document.getElementById('psi-class').textContent = riskClass;
-            document.getElementById('psi-class').style.color = color;
-            updateDashboard();
-        }
-
-        function calculateITURisk() {
-            let factors = 0;
-            
-            ['itu-embarazo', 'itu-diabetes', 'itu-inmunosupresion', 'itu-uropatia', 
-             'itu-cateter', 'itu-instrumentacion', 'itu-masculino', 'itu-anciano'].forEach(id => {
-                if (document.getElementById(id).checked) factors++;
-            });
-            
-            document.getElementById('itu-risk-count').textContent = factors;
-            
-            let classification = '';
-            let color = '';
-            if (factors === 0) {
-                classification = 'ITU no complicada'; color = 'var(--normal-color)';
-            } else {
-                classification = 'ITU complicada'; color = 'var(--alert-color)';
-            }
-            
-            document.getElementById('itu-classification').textContent = classification;
-            document.getElementById('itu-classification').style.color = color;
-            updateDashboard();
-        }
-
-        function evaluateGastroenteritis() {
-            const deposiciones = parseFloat(document.getElementById('deposiciones-dia').value) || 0;
-            const sanguinolenta = document.getElementById('gastro-sanguinolenta').checked;
-            const deshidratacion = document.getElementById('gastro-deshidratacion').checked;
-            const severityEl = document.getElementById('gastroenteritis-severity');
-            
-            let severity = 'Leve';
-            let color = 'var(--normal-color)';
-            
-            if (sanguinolenta || deshidratacion || deposiciones >= 10) {
-                severity = 'Severa'; color = 'var(--alert-color)';
-            } else if (deposiciones >= 6) {
-                severity = 'Moderada'; color = 'var(--warning-color)';
-            }
-            
-            severityEl.textContent = severity;
-            severityEl.style.color = color;
-            updateDashboard();
-        }
-
-/**
- * Genera una conclusión narrativa del examen infectológico basada en los datos del formulario.
- */
-function generateConclusion() {
-    const conclusionEl = document.getElementById('stickyContent');
-    const conclusionTraditional = document.getElementById('conclusion-text-traditional');
-    let conclusion = 'EXAMEN INFECTOLÓGICO\n\n';
-
-    // === 1. MOTIVO DE CONSULTA Y SÍNDROME FEBRIL ===
-    let motivo = '';
-    const tempMaxima = document.getElementById('temperatura-maxima').value;
-    const duracionFiebre = document.getElementById('duracion-fiebre').value;
-    const sinFiebre = document.getElementById('sin-fiebre').checked;
-    const feverClassification = document.getElementById('fever-classification').textContent;
-
-    if (sinFiebre) {
-        motivo += 'MOTIVO DE CONSULTA: Proceso infeccioso sin fiebre. ';
-    } else if (tempMaxima && tempMaxima > 0) {
-        motivo += `MOTIVO DE CONSULTA: Síndrome febril con temperatura máxima de ${tempMaxima}°C`;
-        if (duracionFiebre && duracionFiebre > 0) motivo += ` de ${duracionFiebre} días de evolución`;
-        if (feverClassification !== '--') motivo += ` (${feverClassification})`;
-        motivo += '. ';
-        
-        // Características del patrón febril
-        const patronFebril = [];
-        if (document.getElementById('fiebre-continua').checked) patronFebril.push('continua');
-        if (document.getElementById('fiebre-intermitente').checked) patronFebril.push('intermitente');
-        if (document.getElementById('fiebre-remitente').checked) patronFebril.push('remitente');
-        if (document.getElementById('escalofrios').checked) patronFebril.push('escalofríos');
-        if (document.getElementById('sudoracion').checked) patronFebril.push('sudoración profusa');
-        
-        if (patronFebril.length > 0) {
-            motivo += `Patrón febril: ${patronFebril.join(', ')}. `;
-        }
-    }
-
-    // === 2. SÍNTOMAS POR SISTEMAS ===
-    let sintomas = '';
-
-    // Síntomas respiratorios
-    const sintomasResp = [];
-    ['tos-seca', 'tos-productiva', 'expectoracion-purulenta', 'hemoptisis', 'disnea', 
-     'dolor-toracico', 'dolor-pleuritico', 'odinofagia', 'rinorrea'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            sintomasResp.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-
-    if (sintomasResp.length > 0) {
-        sintomas += `Síntomas respiratorios: ${sintomasResp.join(', ')}. `;
-    }
-
-    // Síntomas gastrointestinales
-    const sintomasGI = [];
-    ['nauseas', 'vomitos', 'diarrea', 'diarrea-sanguinolenta', 'dolor-abdominal', 
-     'distension-abdominal', 'tenesmo', 'ictericia'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            sintomasGI.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-
-    if (sintomasGI.length > 0) {
-        sintomas += `Síntomas gastrointestinales: ${sintomasGI.join(', ')}. `;
-    }
-
-    // Síntomas neurológicos
-    const sintomasNeuro = [];
-    ['cefalea', 'cefalea-intensa', 'fotofobia', 'rigidez-nuca', 'confusion', 
-     'alteracion-conciencia', 'convulsiones', 'deficit-focal'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            sintomasNeuro.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-
-    if (sintomasNeuro.length > 0) {
-        sintomas += `Síntomas neurológicos: ${sintomasNeuro.join(', ')}. `;
-    }
-
-    // Síntomas genitourinarios
-    const sintomasGU = [];
-    ['disuria', 'poliaquiuria', 'urgencia-miccional', 'hematuria', 'dolor-lumbar', 
-     'dolor-suprapubico', 'secrecion-uretral', 'dolor-pelvico'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            sintomasGU.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-
-    if (sintomasGU.length > 0) {
-        sintomas += `Síntomas genitourinarios: ${sintomasGU.join(', ')}. `;
-    }
-
-    // Síntomas cutáneos
-    const sintomasCutaneos = [];
-    ['exantema', 'petequias', 'purpura', 'celulitis', 'abscesos', 'ulceras-cutaneas', 
-     'lesiones-vesiculares', 'adenopatias-cutaneas'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            sintomasCutaneos.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-
-    if (sintomasCutaneos.length > 0) {
-        sintomas += `Síntomas cutáneos: ${sintomasCutaneos.join(', ')}. `;
-    }
-
-    if (motivo || sintomas) {
-        conclusion += motivo + sintomas + '\n\n';
-    }
-
-    // === 3. FACTORES EPIDEMIOLÓGICOS ===
-    const viajesRecientes = document.getElementById('viajes-recientes')?.value;
-    const factoresEpi = [];
-    ['zona-endemica', 'contacto-animales', 'agua-contaminada', 'alimentos-riesgo', 
-     'actividad-sexual-riesgo', 'picaduras-insectos', 'contacto-enfermos', 'brote-comunitario'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            factoresEpi.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-
-    if (viajesRecientes || factoresEpi.length > 0) {
-        conclusion += 'FACTORES EPIDEMIOLÓGICOS:\n';
-        if (viajesRecientes) conclusion += `• Viajes recientes: ${viajesRecientes}. `;
-        if (factoresEpi.length > 0) conclusion += `• Exposiciones de riesgo: ${factoresEpi.join(', ')}. `;
-        conclusion += '\n\n';
-    }
-
-    // === 4. ESTADO INMUNOLÓGICO ===
-    const estadoInmuno = [];
-    ['vih-positivo', 'diabetes-mellitus', 'inmunosupresion-farmacologica', 'neoplasia-activa', 
-     'transplante-organos', 'esplenectomia', 'cirrosis-hepatica'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            estadoInmuno.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-
-    if (estadoInmuno.length > 0) {
-        conclusion += `ESTADO INMUNOLÓGICO: ${estadoInmuno.join(', ')}.\n\n`;
-    } else if (document.getElementById('inmunocompetente')?.checked) {
-        conclusion += 'ESTADO INMUNOLÓGICO: Paciente inmunocompetente.\n\n';
-    }
-
-    // === 5. EXAMEN FÍSICO ===
-    const hasPhysicalExamContent = document.querySelector('#physical-exam input:checked') ||
-                                   document.getElementById('temperatura-actual')?.value > 0 ||
-                                   document.getElementById('pas')?.value > 0;
-
-    if (hasPhysicalExamContent) {
-        conclusion += 'EXAMEN FÍSICO:\n';
-
-        // Signos vitales
-        const tempActual = document.getElementById('temperatura-actual')?.value;
-        const pas = document.getElementById('pas')?.value;
-        const pad = document.getElementById('pad')?.value;
-        const fc = document.getElementById('frecuencia-cardiaca')?.value;
-        const fr = document.getElementById('frecuencia-respiratoria')?.value;
-        const satO2 = document.getElementById('saturacion-o2')?.value;
-        const hemoStatus = document.getElementById('hemodynamic-status')?.textContent;
-
-        if (tempActual || pas) {
-            conclusion += '• Signos vitales: ';
-            if (tempActual) conclusion += `T° ${tempActual}°C`;
-            if (pas && pad) {
-                if (tempActual) conclusion += ', ';
-                conclusion += `PA ${pas}/${pad} mmHg`;
-            }
-            if (fc) conclusion += `, FC ${fc} lpm`;
-            if (fr) conclusion += `, FR ${fr} rpm`;
-            if (satO2) conclusion += `, SatO2 ${satO2}%`;
-            if (hemoStatus !== '--') conclusion += ` (Estado: ${hemoStatus})`;
-            conclusion += '. ';
-        }
-
-        // Estado general
-        const estadoGeneral = [];
-        ['mal-estado-general', 'aspecto-toxico', 'palidez', 'cianosis', 'ictericia-fisica', 'deshidratacion'].forEach(id => {
-            if (document.getElementById(id)?.checked) {
-                estadoGeneral.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-            }
-        });
-
-        if (estadoGeneral.length > 0) {
-            conclusion += `• Estado general: ${estadoGeneral.join(', ')}. `;
-        } else if (document.getElementById('buen-estado-general')?.checked) {
-            conclusion += '• Estado general conservado. ';
-        }
-
-        // Examen respiratorio
-        const hallazgosResp = [];
-        ['crepitantes-der', 'crepitantes-izq', 'roncus-der', 'roncus-izq', 'sibilancias-der', 'sibilancias-izq',
-         'mvr-disminuido-der', 'mvr-disminuido-izq', 'roce-pleural-der', 'roce-pleural-izq'].forEach(id => {
-            if (document.getElementById(id)?.checked) {
-                const lado = id.includes('-der') ? 'derecho' : 'izquierdo';
-                const hallazgo = id.replace('-der', '').replace('-izq', '');
-                hallazgosResp.push(`${hallazgo} ${lado}`);
-            }
-        });
-
-        if (hallazgosResp.length > 0) {
-            conclusion += `• Examen respiratorio: ${hallazgosResp.join(', ')}. `;
-        } else if (document.getElementById('mvr-normal-der')?.checked && document.getElementById('mvr-normal-izq')?.checked) {
-            conclusion += '• Examen respiratorio: MV normal bilateral. ';
-        }
-
-        // Examen cardiovascular
-        const hallazgosCardio = [];
-        ['taquicardia', 'bradicardia', 'soplo-cardiaco', 'galope', 'roce-pericardico', 
-         'edema-mmii', 'ingurgitacion-yugular'].forEach(id => {
-            if (document.getElementById(id)?.checked) {
-                hallazgosCardio.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-            }
-        });
-
-        if (hallazgosCardio.length > 0) {
-            conclusion += `• Examen cardiovascular: ${hallazgosCardio.join(', ')}. `;
-        } else if (document.getElementById('ruidos-cardiacos-normales')?.checked) {
-            conclusion += '• Examen cardiovascular: Ruidos cardíacos normales. ';
-        }
-
-        // Examen abdominal
-        const hallazgosAbdomen = [];
-        ['abdomen-distendido', 'dolor-abdominal-palpacion', 'defensa-abdominal', 'rebote-positivo',
-         'hepatomegalia', 'esplenomegalia', 'ascitis'].forEach(id => {
-            if (document.getElementById(id)?.checked) {
-                hallazgosAbdomen.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-            }
-        });
-
-        if (hallazgosAbdomen.length > 0) {
-            conclusion += `• Examen abdominal: ${hallazgosAbdomen.join(', ')}. `;
-        } else if (document.getElementById('abdomen-normal')?.checked) {
-            conclusion += '• Examen abdominal: Abdomen blando, depresible, no doloroso. ';
-        }
-
-        // Examen neurológico
-        const glasgow = document.getElementById('glasgow')?.value;
-        const glasgowInterpretation = document.getElementById('glasgow-interpretation')?.textContent;
-        const signosNeuro = [];
-        ['desorientacion', 'somnolencia', 'estupor', 'kernig-positivo', 'brudzinski-positivo',
-         'rigidez-nuca-fisica', 'fotofobia-fisica'].forEach(id => {
-            if (document.getElementById(id)?.checked) {
-                signosNeuro.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-            }
-        });
-
-        if (glasgow || signosNeuro.length > 0) {
-            conclusion += '• Examen neurológico: ';
-            if (glasgow) {
-                conclusion += `Glasgow ${glasgow}/15`;
-                if (glasgowInterpretation !== '--') conclusion += ` (${glasgowInterpretation})`;
-            }
-            if (signosNeuro.length > 0) {
-                if (glasgow) conclusion += ', ';
-                conclusion += signosNeuro.join(', ');
-            }
-            conclusion += '. ';
-        } else if (document.getElementById('conciencia-normal')?.checked) {
-            conclusion += '• Examen neurológico: Conciencia normal, sin signos meníngeos. ';
-        }
-
-        // Examen de piel
-        const lesionescutaneas = [];
-        ['exantema-maculopapular', 'exantema-vesicular', 'petequias-fisica', 'purpura-fisica',
-         'equimosis', 'celulitis-fisica', 'abscesos-fisica'].forEach(id => {
-            if (document.getElementById(id)?.checked) {
-                lesionescutaneas.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-            }
-        });
-
-        if (lesionescutaneas.length > 0) {
-            conclusion += `• Examen de piel: ${lesionescutaneas.join(', ')}. `;
-        } else if (document.getElementById('piel-normal')?.checked) {
-            conclusion += '• Examen de piel: Sin lesiones aparentes. ';
-        }
-
-        // Adenopatías
-        const adenopatias = [];
-        ['adenopatias-cervicales', 'adenopatias-supraclaviculares', 'adenopatias-axilares',
-         'adenopatias-inguinales', 'adenopatias-generalizadas'].forEach(id => {
-            if (document.getElementById(id)?.checked) {
-                adenopatias.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase().replace('adenopatías ', ''));
-            }
-        });
-
-        if (adenopatias.length > 0) {
-            conclusion += `• Adenopatías: ${adenopatias.join(', ')}`;
-            if (document.getElementById('adenopatias-dolorosas')?.checked) conclusion += ', dolorosas';
-            if (document.getElementById('adenopatias-adheridas')?.checked) conclusion += ', adheridas';
-            conclusion += '. ';
-        } else if (document.getElementById('adenopatias-ausentes')?.checked) {
-            conclusion += '• Sin adenopatías palpables. ';
-        }
-
-        conclusion += '\n\n';
-    }
-
-    // === 6. EVALUACIÓN DEL SÍNDROME FEBRIL ===
-    const tempPresentacion = document.getElementById('temp-presentacion')?.value;
-    const feverSyndromeClassification = document.getElementById('fever-syndrome-classification')?.textContent;
-
-    if (tempPresentacion || feverSyndromeClassification !== '--') {
-        conclusion += 'EVALUACIÓN DEL SÍNDROME FEBRIL:\n';
-        if (tempPresentacion) conclusion += `• Temperatura de presentación: ${tempPresentacion}°C. `;
-        if (feverSyndromeClassification !== '--') conclusion += `• Clasificación: ${feverSyndromeClassification}. `;
-        conclusion += '\n\n';
-    }
-
-    // === 7. EVALUACIÓN DE SEPSIS Y SIRS ===
-    const qsofaScore = document.getElementById('qsofa-score')?.textContent;
-    const qsofaRisk = document.getElementById('qsofa-risk')?.textContent;
-    const sirsCriterios = document.getElementById('sirs-criterios')?.textContent;
-    const sirsDiagnosis = document.getElementById('sirs-diagnosis')?.textContent;
-
-    if ((qsofaScore && qsofaScore !== '0') || (sirsDiagnosis && sirsDiagnosis !== '--')) {
-        conclusion += 'EVALUACIÓN DE SEPSIS Y SIRS:\n';
-        
-        if (qsofaScore && qsofaScore !== '0') {
-            conclusion += `• qSOFA: ${qsofaScore}/3 puntos`;
-            if (qsofaRisk !== '--') conclusion += ` (${qsofaRisk})`;
-            conclusion += '. ';
-        }
-        
-        if (sirsDiagnosis && sirsDiagnosis !== '--') {
-            const cumpleSIRS = sirsDiagnosis.includes('SÍ') ? 'Cumple' : 'No cumple';
-            conclusion += `• SIRS: ${cumpleSIRS} criterios (${sirsCriterios}/4). `;
-        }
-
-        // Disfunción orgánica
-        const disfuncionOrganica = [];
-        ['hipotension-refractaria', 'oliguria', 'lactato-elevado', 'bilirrubina-elevada',
-         'plaquetopenia', 'coagulopatia', 'hipoxemia', 'acidosis-metabolica'].forEach(id => {
-            if (document.getElementById(id)?.checked) {
-                disfuncionOrganica.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-            }
-        });
-
-        if (disfuncionOrganica.length > 0) {
-            conclusion += `• Disfunción orgánica: ${disfuncionOrganica.join(', ')}. `;
-        }
-
-        conclusion += '\n\n';
-    }
-
-    // === 8. ESCALAS DE RIESGO ===
-    const curb65Score = document.getElementById('curb65-score')?.textContent;
-    const curb65Risk = document.getElementById('curb65-risk')?.textContent;
-    const curb65Recommendation = document.getElementById('curb65-recommendation')?.textContent;
-    const psiScore = document.getElementById('psi-score')?.textContent;
-    const psiClass = document.getElementById('psi-class')?.textContent;
-    const ituRiskCount = document.getElementById('itu-risk-count')?.textContent;
-    const ituClassification = document.getElementById('itu-classification')?.textContent;
-
-    const hasRiskScalesContent = (curb65Score && curb65Score !== '0') || 
-                                 (psiScore && psiScore !== '0') || 
-                                 (ituClassification && ituClassification !== '--');
-
-    if (hasRiskScalesContent) {
-        conclusion += 'ESCALAS DE RIESGO:\n';
-        
-        if (curb65Score && curb65Score !== '0') {
-            conclusion += `• CURB-65: ${curb65Score}/5 puntos`;
-            if (curb65Risk !== '--') conclusion += `, riesgo ${curb65Risk}`;
-            if (curb65Recommendation !== '--') conclusion += `, recomendación: ${curb65Recommendation}`;
-            conclusion += '. ';
-        }
-        
-        if (psiScore && psiScore !== '0') {
-            conclusion += `• PSI/PORT: ${psiScore} puntos`;
-            if (psiClass !== '--') conclusion += ` (${psiClass})`;
-            conclusion += '. ';
-        }
-        
-        if (ituClassification && ituClassification !== '--') {
-            conclusion += `• Evaluación ITU: ${ituClassification} (${ituRiskCount} factores de riesgo). `;
-        }
-        
-        conclusion += '\n\n';
-    }
-
-    // === 9. FOCO INFECCIOSO IDENTIFICADO ===
-    const focos = [];
-    
-    // Foco respiratorio
-    const focosResp = [];
-    ['neumonia-probable', 'bronquitis', 'faringitis', 'sinusitis', 'otitis'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            focosResp.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-    if (focosResp.length > 0) focos.push(`Respiratorio: ${focosResp.join(', ')}`);
-
-    // Foco urinario
-    const focosUrin = [];
-    ['itu-baja', 'pielonefritis', 'uretritis', 'prostatitis'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            focosUrin.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-    if (focosUrin.length > 0) focos.push(`Urinario: ${focosUrin.join(', ')}`);
-
-    // Foco gastrointestinal
-    const focosGI = [];
-    ['gastroenteritis', 'colitis', 'apendicitis', 'colangitis', 'absceso-abdominal'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            focosGI.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-    if (focosGI.length > 0) focos.push(`Gastrointestinal: ${focosGI.join(', ')}`);
-
-    // Foco neurológico
-    const focosNeuro = [];
-    ['meningitis-probable', 'encefalitis', 'absceso-cerebral'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            focosNeuro.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-    if (focosNeuro.length > 0) focos.push(`Neurológico: ${focosNeuro.join(', ')}`);
-
-    // Foco cutáneo
-    const focosCutaneos = [];
-    ['celulitis-foco', 'erisipela', 'absceso-cutaneo', 'impetigo'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            focosCutaneos.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-    if (focosCutaneos.length > 0) focos.push(`Cutáneo: ${focosCutaneos.join(', ')}`);
-
-    // Otros focos
-    const otrosfocos = [];
-    ['endocarditis-probable', 'artritis-septica', 'osteomielitis'].forEach(id => {
-        if (document.getElementById(id)?.checked) {
-            otrosfocos.push(document.querySelector(`label[for="${id}"]`).textContent.toLowerCase());
-        }
-    });
-    if (otrosfocos.length > 0) focos.push(`Otros: ${otrosfocos.join(', ')}`);
-
-    if (focos.length > 0) {
-        conclusion += `FOCO INFECCIOSO IDENTIFICADO:\n• ${focos.join('. ')}.`;
-        conclusion += '\n\n';
-    } else if (document.getElementById('foco-desconocido')?.checked) {
-        conclusion += 'FOCO INFECCIOSO: No identificado en el examen actual.\n\n';
-    }
-
-    // === CONCLUSIÓN FINAL ===
-    if (conclusion.trim() === 'EXAMEN INFECTOLÓGICO') {
-        conclusion = 'Seleccione los parámetros del examen para generar la conclusión infectológica...';
-    } else {
-        // Resumen de hallazgos del dashboard
-        if (alertCount > 0 || warningCount > 0 || findingsCount > 0) {
-            conclusion += '⚠️ RESUMEN DE HALLAZGOS DEL EXAMEN:\n';
-            if (alertCount > 0) {
-                conclusion += `• ALERTAS CRÍTICAS: ${alertCount}\n`;
-            }
-            if (warningCount > 0) {
-                conclusion += `• HALLAZGOS DE ATENCIÓN: ${warningCount}\n`;
-            }
-            conclusion += `• TOTAL DE HALLAZGOS REGISTRADOS: ${findingsCount}\n\n`;
-        }
-
-        conclusion += '🎯 IMPRESIÓN DIAGNÓSTICA:\n';
-        conclusion += '[Pendiente de correlación clínico-laboratorial y estudios complementarios]\n\n';
-        conclusion += '📋 PLAN DE MANEJO:\n';
-        conclusion += '[A determinar según la patología infecciosa sospechada y severidad]\n\n';
-        conclusion += `📊 COMPLETITUD DEL EXAMEN: ${examProgress}%`;
-    }
-
-    conclusionEl.textContent = conclusion;
-    conclusionTraditional.textContent = conclusion;
-}
-
-        // 📊 ACTUALIZAR DASHBOARD
-        function updateDashboard() {
-            const sections = [
-                'anamnesis', 'physical-exam', 'fever-evaluation', 'sepsis-evaluation', 
-                'risk-scales', 'source-evaluation'
-            ];
-            
-            let currentCompletedSections = 0;
-            let currentAlertCount = 0;
-            let currentWarningCount = 0;
-            let currentFindingsCount = 0;
-            
-            sections.forEach(sectionId => {
-                const sectionElement = document.getElementById(sectionId);
-                if (sectionElement) {
-                    const checkboxes = sectionElement.querySelectorAll('input[type="checkbox"]:checked');
-                    const radios = sectionElement.querySelectorAll('input[type="radio"]:checked');
-                    const numbers = sectionElement.querySelectorAll('input[type="number"]');
-                    const selects = sectionElement.querySelectorAll('select');
-                    const textInputs = sectionElement.querySelectorAll('input[type="text"]');
+            sectionHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const section = this.closest('.exam-section');
+                    const content = section.querySelector('.section-content');
+                    const chevron = this.querySelector('.fa-chevron-down, .fa-chevron-up');
                     
-                    let hasContent = false;
-                    if (checkboxes.length > 0 || radios.length > 0) hasContent = true;
-                    numbers.forEach(input => {
-                        if (input.value && input.value !== '0') hasContent = true;
-                    });
-                    selects.forEach(select => {
-                        if (select.value && select.value !== '') hasContent = true;
-                    });
-                    textInputs.forEach(input => {
-                        if (input.value.trim() !== '') hasContent = true;
-                    });
-                    
-                    if (hasContent) {
-                        currentCompletedSections++;
-                        currentFindingsCount += (checkboxes.length + radios.length);
-                        
-                        const badge = document.getElementById(`badge-${sectionId}`);
-                        const navItem = document.getElementById(`nav-${sectionId}`);
-                        
-                        if (badge) {
-                            badge.classList.add('completed');
-                            badge.innerHTML = '<i class="fas fa-check"></i>';
-                        }
-                        if (navItem) {
-                            navItem.style.opacity = '1';
-                            navItem.parentElement.classList.add('completed');
-                        }
-                        
-                        // Criterios de alerta y warning específicos para Infectología
-                        
-                        // Síndrome febril
-                        const feverClassificationText = document.getElementById('fever-classification')?.textContent;
-                        if (feverClassificationText === 'Hipertermia') currentAlertCount++;
-                        else if (feverClassificationText === 'Fiebre alta') currentWarningCount++;
-
-                        // Síntomas de alarma
-                        if (document.getElementById('hemoptisis').checked || document.getElementById('alteracion-conciencia').checked || 
-                            document.getElementById('diarrea-sanguinolenta').checked) currentAlertCount++;
-                        if (document.getElementById('rigidez-nuca').checked || document.getElementById('fotofobia').checked || 
-                            document.getElementById('convulsiones').checked) currentAlertCount++;
-
-                        // Estado general
-                        if (document.getElementById('mal-estado-general').checked || document.getElementById('aspecto-toxico').checked) currentAlertCount++;
-                        if (document.getElementById('cianosis').checked || document.getElementById('deshidratacion').checked) currentWarningCount++;
-
-                        // Signos vitales
-                        const hemoStatusText = document.getElementById('hemodynamic-status')?.textContent;
-                        if (hemoStatusText === 'Inestable') currentAlertCount++;
-                        else if (hemoStatusText === 'Vigilancia') currentWarningCount++;
-
-                        // Glasgow
-                        const glasgowInterpretation = document.getElementById('glasgow-interpretation')?.textContent;
-                        if (glasgowInterpretation === 'Severo') currentAlertCount++;
-                        else if (glasgowInterpretation === 'Moderado') currentWarningCount++;
-
-                        // Signos meníngeos
-                        if (document.getElementById('kernig-positivo').checked || document.getElementById('brudzinski-positivo').checked || 
-                            document.getElementById('rigidez-nuca-fisica').checked) currentAlertCount++;
-
-                        // Lesiones cutáneas de gravedad
-                        if (document.getElementById('petequias-fisica').checked || document.getElementById('purpura-fisica').checked) currentAlertCount++;
-                        if (document.getElementById('exantema-maculopapular').checked) currentWarningCount++;
-
-                        // Escalas de riesgo
-                        const qsofaScoreValue = parseInt(document.getElementById('qsofa-score').textContent);
-                        if (qsofaScoreValue >= 2) currentAlertCount++;
-                        else if (qsofaScoreValue === 1) currentWarningCount++;
-
-                        const sirsDiagnosisText = document.getElementById('sirs-diagnosis')?.textContent;
-                        if (sirsDiagnosisText?.includes('SÍ')) currentAlertCount++;
-
-                        const curb65ScoreValue = parseInt(document.getElementById('curb65-score').textContent);
-                        if (curb65ScoreValue >= 3) currentAlertCount++;
-                        else if (curb65ScoreValue === 2) currentWarningCount++;
-
-                        // Disfunción orgánica
-                        const disfuncionOrganicaElements = ['hipotension-refractaria', 'oliguria', 'lactato-elevado', 'acidosis-metabolica'];
-                        disfuncionOrganicaElements.forEach(id => {
-                            if (document.getElementById(id).checked) currentAlertCount++;
-                        });
-
-                        // Gastroenteritis severa
-                        const gastroenteritisRisk = document.getElementById('gastroenteritis-severity')?.textContent;
-                        if (gastroenteritisRisk === 'Severa') currentAlertCount++;
-                        else if (gastroenteritisRisk === 'Moderada') currentWarningCount++;
-
-                        // Estado inmunológico comprometido
-                        if (document.getElementById('vih-positivo').checked || document.getElementById('inmunosupresion-farmacologica').checked || 
-                            document.getElementById('neoplasia-activa').checked) currentWarningCount++;
-
+                    if (content.style.display === 'none' || !content.style.display) {
+                        content.style.display = 'block';
+                        if (chevron) chevron.classList.replace('fa-chevron-down', 'fa-chevron-up');
                     } else {
-                        const badge = document.getElementById(`badge-${sectionId}`);
-                        const navItem = document.getElementById(`nav-${sectionId}`);
-                        
-                        if (badge) {
-                            badge.classList.remove('completed');
-                            badge.innerHTML = '<i class="fas fa-circle"></i>';
-                        }
-                        if (navItem) {
-                            navItem.style.opacity = '0';
-                            navItem.parentElement.classList.remove('completed');
-                        }
-                    }
-                }
-            });
-            
-            const totalSections = sections.length;
-            const progress = Math.round((currentCompletedSections / totalSections) * 100);
-            document.getElementById('exam-progress').textContent = `${progress}%`;
-            document.getElementById('sections-completed').textContent = `${currentCompletedSections}/${totalSections}`;
-            document.getElementById('alert-count').textContent = currentAlertCount;
-            document.getElementById('warning-count').textContent = currentWarningCount;
-            document.getElementById('findings-count').textContent = currentFindingsCount;
-            
-            const alertsItem = document.getElementById('alerts-item');
-            const warningsItem = document.getElementById('warnings-item');
-            const findingsItem = document.getElementById('findings-item');
-            const sepsisStatusItem = document.getElementById('sepsis-status-item');
-
-            alertsItem.style.display = 'flex'; 
-            warningsItem.style.display = 'flex';
-            findingsItem.style.display = 'flex';
-            sepsisStatusItem.style.display = 'flex';
-            
-            alertsItem.classList.toggle('dashboard-alert', currentAlertCount > 0);
-            warningsItem.classList.toggle('dashboard-warning', currentWarningCount > 0);
-            findingsItem.classList.toggle('dashboard-normal', currentFindingsCount > 0);
-            
-            // Actualizar el estado de sepsis/SIRS del dashboard
-            const qsofaScoreValue = parseInt(document.getElementById('qsofa-score').textContent) || 0;
-            const sirsDiagnosisText = document.getElementById('sirs-diagnosis')?.textContent;
-            
-            let currentSepsisStatus = 'Normal';
-            let sepsisColorClass = 'dashboard-normal';
-
-            if (qsofaScoreValue >= 2 || (sirsDiagnosisText && sirsDiagnosisText.includes('SÍ'))) {
-                currentSepsisStatus = 'Sepsis/SIRS';
-                sepsisColorClass = 'dashboard-sepsis';
-            } else if (qsofaScoreValue === 1) {
-                currentSepsisStatus = 'Vigilancia';
-                sepsisColorClass = 'dashboard-warning';
-            }
-
-            document.getElementById('sepsis-status').textContent = currentSepsisStatus;
-            sepsisStatusItem.className = `dashboard-item ${sepsisColorClass}`;
-
-            // Guardar valores globales
-            examProgress = progress;
-            sectionsCompleted = currentCompletedSections;
-            alertCount = currentAlertCount;
-            warningCount = currentWarningCount;
-            findingsCount = currentFindingsCount;
-            sepsisStatus = currentSepsisStatus;
-
-            generateConclusion();
-        }
-
-        // 🗑️ Limpiar formulario
-        function clearForm() {
-            if (confirm('¿Está seguro de que desea limpiar todos los datos del formulario?')) {
-                document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                    cb.checked = false;
-                    cb.disabled = false;
-                });
-                document.querySelectorAll('input[type="radio"]').forEach(rb => rb.checked = false);
-                document.querySelectorAll('input[type="number"]').forEach(nb => nb.value = '');
-                document.querySelectorAll('input[type="text"]').forEach(tb => tb.value = '');
-                document.querySelectorAll('select').forEach(sel => sel.selectedIndex = 0);
-                document.querySelectorAll('textarea').forEach(ta => ta.value = '');
-                
-                // Resetear valores específicos y sus colores
-                const elementsToReset = [
-                    'fever-classification', 'hemodynamic-status', 'glasgow-interpretation',
-                    'fever-syndrome-classification', 'qsofa-risk', 'sirs-diagnosis', 
-                    'curb65-risk', 'curb65-recommendation', 'psi-class', 'itu-classification',
-                    'gastroenteritis-severity'
-                ];
-                
-                elementsToReset.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.textContent = '--';
-                        element.style.color = '';
+                        content.style.display = 'none';
+                        if (chevron) chevron.classList.replace('fa-chevron-up', 'fa-chevron-down');
                     }
                 });
+            });
 
-                // Resetear scores
-                const scoresToReset = [
-                    'qsofa-score', 'sirs-criterios', 'curb65-score', 'psi-score', 'itu-risk-count'
-                ];
-                
-                scoresToReset.forEach(id => {
-                    const element = document.getElementById(id);
-                    if (element) {
-                        element.textContent = '0';
+            // Expandir primera sección por defecto
+            const firstSection = document.querySelector('.exam-section .section-content');
+            if (firstSection) {
+                firstSection.style.display = 'block';
+                const firstChevron = document.querySelector('.exam-section .fa-chevron-down');
+                if (firstChevron) firstChevron.classList.replace('fa-chevron-down', 'fa-chevron-up');
+            }
+
+            // Validación de temperatura
+            const temperaturaInput = document.getElementById('temperatura');
+            const pcrInput = document.getElementById('pcr-infec');
+            const procalcitoninaInput = document.getElementById('procalcitonina');
+
+            if (temperaturaInput) {
+                temperaturaInput.addEventListener('input', function() {
+                    const value = parseFloat(this.value);
+                    if (value >= 38.0 && window.medicalInterface) {
+                        window.medicalInterface.showAlert('fiebre-detectada', 'warning', `Fiebre: ${value}°C`);
+                    } else if (value >= 39.0 && window.medicalInterface) {
+                        window.medicalInterface.showAlert('fiebre-alta', 'error', `Fiebre alta: ${value}°C`);
                     }
                 });
-
-                // Resetear dashboard variables
-                examProgress = 0;
-                sectionsCompleted = 0;
-                alertCount = 0;
-                warningCount = 0;
-                findingsCount = 0;
-                sepsisStatus = 'Normal';
-
-                document.getElementById('exam-progress').textContent = '0%';
-                document.getElementById('sections-completed').textContent = '0/6';
-                document.getElementById('alert-count').textContent = '0';
-                document.getElementById('warning-count').textContent = '0';
-                document.getElementById('findings-count').textContent = '0';
-                document.getElementById('sepsis-status').textContent = 'Normal';
-                
-                document.getElementById('alerts-item').classList.remove('dashboard-alert');
-                document.getElementById('warnings-item').classList.remove('dashboard-warning');
-                document.getElementById('findings-item').classList.remove('dashboard-normal');
-                document.getElementById('sepsis-status-item').classList.remove('dashboard-normal', 'dashboard-warning', 'dashboard-sepsis');
-                document.getElementById('sepsis-status-item').classList.add('dashboard-item');
-
-                updateDashboard();
             }
-        }
 
-        // Funciones de copiar e imprimir para la conclusión tradicional
-        function copyToClipboard() {
-            const conclusion = document.getElementById('conclusion-text-traditional').textContent;
-            
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(conclusion).then(() => {
-                    showCopyNotification();
-                }).catch(err => {
-                    fallbackCopyToClipboard(conclusion);
+            if (pcrInput) {
+                pcrInput.addEventListener('input', function() {
+                    const value = parseFloat(this.value);
+                    if (value > 10 && window.medicalInterface) {
+                        window.medicalInterface.showAlert('pcr-muy-elevada', 'error', `PCR muy elevada: ${value} mg/L - Infección bacteriana probable`);
+                    } else if (value > 3 && window.medicalInterface) {
+                        window.medicalInterface.showAlert('pcr-elevada', 'warning', `PCR elevada: ${value} mg/L`);
+                    }
                 });
-            } else {
-                fallbackCopyToClipboard(conclusion);
-            }
-        }
-
-        function printConclusion() {
-            const conclusion = document.getElementById('conclusion-text-traditional').textContent;
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>Conclusión Infectológica</title>
-                    <style>
-                        body { 
-                            font-family: Arial, sans-serif; 
-                            margin: 20px; 
-                            line-height: 1.6;
-                        }
-                        pre { 
-                            white-space: pre-wrap; 
-                            font-family: 'Courier New', monospace; 
-                            font-size: 12px;
-                        }
-                        .header {
-                            text-align: center;
-                            border-bottom: 2px solid #e74c3c;
-                            padding-bottom: 10px;
-                            margin-bottom: 20px;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="header">
-                        <h1>Conclusión Infectológica</h1>
-                        <p>Fecha: ${new Date().toLocaleDateString()}</p>
-                    </div>
-                    <pre>${conclusion}</pre>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-            printWindow.print();
-        }
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            // Cargar tema guardado
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                document.getElementById('theme-icon').className = 'fas fa-sun';
             }
 
-            // Event listeners para actualizar dashboard y conclusión
-            document.querySelectorAll('input, select, textarea').forEach(el => {
-                el.addEventListener('change', updateDashboard);
-                el.addEventListener('input', updateDashboard);
-            });
-             
-            // Ajustar altura de secciones al cambiar contenido
-            document.querySelector('.main-container').addEventListener('change', (event) => {
-                const sectionContent = event.target.closest('.section-content.expanded');
-                if (sectionContent) {
-                    updateSectionHeight(sectionContent);
-                }
-            });
-
-            // Expandir la primera sección por defecto
-            toggleSection(document.querySelector('.section-header'));
-            
-            // Inicializar todas las evaluaciones
-            evaluateFever();
-            evaluateVitalSigns();
-            evaluateGlasgow();
-            evaluateFeverPattern();
-            calculateQSOFA();
-            calculateSIRS();
-            calculateCURB65();
-            calculatePSI();
-            calculateITURisk();
-            evaluateGastroenteritis();
-            
-            // Forzar una actualización inicial completa del dashboard y la conclusión
-            updateDashboard();
-
-            // Mostrar mensaje de bienvenida
-            setTimeout(() => {
-                console.log('🦠 Sistema de Evaluación Infectológica Premium cargado exitosamente!');
-            }, 1000);
+            if (procalcitoninaInput) {
+                procalcitoninaInput.addEventListener('input', function() {
+                    const value = parseFloat(this.value);
+                    if (value > 0.5 && window.medicalInterface) {
+                        window.medicalInterface.showAlert('procalcitonina-elevada', 'error', `Procalcitonina elevada: ${value} ng/mL - Sepsis probable`);
+                    } else if (value > 0.25 && window.medicalInterface) {
+                        window.medicalInterface.showAlert('procalcitonina-borderline', 'warning', `Procalcitonina elevada: ${value} ng/mL`);
+                    }
+                });
+            }
         });
     </script>
 </body>
 </html>
-                            

@@ -1,1212 +1,334 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema Musculoesquelético - Algoritmo de Examen</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+    <title>Examen Musculoesquelético - Portal Médico</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --card-bg: rgba(255, 255, 255, 0.1);
+            --card-border: rgba(255, 255, 255, 0.2);
+            --text-primary: #ffffff;
+            --text-secondary: rgba(255, 255, 255, 0.7);
+            --hover-bg: rgba(255, 255, 255, 0.05);
+        }
+
         body {
-            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 1600px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f8f9fa;
-            line-height: 1.6;
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #1e1b4b 0%, #1e293b 50%, #1e3a8a 100%);
+            min-height: 100vh;
+            color: var(--text-primary);
         }
-        
-        .home-button {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #8e44ad;
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
-            font-size: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-decoration: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            z-index: 1000;
-            transition: all 0.3s ease;
+
+        .glassmorphism {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
-        
-        .home-button:hover {
-            background-color: #7d3c98;
-            transform: scale(1.1);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-        }
-        
-        .main-container {
-            background: white;
+
+        .exam-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
             border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            padding: 30px;
-        }
-        
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-            font-size: 28px;
-            border-bottom: 3px solid #8e44ad;
-            padding-bottom: 15px;
-        }
-        
-        .section {
-            margin-bottom: 25px;
-            border: 2px solid #ecf0f1;
-            border-radius: 8px;
+            margin-bottom: 1rem;
             overflow: hidden;
+        }
+
+        .section-header {
+            padding: 1rem;
+            cursor: pointer;
             transition: all 0.3s ease;
         }
-        
-        .section.active {
-            border-color: #8e44ad;
-            box-shadow: 0 2px 8px rgba(142, 68, 173, 0.2);
-        }
-        
-        .section-header {
-            background: linear-gradient(135deg, #8e44ad, #7d3c98);
-            color: white;
-            padding: 15px 20px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background 0.3s ease;
-        }
-        
+
         .section-header:hover {
-            background: linear-gradient(135deg, #7d3c98, #6c3483);
+            background: var(--hover-bg);
         }
-        
-        .section-header .arrow {
-            transition: transform 0.3s ease;
-            font-size: 18px;
-        }
-        
-        .section-header.expanded .arrow {
-            transform: rotate(180deg);
-        }
-        
+
         .section-content {
-            max-height: 0;
+            padding: 1.5rem;
+            border-top: 1px solid var(--card-border);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .symptom-card {
+            padding: 0.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .symptom-card:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .symptom-card.selected {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgb(59, 130, 246);
+        }
+
+        .progress-bar {
+            width: 4rem;
+            height: 0.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
             overflow: hidden;
-            transition: max-height 0.5s ease-in-out;
-            background: #fafbfc;
-        }
-        
-        .section-content.expanded {
-            padding: 20px;
-        }
-        
-        .joint-container {
-            background: white;
-            border: 1px solid #e1e8ed;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-        
-        .joint-header {
-            font-size: 18px;
-            font-weight: 600;
-            color: #8e44ad;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #f0f3f4;
-        }
-        
-        .joint-section {
-            background: #f8f9fa;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-        
-        .joint-section h4 {
-            color: #2c3e50;
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            font-weight: 600;
         }
 
-        .movement-type-header {
-            color: #7d3c98;
-            margin: 15px 0 8px 0;
-            font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
+            transition: width 0.3s ease;
+            width: 0%;
         }
-        
-        .checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 8px;
-            margin-bottom: 15px;
+
+        .medical-input {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 0.75rem;
+            color: white;
+            width: 100%;
         }
-        
-        .checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px;
-        }
-        
-        .checkbox-item input[type="checkbox"] {
-            width: 16px;
-            height: 16px;
-            margin: 0;
-        }
-        
-        .checkbox-item label {
-            font-size: 13px;
-            color: #2c3e50;
-            cursor: pointer;
-        }
-        
-        .rom-measurement {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin: 5px 0;
-        }
-        
-        .rom-measurement label {
-            font-size: 12px;
-            color: #5d6d7e;
-            flex-basis: 120px;
-            flex-shrink: 0;
-        }
-        
-        .rom-input {
-            width: 60px;
-            padding: 4px 8px;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-            font-size: 12px;
-            text-align: center;
-        }
-        
-        .rom-input:focus {
+
+        .medical-input:focus {
             outline: none;
-            border-color: #8e44ad;
-            box-shadow: 0 0 0 2px rgba(142, 68, 173, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
-        .rom-comparison {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 15px;
-            margin-bottom: 10px;
-        }
-
-        .active-passive {
-            padding: 10px;
-            border: 1px solid #e1e8ed;
-            border-radius: 4px;
-            background: #ffffff;
-        }
-
-        .active-passive h5 {
-            margin: 0 0 8px 0;
-            font-size: 12px;
-            color: #2c3e50;
-            text-align: center;
-        }
-
-        .active-movements {
-            border-left: 3px solid #3498db;
-        }
-
-        .passive-movements {
-            border-left: 3px solid #e67e22;
-        }
-
-        .contracture-section {
-            background: #fff5f5;
-            border: 1px solid #f8b4b4;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        .contracture-section h4 {
-            color: #c53030;
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .contracture-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 8px;
-        }
-
-        .contracture-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px;
-        }
-
-        .contracture-item input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
-        }
-
-        .contracture-item label {
-            font-size: 12px;
-            color: #c53030;
-            cursor: pointer;
-        }
-        
-        .test-results {
-            margin-top: 10px;
-        }
-        
-        .test-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            padding: 6px 10px;
-            margin: 4px 0;
-            background: white;
-            border: 1px solid #e8ecef;
-            border-radius: 4px;
-        }
-        
-        .test-item label {
-            font-size: 12px;
-            color: #2c3e50;
-            flex-grow: 1;
-            margin-right: 10px;
-        }
-        
-        .test-controls {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-        }
-        
-        .test-checkbox {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .test-checkbox input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
-        }
-        
-        .test-checkbox span {
-            font-size: 11px;
-            color: #7f8c8d;
-        }
-        
-        .positive { color: #e74c3c !important; }
-        .negative { color: #27ae60 !important; }
-        
-        .bilateral-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-top: 10px;
-        }
-        
-        .side-container {
-            padding: 15px;
-            background: #ffffff;
-            border: 1px solid #e8ecef;
-            border-radius: 6px;
-        }
-        
-        .side-header {
-            font-weight: 600;
-            font-size: 14px;
-            color: #34495e;
-            margin-bottom: 12px;
-            text-align: center;
-            border-bottom: 1px solid #f0f3f4;
-            padding-bottom: 8px;
-        }
-        
-        .spine-segments {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 10px;
-        }
-        
-        .spine-segment {
-            padding: 15px;
-            background: white;
-            border: 1px solid #e8ecef;
-            border-radius: 6px;
-        }
-        
-        .spine-segment h5 {
-            margin: 0 0 12px 0;
-            font-size: 14px;
-            color: #8e44ad;
-            text-align: center;
-            font-weight: 600;
-        }
-        
-        .conclusion {
-            margin-top: 30px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        .medical-select {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
             border-radius: 8px;
-            border: 2px solid #dee2e6;
-        }
-        
-        .conclusion h3 {
-            color: #2c3e50;
-            margin-bottom: 15px;
-        }
-        
-        .conclusion-text {
-            padding: 15px;
-            background: white;
-            border-radius: 6px;
-            border: 1px solid #dee2e6;
-            min-height: 200px;
-            font-family: 'Courier New', monospace;
-            white-space: pre-wrap;
-            font-size: 13px;
-            line-height: 1.4;
+            padding: 0.75rem;
+            color: white;
+            width: 100%;
         }
 
-        .control-buttons {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: background-color 0.3s;
+        .medical-select:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
         }
 
         .btn-primary {
-            background-color: #8e44ad;
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.8) 0%, rgba(99, 102, 241, 0.8) 100%);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--card-border);
             color: white;
+            font-weight: bold;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
         .btn-primary:hover {
-            background-color: #7d3c98;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
         }
 
-        .btn-secondary {
-            background-color: #95a5a6;
-            color: white;
-        }
-
-        .btn-secondary:hover {
-            background-color: #7f8c8d;
-        }
-
-        .legend {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 15px;
-            font-size: 12px;
-        }
-
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-        }
-
-        .active-color { background-color: #3498db; }
-        .passive-color { background-color: #e67e22; }
-        .contracture-color { background-color: #c53030; }
-
-        /* ===== NUEVOS ESTILOS PARA LAS MEJORAS ===== */
-        
-        /* Estilos para Anamnesis ALICIA mejorada */
-        .alicia-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-
-        .alicia-item {
-            background: #ffffff;
-            border: 1px solid #e1e8ed;
-            border-radius: 6px;
-            padding: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .alicia-item h5 {
-            color: #8e44ad;
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .alicia-checkbox-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 6px;
-            margin-bottom: 10px;
-        }
-
-        .alicia-checkbox-item {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 3px;
-        }
-
-        .alicia-checkbox-item input[type="checkbox"] {
-            width: 14px;
-            height: 14px;
-            margin: 0;
-        }
-
-        .alicia-checkbox-item label {
-            font-size: 12px;
-            color: #2c3e50;
-            cursor: pointer;
-        }
-
-        .alicia-select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-            font-size: 12px;
-            background: white;
-        }
-
-        .alicia-select:focus {
-            outline: none;
-            border-color: #8e44ad;
-            box-shadow: 0 0 0 2px rgba(142, 68, 173, 0.2);
-        }
-
-        .alicia-textarea {
-            width: 100%;
-            min-height: 50px;
-            padding: 8px;
-            border: 1px solid #bdc3c7;
-            border-radius: 4px;
-            font-size: 12px;
-            resize: vertical;
-            font-family: inherit;
-        }
-
-        .alicia-textarea:focus {
-            outline: none;
-            border-color: #8e44ad;
-            box-shadow: 0 0 0 2px rgba(142, 68, 173, 0.2);
-        }
-
-        .intensity-scale {
-            display: flex;
-            gap: 5px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-
-        .intensity-number {
-            width: 32px;
-            height: 32px;
-            border: 2px solid #bdc3c7;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .intensity-number.selected {
-            background-color: #8e44ad;
-            border-color: #8e44ad;
-            color: white;
-        }
-
-        .intensity-number:hover {
-            border-color: #8e44ad;
-            background-color: rgba(142, 68, 173, 0.1);
-        }
-
-        /* Barra lateral de conclusión */
-        .conclusion-panel {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            width: 320px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 999;
-            max-height: calc(100vh - 100px);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .conclusion-panel-header {
-            background: linear-gradient(135deg, #8e44ad, #7d3c98);
-            color: white;
-            padding: 12px 15px;
-            font-weight: 600;
-            font-size: 14px;
-            border-radius: 8px 8px 0 0;
-        }
-
-        .conclusion-panel-content {
-            padding: 15px;
-            background: #fafbfc;
-            font-family: 'Courier New', monospace;
-            font-size: 11px;
-            line-height: 1.4;
-            overflow-y: auto;
-            flex: 1;
-            white-space: pre-wrap;
-            color: #2c3e50;
-        }
-
-        .conclusion-panel-buttons {
-            padding: 10px;
-            border-top: 1px solid #8e44ad;
-            background: white;
-        }
-
-        .conclusion-panel-buttons .btn {
-            width: 100%;
-            margin-bottom: 8px;
-            font-size: 12px;
-            padding: 8px;
-        }
-
-        .conclusion-panel-buttons .btn:last-child {
-            margin-bottom: 0;
-        }
-
-        @media (max-width: 1400px) {
-            .conclusion-panel {
-                position: relative;
-                top: auto;
-                right: auto;
-                width: 100%;
-                margin: 20px 0;
-                max-height: 400px;
-            }
-        }
-
-        /* Estilos para Evaluación MRC */
-        .mrc-container {
-            background: #f0f8ff;
-            border: 1px solid #b6d7ff;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        .mrc-container h4 {
-            color: #2c5aa0;
-            margin: 0 0 12px 0;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .mrc-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-        }
-
-        .mrc-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 6px 10px;
-            background: white;
-            border: 1px solid #e1e8ed;
-            border-radius: 4px;
-        }
-
-        .mrc-item label {
-            font-size: 12px;
-            color: #2c3e50;
-            flex-grow: 1;
-        }
-
-        .mrc-select {
-            width: 50px;
-            padding: 2px 4px;
-            border: 1px solid #bdc3c7;
-            border-radius: 3px;
-            font-size: 11px;
-            text-align: center;
-        }
-
-        .mrc-select:focus {
-            outline: none;
-            border-color: #2c5aa0;
-            box-shadow: 0 0 0 2px rgba(44, 90, 160, 0.2);
-        }
-
-        .mrc-legend {
-            font-size: 10px;
-            color: #5d6d7e;
-            margin-top: 8px;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 4px;
-        }
-
-        /* Estilos para Examen Neurológico */
-        .neuro-container {
-            background: #fff8e1;
-            border: 1px solid #ffd54f;
-            border-radius: 6px;
-            padding: 15px;
-            margin-top: 15px;
-        }
-
-        .neuro-container h4 {
-            color: #e65100;
-            margin: 0 0 12px 0;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .neuro-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 8px;
-        }
-
-        .neuro-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 4px 8px;
-            background: white;
-            border: 1px solid #e1e8ed;
-            border-radius: 4px;
-        }
-
-        .neuro-item label {
-            font-size: 11px;
-            color: #2c3e50;
-            flex-grow: 1;
-        }
-
-        .neuro-checkbox {
-            display: flex;
-            gap: 8px;
-        }
-
-        .neuro-checkbox input[type="checkbox"] {
-            width: 12px;
-            height: 12px;
-        }
-
-        .neuro-checkbox span {
-            font-size: 10px;
-            color: #7f8c8d;
-        }
-
-        /* Estilos para informe mejorado */
-        .narrative-section {
-            background: #f8f9fa;
-            border: 1px solid #dee2e6;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 15px;
-        }
-
-        .narrative-section h4 {
-            color: #495057;
-            margin: 0 0 10px 0;
-            font-size: 14px;
-            font-weight: 600;
-            border-bottom: 1px solid #dee2e6;
-            padding-bottom: 5px;
-        }
-
-        .narrative-text {
-            font-size: 13px;
-            line-height: 1.5;
-            color: #212529;
-        }
-
-        .opening-paragraph {
-            background: #e7f3ff;
-            border-left: 4px solid #007bff;
-            padding: 12px;
-            margin-bottom: 15px;
-            font-style: italic;
-        }
-
-        .pertinent-negatives {
-            background: #f8f9fa;
-            border-left: 4px solid #6c757d;
-            padding: 12px;
-            margin-top: 10px;
-            font-size: 12px;
-            color: #495057;
+        .results-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
         }
     </style>
 </head>
 <body>
-    <a href="index.html" class="home-button">🏠</a>
-    <div class="main-container">
-        <h1>Sistema Musculoesquelético - Algoritmo de Examen Completo</h1>
-        
-        <!-- ===== BARRA LATERAL DE CONCLUSIÓN EN TIEMPO REAL ===== -->
-        <div class="conclusion-panel">
-            <div class="conclusion-panel-header">
-                📋 Conclusión en Tiempo Real
-            </div>
-            <div class="conclusion-panel-content" id="real-time-conclusion">EXAMEN MUSCULOESQUELÉTICO
+    <!-- Botón de volver -->
+    <div class="absolute top-4 left-4 z-10">
+        <a href="index.html" class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border hover:text-accent-foreground h-9 rounded-md px-3 bg-white/10 border-white/20 text-white hover:bg-white/20 backdrop-blur-md">
+            <i class="fas fa-arrow-left w-4 h-4 mr-2"></i>
+            Volver
+        </a>
+    </div>
 
-ANAMNESIS:
-[Pendiente de datos]
-
-EXAMEN FÍSICO:
-[Pendiente de evaluación]
-
-EVALUACIÓN FUNCIONAL:
-[Pendiente de pruebas]
-
-IMPRESIÓN DIAGNÓSTICA:
-[Pendiente de correlación clínico-patológica]
-
-PLAN DE MANEJO:
-[A determinar según impresión diagnóstica definitiva]</div>
-            <div class="conclusion-panel-buttons">
-                <button class="btn btn-primary" onclick="generateRealTimeConclusion()">📋 Actualizar</button>
-                <button class="btn btn-primary" onclick="copyRealTimeConclusion()">📋 Copiar</button>
-            </div>
-        </div>
-        
-        <!-- ===== NUEVA SECCIÓN: ANAMNESIS ESTRUCTURADA (ALICIA) ===== -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span>🩺 Anamnesis Estructurada (ALICIA)</span>
-                <span class="arrow">▼</span>
-            </div>
-            <div class="section-content" id="alicia-anamnesis">
-                <div class="joint-container">
-                    <div class="joint-header">Características del Dolor y Síntomas</div>
-                    <div class="alicia-grid">
-                        <div class="alicia-item">
-                            <h5>📅 Aparición</h5>
-                            <div class="alicia-checkbox-grid">
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="aparicion-subita"><label for="aparicion-subita">Súbita</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="aparicion-gradual"><label for="aparicion-gradual">Gradual</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="aparicion-trauma"><label for="aparicion-trauma">Post-trauma</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="aparicion-ejercicio"><label for="aparicion-ejercicio">Durante ejercicio</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="aparicion-reposo"><label for="aparicion-reposo">En reposo</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="aparicion-nocturna"><label for="aparicion-nocturna">Nocturna</label></div>
-                            </div>
-                            <textarea class="alicia-textarea" id="aparicion-other" placeholder="Otros detalles específicos..."></textarea>
+    <div class="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-blue-800">
+        <!-- Header -->
+        <div class="backdrop-blur-md bg-black/30 border-b border-white/10 p-6">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="p-3 bg-green-500/20 rounded-full border border-green-500/30">
+                            <i class="fas fa-running h-8 w-8 text-green-300"></i>
                         </div>
-                        
-                        <div class="alicia-item">
-                            <h5>📍 Localización</h5>
-                            <select multiple class="alicia-select" id="localizacion-select" size="6">
-                                <option value="cervical">Región cervical</option>
-                                <option value="hombro-derecho">Hombro derecho</option>
-                                <option value="hombro-izquierdo">Hombro izquierdo</option>
-                                <option value="brazo-derecho">Brazo derecho</option>
-                                <option value="brazo-izquierdo">Brazo izquierdo</option>
-                                <option value="codo-derecho">Codo derecho</option>
-                                <option value="codo-izquierdo">Codo izquierdo</option>
-                                <option value="muneca-derecha">Muñeca derecha</option>
-                                <option value="muneca-izquierda">Muñeca izquierda</option>
-                                <option value="torax">Región torácica</option>
-                                <option value="lumbar">Región lumbar</option>
-                                <option value="cadera-derecha">Cadera derecha</option>
-                                <option value="cadera-izquierda">Cadera izquierda</option>
-                                <option value="rodilla-derecha">Rodilla derecha</option>
-                                <option value="rodilla-izquierda">Rodilla izquierda</option>
-                                <option value="tobillo-derecho">Tobillo derecho</option>
-                                <option value="tobillo-izquierdo">Tobillo izquierdo</option>
-                            </select>
+                        <div>
+                            <h1 class="text-3xl font-bold text-white">Musculoesquelético Avanzado</h1>
+                            <p class="text-white/70">Framework Universal - Principio ZERO-TYPING</p>
                         </div>
-                        
-                        <div class="alicia-item">
-                            <h5>↗️ Irradiación</h5>
-                            <div class="alicia-checkbox-grid">
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="irradiacion-ninguna"><label for="irradiacion-ninguna">Sin irradiación</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="irradiacion-cuello"><label for="irradiacion-cuello">Hacia cuello</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="irradiacion-brazo"><label for="irradiacion-brazo">Hacia brazo</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="irradiacion-espalda"><label for="irradiacion-espalda">Hacia espalda</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="irradiacion-pierna"><label for="irradiacion-pierna">Hacia pierna</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="irradiacion-gluteo"><label for="irradiacion-gluteo">Hacia glúteo</label></div>
-                            </div>
-                            <textarea class="alicia-textarea" id="irradiacion-other" placeholder="Descripción específica del patrón..."></textarea>
-                        </div>
-                        
-                        <div class="alicia-item">
-                            <h5>🎭 Carácter</h5>
-                            <div class="alicia-checkbox-grid">
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="caracter-punzante"><label for="caracter-punzante">Punzante</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="caracter-sordo"><label for="caracter-sordo">Sordo</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="caracter-quemante"><label for="caracter-quemante">Quemante</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="caracter-pulsatil"><label for="caracter-pulsatil">Pulsátil</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="caracter-lancinante"><label for="caracter-lancinante">Lancinante</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="caracter-constrictivo"><label for="caracter-constrictivo">Constrictivo</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="caracter-electrico"><label for="caracter-electrico">Eléctrico</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="caracter-calambre"><label for="caracter-calambre">Calambre</label></div>
-                            </div>
-                        </div>
-                        
-                        <div class="alicia-item">
-                            <h5>📊 Intensidad (0-10)</h5>
-                            <div class="intensity-scale">
-                                <div class="intensity-number" onclick="selectIntensity(0)">0</div>
-                                <div class="intensity-number" onclick="selectIntensity(1)">1</div>
-                                <div class="intensity-number" onclick="selectIntensity(2)">2</div>
-                                <div class="intensity-number" onclick="selectIntensity(3)">3</div>
-                                <div class="intensity-number" onclick="selectIntensity(4)">4</div>
-                                <div class="intensity-number" onclick="selectIntensity(5)">5</div>
-                                <div class="intensity-number" onclick="selectIntensity(6)">6</div>
-                                <div class="intensity-number" onclick="selectIntensity(7)">7</div>
-                                <div class="intensity-number" onclick="selectIntensity(8)">8</div>
-                                <div class="intensity-number" onclick="selectIntensity(9)">9</div>
-                                <div class="intensity-number" onclick="selectIntensity(10)">10</div>
-                            </div>
-                            <input type="hidden" id="pain-intensity" value="">
-                        </div>
-                        
-                        <div class="alicia-item">
-                            <h5>⬆️ Agravantes</h5>
-                            <div class="alicia-checkbox-grid">
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="agravante-movimiento"><label for="agravante-movimiento">Movimiento</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="agravante-caminar"><label for="agravante-caminar">Caminar</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="agravante-correr"><label for="agravante-correr">Correr</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="agravante-cargar"><label for="agravante-cargar">Cargar peso</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="agravante-escaleras"><label for="agravante-escaleras">Subir escaleras</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="agravante-tiempo"><label for="agravante-tiempo">Cambios de clima</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="agravante-manana"><label for="agravante-manana">Por la mañana</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="agravante-noche"><label for="agravante-noche">Por la noche</label></div>
-                            </div>
-                        </div>
-                        
-                        <div class="alicia-item">
-                            <h5>⬇️ Atenuantes</h5>
-                            <div class="alicia-checkbox-grid">
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="atenuante-reposo"><label for="atenuante-reposo">Reposo</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="atenuante-calor"><label for="atenuante-calor">Calor local</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="atenuante-frio"><label for="atenuante-frio">Frío local</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="atenuante-analgesicos"><label for="atenuante-analgesicos">Analgésicos</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="atenuante-aines"><label for="atenuante-aines">AINEs</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="atenuante-masaje"><label for="atenuante-masaje">Masaje</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="atenuante-ejercicio"><label for="atenuante-ejercicio">Ejercicio suave</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="atenuante-posicion"><label for="atenuante-posicion">Cambio posición</label></div>
-                            </div>
-                        </div>
-                        
-                        <div class="alicia-item">
-                            <h5>🕐 Temporalidad</h5>
-                            <div class="alicia-checkbox-grid">
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="temporal-constante"><label for="temporal-constante">Constante</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="temporal-intermitente"><label for="temporal-intermitente">Intermitente</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="temporal-episodico"><label for="temporal-episodico">Episódico</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="temporal-progresivo"><label for="temporal-progresivo">Progresivo</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="temporal-matutino"><label for="temporal-matutino">Peor matutino</label></div>
-                                <div class="alicia-checkbox-item"><input type="checkbox" id="temporal-vespertino"><label for="temporal-vespertino">Peor vespertino</label></div>
-                            </div>
-                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-green-500/20 text-green-200 border border-green-500/30">0% Completado</div>
+                        <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border hover:text-accent-foreground h-10 px-4 py-2 bg-white/10 border-white/20 text-white hover:bg-white/20">
+                            <i class="fas fa-file-text w-4 h-4 mr-2"></i>
+                            Ver Informe
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Inspección General (SIN CAMBIOS) -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span>Inspección General y Quejas</span>
-                <span class="arrow">▼</span>
-            </div>
-            <div class="section-content" id="general-inspection">
-                <div class="joint-container">
-                    <div class="joint-header">Quejas Principales</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="pain-joints"><label for="pain-joints">Dolor en articulaciones</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="morning-stiffness"><label for="morning-stiffness">Rigidez matutina</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="limited-mobility"><label for="limited-mobility">Limitación de la movilidad</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="joint-swelling"><label for="joint-swelling">Hinchazón articular</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="muscle-weakness"><label for="muscle-weakness">Debilidad muscular</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="back-pain"><label for="back-pain">Dolor de espalda</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="deformities"><label for="deformities">Deformidades</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="no-complaints" onchange="handleNoComplaints()"><label for="no-complaints">Sin quejas</label></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Columna Vertebral (CON MEJORAS MRC Y NEUROLÓGICAS) -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)">
-                <span>Columna Vertebral</span>
-                <span class="arrow">▼</span>
-            </div>
-            <div class="section-content" id="spine">
-                <div class="joint-container">
-                    <div class="joint-header">Estado General de la Columna</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="spine-normal"><label for="spine-normal">Curvaturas fisiológicas conservadas</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="kyphosis"><label for="kyphosis">Cifosis aumentada</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="lordosis"><label for="lordosis">Lordosis aumentada</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="scoliosis"><label for="scoliosis">Escoliosis</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="kyphoscoliosis"><label for="kyphoscoliosis">Cifoescoliosis</label></div>
-                    </div>
-                </div>
-
-                <div class="spine-segments">
-                    <div class="spine-segment">
-                        <h5>Segmento Cervical (C1-C7)</h5>
-                        <div class="legend"><div class="legend-item"><div class="legend-color active-color"></div><span>Mov. Activos</span></div><div class="legend-item"><div class="legend-color passive-color"></div><span>Mov. Pasivos</span></div></div>
-                        <div class="joint-section">
-                            <h4>Rango de Movimiento (ROM)</h4>
-                            <div class="rom-comparison">
-                                <div class="active-passive active-movements">
-                                    <h5>Activos</h5>
-                                    <div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="cervical-active-flexion" min="0" max="60"><span>° (45°)</span></div>
-                                    <div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="cervical-active-extension" min="0" max="75"><span>° (65°)</span></div>
-                                    <div class="rom-measurement"><label>Inclinación Lat.:</label><input type="number" class="rom-input" id="cervical-active-lateral" min="0" max="50"><span>° (40°)</span></div>
-                                    <div class="rom-measurement"><label>Rotación:</label><input type="number" class="rom-input" id="cervical-active-rotation" min="0" max="90"><span>° (80°)</span></div>
+        <!-- Contenido principal -->
+        <div class="flex gap-6 p-6">
+            <!-- Lista de secciones -->
+            <div class="transition-all duration-300 w-full max-w-4xl mx-auto">
+                <div class="space-y-4">
+                    <!-- Evaluación de Dolor -->
+                    <div class="exam-section glassmorphism">
+                        <div class="section-header">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-exclamation-circle w-5 h-5 text-red-500"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-white">Evaluación de Dolor</h3>
+                                        <p class="text-sm text-white/70">Localización y características</p>
+                                    </div>
                                 </div>
-                                <div class="active-passive passive-movements">
-                                    <h5>Pasivos</h5>
-                                    <div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="cervical-passive-flexion" min="0" max="60"><span>° (45°)</span></div>
-                                    <div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="cervical-passive-extension" min="0" max="75"><span>° (65°)</span></div>
-                                    <div class="rom-measurement"><label>Inclinación Lat.:</label><input type="number" class="rom-input" id="cervical-passive-lateral" min="0" max="50"><span>° (40°)</span></div>
-                                    <div class="rom-measurement"><label>Rotación:</label><input type="number" class="rom-input" id="cervical-passive-rotation" min="0" max="90"><span>° (80°)</span></div>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill"></div>
+                                        </div>
+                                        <span class="text-xs text-white/70">0%</span>
+                                    </div>
+                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70"></i>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- NUEVA: Evaluación MRC Cervical -->
-                        <div class="mrc-container">
-                            <h4>💪 Evaluación de Fuerza Muscular (MRC)</h4>
-                            <div class="mrc-grid">
-                                <div class="mrc-item">
-                                    <label>Flexores cervicales</label>
-                                    <select class="mrc-select" id="cervical-flexors-mrc">
-                                        <option value="">-</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                    </select>
-                                </div>
-                                <div class="mrc-item">
-                                    <label>Extensores cervicales</label>
-                                    <select class="mrc-select" id="cervical-extensors-mrc">
-                                        <option value="">-</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="mrc-legend">
-                                <strong>Escala MRC:</strong> 0=Sin contracción | 1=Contracción visible sin movimiento | 2=Movimiento eliminando gravedad | 3=Movimiento contra gravedad | 4=Movimiento contra resistencia leve | 5=Fuerza normal
-                            </div>
-                        </div>
-
-                        <!-- NUEVA: Examen Neurológico Cervical -->
-                        <div class="neuro-container">
-                            <h4>🧠 Examen Neurológico</h4>
-                            <div class="neuro-grid">
-                                <div class="neuro-item">
-                                    <label>Reflejo Bicipital (C5-C6)</label>
-                                    <div class="neuro-checkbox">
-                                        <input type="checkbox" id="bicipital-normal" onchange="handleMutuallyExclusive('bicipital-normal', 'bicipital-altered', this)">
-                                        <span>Normal</span>
-                                        <input type="checkbox" id="bicipital-altered" onchange="handleMutuallyExclusive('bicipital-normal', 'bicipital-altered', this)">
-                                        <span>Alterado</span>
+                        <div class="section-content">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="text-white font-semibold text-lg mb-3 flex items-center gap-2">
+                                        <i class="fas fa-map-marker-alt w-4 h-4 text-red-400"></i>
+                                        Localización del Dolor
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="dolor-cervical" name="localizacion_dolor" value="cervical" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="dolor-cervical">Cervical</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="dolor-dorsal" name="localizacion_dolor" value="dorsal" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="dolor-dorsal">Dorsal</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="dolor-lumbar" name="localizacion_dolor" value="lumbar" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="dolor-lumbar">Lumbar</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="dolor-hombro" name="localizacion_dolor" value="hombro" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="dolor-hombro">Hombro</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="dolor-rodilla" name="localizacion_dolor" value="rodilla" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="dolor-rodilla">Rodilla</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="dolor-cadera" name="localizacion_dolor" value="cadera" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="dolor-cadera">Cadera</label>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="neuro-item">
-                                    <label>Reflejo Tricipital (C7-C8)</label>
-                                    <div class="neuro-checkbox">
-                                        <input type="checkbox" id="tricipital-normal" onchange="handleMutuallyExclusive('tricipital-normal', 'tricipital-altered', this)">
-                                        <span>Normal</span>
-                                        <input type="checkbox" id="tricipital-altered" onchange="handleMutuallyExclusive('tricipital-normal', 'tricipital-altered', this)">
-                                        <span>Alterado</span>
-                                    </div>
-                                </div>
-                                <div class="neuro-item">
-                                    <label>Sensibilidad Cervical</label>
-                                    <div class="neuro-checkbox">
-                                        <input type="checkbox" id="cervical-sensation-normal" onchange="handleMutuallyExclusive('cervical-sensation-normal', 'cervical-sensation-altered', this)">
-                                        <span>Normal</span>
-                                        <input type="checkbox" id="cervical-sensation-altered" onchange="handleMutuallyExclusive('cervical-sensation-normal', 'cervical-sensation-altered', this)">
-                                        <span>Alterada</span>
+
+                                <div class="border-t border-white/20 pt-6">
+                                    <label class="text-white font-semibold text-lg mb-3 flex items-center gap-2">
+                                        <i class="fas fa-thermometer-half w-4 h-4 text-orange-400"></i>
+                                        Intensidad del Dolor (EVA)
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div>
+                                            <label class="text-white text-sm mb-2 block">Escala Visual Analógica (0-10)</label>
+                                            <input type="range" id="eva-dolor" min="0" max="10" value="0" class="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer">
+                                            <div class="flex justify-between text-xs text-white/70 mt-1">
+                                                <span>0 (Sin dolor)</span>
+                                                <span id="eva-value">0</span>
+                                                <span>10 (Máximo)</span>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label class="text-white text-sm mb-2 block">Características del dolor</label>
+                                            <select id="tipo-dolor" class="medical-select">
+                                                <option value="">Seleccionar</option>
+                                                <option value="punzante">Punzante</option>
+                                                <option value="sordo">Sordo</option>
+                                                <option value="quemante">Quemante</option>
+                                                <option value="pulsatil">Pulsátil</option>
+                                                <option value="opresivo">Opresivo</option>
+                                            </select>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="spine-segment">
-                        <h5>Segmento Torácico (T1-T12)</h5>
-                        <div class="joint-section">
-                            <h4>Rango de Movimiento (ROM)</h4>
-                            <div class="rom-comparison">
-                                <div class="active-passive active-movements">
-                                    <h5>Activos</h5>
-                                    <div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="thoracic-active-flexion" min="0" max="45"><span>° (35°)</span></div>
-                                    <div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="thoracic-active-extension" min="0" max="30"><span>° (25°)</span></div>
-                                    <div class="rom-measurement"><label>Rotación:</label><input type="number" class="rom-input" id="thoracic-active-rotation" min="0" max="40"><span>° (35°)</span></div>
-                                </div>
-                                <div class="active-passive passive-movements">
-                                    <h5>Pasivos</h5>
-                                    <div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="thoracic-passive-flexion" min="0" max="45"><span>° (35°)</span></div>
-                                    <div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="thoracic-passive-extension" min="0" max="30"><span>° (25°)</span></div>
-                                    <div class="rom-measurement"><label>Rotación:</label><input type="number" class="rom-input" id="thoracic-passive-rotation" min="0" max="40"><span>° (35°)</span></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="spine-segment">
-                        <h5>Segmento Lumbar (L1-L5)</h5>
-                        <div class="joint-section">
-                            <h4>Rango de Movimiento (ROM)</h4>
-                             <div class="rom-comparison">
-                                <div class="active-passive active-movements">
-                                    <h5>Activos</h5>
-                                    <div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="lumbar-active-flexion" min="0" max="80"><span>° (60°)</span></div>
-                                    <div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="lumbar-active-extension" min="0" max="35"><span>° (25°)</span></div>
-                                    <div class="rom-measurement"><label>Inclinación Lat.:</label><input type="number" class="rom-input" id="lumbar-active-lateral" min="0" max="35"><span>° (25°)</span></div>
-                                </div>
-                                <div class="active-passive passive-movements">
-                                    <h5>Pasivos</h5>
-                                    <div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="lumbar-passive-flexion" min="0" max="80"><span>° (60°)</span></div>
-                                    <div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="lumbar-passive-extension" min="0" max="35"><span>° (25°)</span></div>
-                                    <div class="rom-measurement"><label>Inclinación Lat.:</label><input type="number" class="rom-input" id="lumbar-passive-lateral" min="0" max="35"><span>° (25°)</span></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="test-results">
-                            <div class="test-item">
-                                <label>Prueba de Schober</label>
-                                <div class="test-controls">
-                                    <input type="number" id="schober-initial" placeholder="Inicial" class="rom-input" style="width: 50px;">
-                                    <span>cm →</span>
-                                    <input type="number" id="schober-final" placeholder="Final" class="rom-input" style="width: 50px;">
-                                    <span id="schober-result" style="font-weight: bold; min-width: 50px;"></span>
-                                </div>
-                            </div>
-                            <div class="test-item">
-                                <label>Signo de Lasègue</label>
-                                <div class="test-controls">
-                                    <div class="test-checkbox"><input type="checkbox" id="tension-positive" onchange="handleMutuallyExclusive('tension-positive', 'tension-negative', this)"><span class="positive">+</span></div>
-                                    <div class="test-checkbox"><input type="checkbox" id="tension-negative" onchange="handleMutuallyExclusive('tension-positive', 'tension-negative', this)"><span class="negative">-</span></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- NUEVA: Evaluación MRC Lumbar -->
-                        <div class="mrc-container">
-                            <h4>💪 Evaluación de Fuerza Muscular (MRC)</h4>
-                            <div class="mrc-grid">
-                                <div class="mrc-item">
-                                    <label>Flexores lumbares</label>
-                                    <select class="mrc-select" id="lumbar-flexors-mrc">
-                                        <option value="">-</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                    </select>
-                                </div>
-                                <div class="mrc-item">
-                                    <label>Extensores lumbares</label>
-                                    <select class="mrc-select" id="lumbar-extensors-mrc">
-                                        <option value="">-</option>
-                                        <option value="0">0</option>
-                                        <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- NUEVA: Examen Neurológico Lumbar -->
-                        <div class="neuro-container">
-                            <h4>🧠 Examen Neurológico</h4>
-                            <div class="neuro-grid">
-                                <div class="neuro-item">
-                                    <label>Reflejo Rotuliano (L3-L4)</label>
-                                    <div class="neuro-checkbox">
-                                        <input type="checkbox" id="patellar-normal" onchange="handleMutuallyExclusive('patellar-normal', 'patellar-altered', this)">
-                                        <span>Normal</span>
-                                        <input type="checkbox" id="patellar-altered" onchange="handleMutuallyExclusive('patellar-normal', 'patellar-altered', this)">
-                                        <span>Alterado</span>
+                    <!-- Evaluación de Movilidad -->
+                    <div class="exam-section glassmorphism">
+                        <div class="section-header">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-arrows-alt w-5 h-5 text-blue-500"></i>
+                                    <div>
+                                        <h3 class="font-semibold text-white">Evaluación de Movilidad</h3>
+                                        <p class="text-sm text-white/70">Rango de movimiento y limitaciones</p>
                                     </div>
                                 </div>
-                                <div class="neuro-item">
-                                    <label>Reflejo Aquíleo (S1-S2)</label>
-                                    <div class="neuro-checkbox">
-                                        <input type="checkbox" id="achilles-normal" onchange="handleMutuallyExclusive('achilles-normal', 'achilles-altered', this)">
-                                        <span>Normal</span>
-                                        <input type="checkbox" id="achilles-altered" onchange="handleMutuallyExclusive('achilles-normal', 'achilles-altered', this)">
-                                        <span>Alterado</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
+                                        <div class="progress-bar">
+                                            <div class="progress-fill"></div>
+                                        </div>
+                                        <span class="text-xs text-white/70">0%</span>
                                     </div>
+                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70"></i>
                                 </div>
-                                <div class="neuro-item">
-                                    <label>Sensibilidad Lumbar</label>
-                                    <div class="neuro-checkbox">
-                                        <input type="checkbox" id="lumbar-sensation-normal" onchange="handleMutuallyExclusive('lumbar-sensation-normal', 'lumbar-sensation-altered', this)">
-                                        <span>Normal</span>
-                                        <input type="checkbox" id="lumbar-sensation-altered" onchange="handleMutuallyExclusive('lumbar-sensation-normal', 'lumbar-sensation-altered', this)">
-                                        <span>Alterada</span>
+                            </div>
+                        </div>
+                        <div class="section-content">
+                            <div class="space-y-6">
+                                <div>
+                                    <label class="text-white font-semibold text-lg mb-3 flex items-center gap-2">
+                                        <i class="fas fa-ban w-4 h-4 text-yellow-400"></i>
+                                        Limitaciones de Movimiento
+                                    </label>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="limit-flexion" name="limitaciones" value="flexion" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="limit-flexion">Flexión limitada</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="limit-extension" name="limitaciones" value="extension" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="limit-extension">Extensión limitada</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="limit-rotacion" name="limitaciones" value="rotacion" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="limit-rotacion">Rotación limitada</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="limit-rigidez" name="limitaciones" value="rigidez" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="limit-rigidez">Rigidez matutina</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="limit-inflamacion" name="limitaciones" value="inflamacion" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="limit-inflamacion">Inflamación articular</label>
+                                        </div>
+                                        <div class="symptom-card flex items-center space-x-2 p-2 rounded-lg hover:bg-white/5">
+                                            <input type="checkbox" id="limit-crepitacion" name="limitaciones" value="crepitacion" class="h-4 w-4 rounded border-white/20 bg-white/10">
+                                            <label class="text-white text-sm cursor-pointer" for="limit-crepitacion">Crepitación</label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1214,937 +336,123 @@ PLAN DE MANEJO:
                     </div>
                 </div>
             </div>
-        </div>
 
-        <!-- Articulaciones del Hombro (CON MEJORAS MRC) -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)"><span>Articulaciones del Hombro</span><span class="arrow">▼</span></div>
-            <div class="section-content" id="shoulder-joints">
-                 <div class="joint-container">
-                    <div class="joint-header">Hallazgos Generales</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="shoulders-normal"><label for="shoulders-normal">Sin hallazgos visibles</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="shoulder-swelling"><label for="shoulder-swelling">Hinchazón</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="shoulder-deformity"><label for="shoulder-deformity">Deformidad</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="shoulder-asymmetry"><label for="shoulder-asymmetry">Asimetría</label></div>
-                    </div>
-                    <div class="bilateral-container">
-                        <div class="side-container">
-                            <div class="side-header">Hombro Derecho</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="shoulder-r-active-flexion" min="0" max="180"><span>° (180°)</span></div><div class="rom-measurement"><label>Abducción:</label><input type="number" class="rom-input" id="shoulder-r-active-abduction" min="0" max="180"><span>° (180°)</span></div><div class="rom-measurement"><label>Rotación Externa:</label><input type="number" class="rom-input" id="shoulder-r-active-external" min="0" max="90"><span>° (90°)</span></div><div class="rom-measurement"><label>Rotación Interna:</label><input type="number" class="rom-input" id="shoulder-r-active-internal" min="0" max="90"><span>° (90°)</span></div></div>
-                            <div class="joint-section"><h4>Movimientos Pasivos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="shoulder-r-passive-flexion" min="0" max="180"><span>° (180°)</span></div><div class="rom-measurement"><label>Abducción:</label><input type="number" class="rom-input" id="shoulder-r-passive-abduction" min="0" max="180"><span>° (180°)</span></div><div class="rom-measurement"><label>Rotación Externa:</label><input type="number" class="rom-input" id="shoulder-r-passive-external" min="0" max="90"><span>° (90°)</span></div><div class="rom-measurement"><label>Rotación Interna:</label><input type="number" class="rom-input" id="shoulder-r-passive-internal" min="0" max="90"><span>° (90°)</span></div></div>
-                            
-                            <!-- NUEVA: Evaluación MRC Hombro Derecho -->
-                            <div class="mrc-container">
-                                <h4>💪 Evaluación de Fuerza Muscular (MRC)</h4>
-                                <div class="mrc-grid">
-                                    <div class="mrc-item">
-                                        <label>Deltoides</label>
-                                        <select class="mrc-select" id="shoulder-r-deltoid-mrc">
-                                            <option value="">-</option>
-                                            <option value="0">0</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                    </div>
-                                    <div class="mrc-item">
-                                        <label>Manguito rotador</label>
-                                        <select class="mrc-select" id="shoulder-r-rotator-mrc">
-                                            <option value="">-</option>
-                                            <option value="0">0</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                    </div>
-                                </div>
+            <!-- Sidebar -->
+            <div class="w-80 space-y-4">
+                <!-- Búsqueda y filtros -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl">
+                    <div class="p-4">
+                        <div class="space-y-3">
+                            <div class="relative">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-200 w-4 h-4"></i>
+                                <input type="text" class="bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl pl-10 pr-4 py-2 text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400/50 focus:border-blue-400/50 w-full" placeholder="Buscar síntomas..." id="global-search">
                             </div>
-
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba del arco doloroso</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="painful-arc-r-pos" onchange="handleMutuallyExclusive('painful-arc-r-pos', 'painful-arc-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="painful-arc-r-neg" onchange="handleMutuallyExclusive('painful-arc-r-pos', 'painful-arc-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Hawkins</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="hawkins-r-pos" onchange="handleMutuallyExclusive('hawkins-r-pos', 'hawkins-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="hawkins-r-neg" onchange="handleMutuallyExclusive('hawkins-r-pos', 'hawkins-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Neer</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="neer-r-pos" onchange="handleMutuallyExclusive('neer-r-pos', 'neer-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="neer-r-neg" onchange="handleMutuallyExclusive('neer-r-pos', 'neer-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de caída del brazo</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="drop-arm-r-pos" onchange="handleMutuallyExclusive('drop-arm-r-pos', 'drop-arm-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="drop-arm-r-neg" onchange="handleMutuallyExclusive('drop-arm-r-pos', 'drop-arm-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Jobe (Empty Can)</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="jobe-r-pos" onchange="handleMutuallyExclusive('jobe-r-pos', 'jobe-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="jobe-r-neg" onchange="handleMutuallyExclusive('jobe-r-pos', 'jobe-r-neg', this)"><span class="negative">-</span></div></div></div></div></div>
-                        </div>
-                        <div class="side-container">
-                            <div class="side-header">Hombro Izquierdo</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="shoulder-l-active-flexion" min="0" max="180"><span>° (180°)</span></div><div class="rom-measurement"><label>Abducción:</label><input type="number" class="rom-input" id="shoulder-l-active-abduction" min="0" max="180"><span>° (180°)</span></div><div class="rom-measurement"><label>Rotación Externa:</label><input type="number" class="rom-input" id="shoulder-l-active-external" min="0" max="90"><span>° (90°)</span></div><div class="rom-measurement"><label>Rotación Interna:</label><input type="number" class="rom-input" id="shoulder-l-active-internal" min="0" max="90"><span>° (90°)</span></div></div>
-                            <div class="joint-section"><h4>Movimientos Pasivos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="shoulder-l-passive-flexion" min="0" max="180"><span>° (180°)</span></div><div class="rom-measurement"><label>Abducción:</label><input type="number" class="rom-input" id="shoulder-l-passive-abduction" min="0" max="180"><span>° (180°)</span></div><div class="rom-measurement"><label>Rotación Externa:</label><input type="number" class="rom-input" id="shoulder-l-passive-external" min="0" max="90"><span>° (90°)</span></div><div class="rom-measurement"><label>Rotación Interna:</label><input type="number" class="rom-input" id="shoulder-l-passive-internal" min="0" max="90"><span>° (90°)</span></div></div>
-                            
-                            <!-- NUEVA: Evaluación MRC Hombro Izquierdo -->
-                            <div class="mrc-container">
-                                <h4>💪 Evaluación de Fuerza Muscular (MRC)</h4>
-                                <div class="mrc-grid">
-                                    <div class="mrc-item">
-                                        <label>Deltoides</label>
-                                        <select class="mrc-select" id="shoulder-l-deltoid-mrc">
-                                            <option value="">-</option>
-                                            <option value="0">0</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                    </div>
-                                    <div class="mrc-item">
-                                        <label>Manguito rotador</label>
-                                        <select class="mrc-select" id="shoulder-l-rotator-mrc">
-                                            <option value="">-</option>
-                                            <option value="0">0</option>
-                                            <option value="1">1</option>
-                                            <option value="2">2</option>
-                                            <option value="3">3</option>
-                                            <option value="4">4</option>
-                                            <option value="5">5</option>
-                                        </select>
-                                    </div>
-                                </div>
+                            <div class="flex gap-2">
+                                <button class="filter-button active px-3 py-1 rounded-lg text-xs transition-colors bg-blue-500/30 text-blue-200 border border-blue-400/30" data-filter="all">Todos</button>
+                                <button class="filter-button px-3 py-1 rounded-lg text-xs transition-colors bg-white/10 text-white/60 border border-white/20 hover:bg-white/20" data-filter="critical">Críticas</button>
                             </div>
-
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba del arco doloroso</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="painful-arc-l-pos" onchange="handleMutuallyExclusive('painful-arc-l-pos', 'painful-arc-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="painful-arc-l-neg" onchange="handleMutuallyExclusive('painful-arc-l-pos', 'painful-arc-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Hawkins</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="hawkins-l-pos" onchange="handleMutuallyExclusive('hawkins-l-pos', 'hawkins-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="hawkins-l-neg" onchange="handleMutuallyExclusive('hawkins-l-pos', 'hawkins-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Neer</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="neer-l-pos" onchange="handleMutuallyExclusive('neer-l-pos', 'neer-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="neer-l-neg" onchange="handleMutuallyExclusive('neer-l-pos', 'neer-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de caída del brazo</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="drop-arm-l-pos" onchange="handleMutuallyExclusive('drop-arm-l-pos', 'drop-arm-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="drop-arm-l-neg" onchange="handleMutuallyExclusive('drop-arm-l-pos', 'drop-arm-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Jobe (Empty Can)</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="jobe-l-pos" onchange="handleMutuallyExclusive('jobe-l-pos', 'jobe-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="jobe-l-neg" onchange="handleMutuallyExclusive('jobe-l-pos', 'jobe-l-neg', this)"><span class="negative">-</span></div></div></div></div></div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- Articulaciones del Codo (MANTENIDO IGUAL) -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)"><span>Articulaciones del Codo</span><span class="arrow">▼</span></div>
-            <div class="section-content" id="elbow-joints">
-                 <div class="joint-container">
-                    <div class="joint-header">Hallazgos Generales</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="elbows-normal"><label for="elbows-normal">Sin hallazgos visibles</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="elbow-swelling"><label for="elbow-swelling">Hinchazón</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="elbow-deformity"><label for="elbow-deformity">Deformidad</label></div>
-                    </div>
-                    <div class="bilateral-container">
-                        <div class="side-container">
-                            <div class="side-header">Codo Derecho</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="elbow-r-active-flexion" min="0" max="150"><span>° (145°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="elbow-r-active-extension" min="0" max="10"><span>° (0°)</span></div><div class="rom-measurement"><label>Pronación:</label><input type="number" class="rom-input" id="elbow-r-active-pronation" min="0" max="90"><span>° (85°)</span></div><div class="rom-measurement"><label>Supinación:</label><input type="number" class="rom-input" id="elbow-r-active-supination" min="0" max="90"><span>° (85°)</span></div></div>
-                            <div class="joint-section"><h4>Movimientos Pasivos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="elbow-r-passive-flexion" min="0" max="150"><span>° (145°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="elbow-r-passive-extension" min="0" max="10"><span>° (0°)</span></div><div class="rom-measurement"><label>Pronación:</label><input type="number" class="rom-input" id="elbow-r-passive-pronation" min="0" max="90"><span>° (85°)</span></div><div class="rom-measurement"><label>Supinación:</label><input type="number" class="rom-input" id="elbow-r-passive-supination" min="0" max="90"><span>° (85°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba de epicondilitis lateral</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="lateral-epicond-r-pos" onchange="handleMutuallyExclusive('lateral-epicond-r-pos', 'lateral-epicond-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="lateral-epicond-r-neg" onchange="handleMutuallyExclusive('lateral-epicond-r-pos', 'lateral-epicond-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de epicondilitis medial</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="medial-epicond-r-pos" onchange="handleMutuallyExclusive('medial-epicond-r-pos', 'medial-epicond-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="medial-epicond-r-neg" onchange="handleMutuallyExclusive('medial-epicond-r-pos', 'medial-epicond-r-neg', this)"><span class="negative">-</span></div></div></div></div></div>
+
+                <!-- Alertas activas -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl">
+                    <div class="p-6 pb-3">
+                        <div class="font-semibold text-white text-sm flex items-center gap-2">
+                            <i class="fas fa-triangle-exclamation h-4 w-4 text-red-400"></i>
+                            Alertas Activas
                         </div>
-                        <div class="side-container">
-                            <div class="side-header">Codo Izquierdo</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="elbow-l-active-flexion" min="0" max="150"><span>° (145°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="elbow-l-active-extension" min="0" max="10"><span>° (0°)</span></div><div class="rom-measurement"><label>Pronación:</label><input type="number" class="rom-input" id="elbow-l-active-pronation" min="0" max="90"><span>° (85°)</span></div><div class="rom-measurement"><label>Supinación:</label><input type="number" class="rom-input" id="elbow-l-active-supination" min="0" max="90"><span>° (85°)</span></div></div>
-                            <div class="joint-section"><h4>Movimientos Pasivos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="elbow-l-passive-flexion" min="0" max="150"><span>° (145°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="elbow-l-passive-extension" min="0" max="10"><span>° (0°)</span></div><div class="rom-measurement"><label>Pronación:</label><input type="number" class="rom-input" id="elbow-l-passive-pronation" min="0" max="90"><span>° (85°)</span></div><div class="rom-measurement"><label>Supinación:</label><input type="number" class="rom-input" id="elbow-l-passive-supination" min="0" max="90"><span>° (85°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba de epicondilitis lateral</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="lateral-epicond-l-pos" onchange="handleMutuallyExclusive('lateral-epicond-l-pos', 'lateral-epicond-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="lateral-epicond-l-neg" onchange="handleMutuallyExclusive('lateral-epicond-l-pos', 'lateral-epicond-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de epicondilitis medial</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="medial-epicond-l-pos" onchange="handleMutuallyExclusive('medial-epicond-l-pos', 'medial-epicond-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="medial-epicond-l-neg" onchange="handleMutuallyExclusive('medial-epicond-l-pos', 'medial-epicond-l-neg', this)"><span class="negative">-</span></div></div></div></div></div>
+                    </div>
+                    <div class="p-6 pt-0 space-y-3" id="alerts-container">
+                        <div class="relative w-full border p-4 rounded-xl backdrop-blur-sm border-orange-400/50 bg-orange-500/20">
+                            <div class="text-xs text-orange-200">⚠️ 0 síntomas evaluados</div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Articulaciones de la Muñeca y Mano (MANTENIDO IGUAL) -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)"><span>Articulaciones de la Muñeca y Mano</span><span class="arrow">▼</span></div>
-            <div class="section-content" id="wrist-joints">
-                <div class="joint-container">
-                    <div class="joint-header">Hallazgos Generales</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="wrists-normal"><label for="wrists-normal">Sin hallazgos visibles</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="wrist-swelling"><label for="wrist-swelling">Hinchazón</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="finger-deformity"><label for="finger-deformity">Deformidad de los dedos</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="hand-atrophy"><label for="hand-atrophy">Atrofia muscular de la mano</label></div>
-                    </div>
-                    <div class="bilateral-container">
-                        <div class="side-container">
-                            <div class="side-header">Mano Derecha</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="wrist-r-active-flexion" min="0" max="90"><span>° (75°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="wrist-r-active-extension" min="0" max="90"><span>° (75°)</span></div><div class="rom-measurement"><label>Desviación Radial:</label><input type="number" class="rom-input" id="wrist-r-active-radial" min="0" max="30"><span>° (25°)</span></div><div class="rom-measurement"><label>Desviación Ulnar:</label><input type="number" class="rom-input" id="wrist-r-active-ulnar" min="0" max="45"><span>° (35°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba de Finkelstein</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="finkelstein-r-pos" onchange="handleMutuallyExclusive('finkelstein-r-pos', 'finkelstein-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="finkelstein-r-neg" onchange="handleMutuallyExclusive('finkelstein-r-pos', 'finkelstein-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Tinel</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="tinel-r-pos" onchange="handleMutuallyExclusive('tinel-r-pos', 'tinel-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="tinel-r-neg" onchange="handleMutuallyExclusive('tinel-r-pos', 'tinel-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Phalen</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="phalen-r-pos" onchange="handleMutuallyExclusive('phalen-r-pos', 'phalen-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="phalen-r-neg" onchange="handleMutuallyExclusive('phalen-r-pos', 'phalen-r-neg', this)"><span class="negative">-</span></div></div></div></div></div>
+                <!-- Progreso del examen -->
+                <div class="bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl">
+                    <div class="p-6 pb-3">
+                        <div class="font-semibold text-white text-sm flex items-center gap-2">
+                            <i class="fas fa-chart-line h-4 w-4 text-blue-400"></i>
+                            Progreso del Examen
+                            <div class="ml-auto">
+                                <div class="inline-flex items-center rounded-full px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 hover:bg-primary/80 bg-blue-500/30 text-blue-200 border border-blue-400/30 text-xs">0%</div>
+                            </div>
                         </div>
-                        <div class="side-container">
-                            <div class="side-header">Mano Izquierda</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="wrist-l-active-flexion" min="0" max="90"><span>° (75°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="wrist-l-active-extension" min="0" max="90"><span>° (75°)</span></div><div class="rom-measurement"><label>Desviación Radial:</label><input type="number" class="rom-input" id="wrist-l-active-radial" min="0" max="30"><span>° (25°)</span></div><div class="rom-measurement"><label>Desviación Ulnar:</label><input type="number" class="rom-input" id="wrist-l-active-ulnar" min="0" max="45"><span>° (35°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba de Finkelstein</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="finkelstein-l-pos" onchange="handleMutuallyExclusive('finkelstein-l-pos', 'finkelstein-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="finkelstein-l-neg" onchange="handleMutuallyExclusive('finkelstein-l-pos', 'finkelstein-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Tinel</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="tinel-l-pos" onchange="handleMutuallyExclusive('tinel-l-pos', 'tinel-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="tinel-l-neg" onchange="handleMutuallyExclusive('tinel-l-pos', 'tinel-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Phalen</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="phalen-l-pos" onchange="handleMutuallyExclusive('phalen-l-pos', 'phalen-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="phalen-l-neg" onchange="handleMutuallyExclusive('phalen-l-pos', 'phalen-l-neg', this)"><span class="negative">-</span></div></div></div></div></div>
+                    </div>
+                    <div class="p-6 pt-0">
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-blue-200 text-xs">Completado</span>
+                                <span class="text-white text-sm font-bold">0%</span>
+                            </div>
+                            <div class="relative w-full overflow-hidden h-3 bg-white/20 rounded-xl">
+                                <div class="h-full w-full flex-1 bg-gradient-to-r from-green-400 to-emerald-500 transition-all" style="transform: translateX(-100%);"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- Articulaciones de la Cadera (MANTENIDO IGUAL) -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)"><span>Articulaciones de la Cadera</span><span class="arrow">▼</span></div>
-            <div class="section-content" id="hip-joints">
-                <div class="joint-container">
-                    <div class="joint-header">Hallazgos Generales</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="hips-normal"><label for="hips-normal">Sin hallazgos visibles</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="hip-swelling"><label for="hip-swelling">Hinchazón</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="hip-deformity"><label for="hip-deformity">Deformidad</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="leg-length-discrepancy"><label for="leg-length-discrepancy">Discrepancia de longitud</label></div>
-                    </div>
-                    <div class="bilateral-container">
-                        <div class="side-container">
-                            <div class="side-header">Cadera Derecha</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="hip-r-active-flexion" min="0" max="130"><span>° (125°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="hip-r-active-extension" min="0" max="30"><span>° (15°)</span></div><div class="rom-measurement"><label>Abducción:</label><input type="number" class="rom-input" id="hip-r-active-abduction" min="0" max="50"><span>° (45°)</span></div><div class="rom-measurement"><label>Aducción:</label><input type="number" class="rom-input" id="hip-r-active-adduction" min="0" max="30"><span>° (25°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba de Trendelenburg</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="trendelenburg-r-pos" onchange="handleMutuallyExclusive('trendelenburg-r-pos', 'trendelenburg-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="trendelenburg-r-neg" onchange="handleMutuallyExclusive('trendelenburg-r-pos', 'trendelenburg-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Patrick (FABERE)</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="patrick-r-pos" onchange="handleMutuallyExclusive('patrick-r-pos', 'patrick-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="patrick-r-neg" onchange="handleMutuallyExclusive('patrick-r-pos', 'patrick-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Thomas</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="thomas-r-pos" onchange="handleMutuallyExclusive('thomas-r-pos', 'thomas-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="thomas-r-neg" onchange="handleMutuallyExclusive('thomas-r-pos', 'thomas-r-neg', this)"><span class="negative">-</span></div></div></div></div></div>
-                        </div>
-                        <div class="side-container">
-                            <div class="side-header">Cadera Izquierda</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="hip-l-active-flexion" min="0" max="130"><span>° (125°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="hip-l-active-extension" min="0" max="30"><span>° (15°)</span></div><div class="rom-measurement"><label>Abducción:</label><input type="number" class="rom-input" id="hip-l-active-abduction" min="0" max="50"><span>° (45°)</span></div><div class="rom-measurement"><label>Aducción:</label><input type="number" class="rom-input" id="hip-l-active-adduction" min="0" max="30"><span>° (25°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba de Trendelenburg</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="trendelenburg-l-pos" onchange="handleMutuallyExclusive('trendelenburg-l-pos', 'trendelenburg-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="trendelenburg-l-neg" onchange="handleMutuallyExclusive('trendelenburg-l-pos', 'trendelenburg-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Patrick (FABERE)</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="patrick-l-pos" onchange="handleMutuallyExclusive('patrick-l-pos', 'patrick-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="patrick-l-neg" onchange="handleMutuallyExclusive('patrick-l-pos', 'patrick-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Thomas</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="thomas-l-pos" onchange="handleMutuallyExclusive('thomas-l-pos', 'thomas-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="thomas-l-neg" onchange="handleMutuallyExclusive('thomas-l-pos', 'thomas-l-neg', this)"><span class="negative">-</span></div></div></div></div></div>
-                        </div>
-                    </div>
-                </div>
+                <!-- Botón finalizar -->
+                <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary hover:bg-primary/90 h-11 px-8 w-full bg-gradient-to-r from-green-500/80 to-emerald-600/80 hover:from-green-600/90 hover:to-emerald-700/90 backdrop-blur-xl border border-white/20 text-white font-bold py-4 shadow-2xl transform transition-all duration-300 hover:scale-105 rounded-2xl">
+                    <i class="fas fa-circle-check h-5 w-5 mr-2"></i>
+                    Finalizar Musculoesquelético
+                </button>
             </div>
-        </div>
-
-        <!-- Articulaciones de la Rodilla (MANTENIDO IGUAL) -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)"><span>Articulaciones de la Rodilla</span><span class="arrow">▼</span></div>
-            <div class="section-content" id="knee-joints">
-                <div class="joint-container">
-                    <div class="joint-header">Hallazgos Generales</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="knees-normal"><label for="knees-normal">Sin hallazgos visibles</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="knee-swelling"><label for="knee-swelling">Hinchazón</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="knee-effusion"><label for="knee-effusion">Derrame articular</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="valgus-deformity"><label for="valgus-deformity">Deformidad en valgo</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="varus-deformity"><label for="varus-deformity">Deformidad en varo</label></div>
-                    </div>
-                    <div class="bilateral-container">
-                        <div class="side-container">
-                            <div class="side-header">Rodilla Derecha</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="knee-r-active-flexion" min="0" max="150"><span>° (135°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="knee-r-active-extension" min="-10" max="10"><span>° (0°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba del cajón anterior</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="anterior-drawer-r-pos" onchange="handleMutuallyExclusive('anterior-drawer-r-pos', 'anterior-drawer-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="anterior-drawer-r-neg" onchange="handleMutuallyExclusive('anterior-drawer-r-pos', 'anterior-drawer-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Lachman</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="lachman-r-pos" onchange="handleMutuallyExclusive('lachman-r-pos', 'lachman-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="lachman-r-neg" onchange="handleMutuallyExclusive('lachman-r-pos', 'lachman-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de McMurray (Medial)</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="mcmurray-medial-r-pos" onchange="handleMutuallyExclusive('mcmurray-medial-r-pos', 'mcmurray-medial-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="mcmurray-medial-r-neg" onchange="handleMutuallyExclusive('mcmurray-medial-r-pos', 'mcmurray-medial-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de McMurray (Lateral)</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="mcmurray-lateral-r-pos" onchange="handleMutuallyExclusive('mcmurray-lateral-r-pos', 'mcmurray-lateral-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="mcmurray-lateral-r-neg" onchange="handleMutuallyExclusive('mcmurray-lateral-r-pos', 'mcmurray-lateral-r-neg', this)"><span class="negative">-</span></div></div></div></div></div>
-                        </div>
-                        <div class="side-container">
-                            <div class="side-header">Rodilla Izquierda</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Flexión:</label><input type="number" class="rom-input" id="knee-l-active-flexion" min="0" max="150"><span>° (135°)</span></div><div class="rom-measurement"><label>Extensión:</label><input type="number" class="rom-input" id="knee-l-active-extension" min="-10" max="10"><span>° (0°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba del cajón anterior</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="anterior-drawer-l-pos" onchange="handleMutuallyExclusive('anterior-drawer-l-pos', 'anterior-drawer-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="anterior-drawer-l-neg" onchange="handleMutuallyExclusive('anterior-drawer-l-pos', 'anterior-drawer-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Lachman</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="lachman-l-pos" onchange="handleMutuallyExclusive('lachman-l-pos', 'lachman-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="lachman-l-neg" onchange="handleMutuallyExclusive('lachman-l-pos', 'lachman-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de McMurray (Medial)</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="mcmurray-medial-l-pos" onchange="handleMutuallyExclusive('mcmurray-medial-l-pos', 'mcmurray-medial-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="mcmurray-medial-l-neg" onchange="handleMutuallyExclusive('mcmurray-medial-l-pos', 'mcmurray-medial-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de McMurray (Lateral)</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="mcmurray-lateral-l-pos" onchange="handleMutuallyExclusive('mcmurray-lateral-l-pos', 'mcmurray-lateral-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="mcmurray-lateral-l-neg" onchange="handleMutuallyExclusive('mcmurray-lateral-l-pos', 'mcmurray-lateral-l-neg', this)"><span class="negative">-</span></div></div></div></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Articulaciones del Tobillo y Pie (MANTENIDO IGUAL) -->
-        <div class="section">
-            <div class="section-header" onclick="toggleSection(this)"><span>Articulaciones del Tobillo y Pie</span><span class="arrow">▼</span></div>
-            <div class="section-content" id="ankle-joints">
-                <div class="joint-container">
-                    <div class="joint-header">Hallazgos Generales</div>
-                    <div class="checkbox-grid">
-                        <div class="checkbox-item"><input type="checkbox" id="ankles-normal"><label for="ankles-normal">Sin hallazgos visibles</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="ankle-swelling"><label for="ankle-swelling">Hinchazón</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="foot-deformity"><label for="foot-deformity">Deformidad del pie</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="flat-feet"><label for="flat-feet">Pie plano</label></div>
-                        <div class="checkbox-item"><input type="checkbox" id="hallux-valgus"><label for="hallux-valgus">Hallux valgus</label></div>
-                    </div>
-                    <div class="bilateral-container">
-                        <div class="side-container">
-                            <div class="side-header">Tobillo Derecho</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Dorsiflexión:</label><input type="number" class="rom-input" id="ankle-r-active-dorsiflexion" min="0" max="30"><span>° (20°)</span></div><div class="rom-measurement"><label>Flexión Plantar:</label><input type="number" class="rom-input" id="ankle-r-active-plantarflexion" min="0" max="60"><span>° (50°)</span></div><div class="rom-measurement"><label>Inversión:</label><input type="number" class="rom-input" id="ankle-r-active-inversion" min="0" max="40"><span>° (35°)</span></div><div class="rom-measurement"><label>Eversión:</label><input type="number" class="rom-input" id="ankle-r-active-eversion" min="0" max="25"><span>° (15°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba del cajón anterior</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="ankle-drawer-r-pos" onchange="handleMutuallyExclusive('ankle-drawer-r-pos', 'ankle-drawer-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="ankle-drawer-r-neg" onchange="handleMutuallyExclusive('ankle-drawer-r-pos', 'ankle-drawer-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de inclinación talar</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="talar-tilt-r-pos" onchange="handleMutuallyExclusive('talar-tilt-r-pos', 'talar-tilt-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="talar-tilt-r-neg" onchange="handleMutuallyExclusive('talar-tilt-r-pos', 'talar-tilt-r-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Thompson</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="thompson-r-pos" onchange="handleMutuallyExclusive('thompson-r-pos', 'thompson-r-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="thompson-r-neg" onchange="handleMutuallyExclusive('thompson-r-pos', 'thompson-r-neg', this)"><span class="negative">-</span></div></div></div></div></div>
-                        </div>
-                        <div class="side-container">
-                            <div class="side-header">Tobillo Izquierdo</div>
-                            <div class="joint-section"><h4>Movimientos Activos</h4><div class="rom-measurement"><label>Dorsiflexión:</label><input type="number" class="rom-input" id="ankle-l-active-dorsiflexion" min="0" max="30"><span>° (20°)</span></div><div class="rom-measurement"><label>Flexión Plantar:</label><input type="number" class="rom-input" id="ankle-l-active-plantarflexion" min="0" max="60"><span>° (50°)</span></div><div class="rom-measurement"><label>Inversión:</label><input type="number" class="rom-input" id="ankle-l-active-inversion" min="0" max="40"><span>° (35°)</span></div><div class="rom-measurement"><label>Eversión:</label><input type="number" class="rom-input" id="ankle-l-active-eversion" min="0" max="25"><span>° (15°)</span></div></div>
-                            <div class="joint-section"><h4>Pruebas Especiales</h4><div class="test-results"><div class="test-item"><label>Prueba del cajón anterior</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="ankle-drawer-l-pos" onchange="handleMutuallyExclusive('ankle-drawer-l-pos', 'ankle-drawer-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="ankle-drawer-l-neg" onchange="handleMutuallyExclusive('ankle-drawer-l-pos', 'ankle-drawer-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de inclinación talar</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="talar-tilt-l-pos" onchange="handleMutuallyExclusive('talar-tilt-l-pos', 'talar-tilt-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="talar-tilt-l-neg" onchange="handleMutuallyExclusive('talar-tilt-l-pos', 'talar-tilt-l-neg', this)"><span class="negative">-</span></div></div></div><div class="test-item"><label>Prueba de Thompson</label><div class="test-controls"><div class="test-checkbox"><input type="checkbox" id="thompson-l-pos" onchange="handleMutuallyExclusive('thompson-l-pos', 'thompson-l-neg', this)"><span class="positive">+</span></div><div class="test-checkbox"><input type="checkbox" id="thompson-l-neg" onchange="handleMutuallyExclusive('thompson-l-pos', 'thompson-l-neg', this)"><span class="negative">-</span></div></div></div></div></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- ===== NUEVA SECCIÓN: INFORME NARRATIVO MEJORADO ===== -->
-        <div class="conclusion">
-            <h3>📋 Informe Clínico Narrativo del Sistema Musculoesquelético</h3>
-            
-            <!-- Párrafo de Apertura Dinámico -->
-            <div class="opening-paragraph" id="opening-paragraph">
-                <strong>Perfil del Paciente:</strong> Se evalúa el sistema musculoesquelético de un paciente que presenta...
-            </div>
-
-            <!-- Hallazgos por Sistemas -->
-            <div class="narrative-section" id="spine-findings">
-                <h4>🦴 Hallazgos de Columna Vertebral</h4>
-                <div class="narrative-text" id="spine-narrative">
-                    Los hallazgos de la columna vertebral se detallarán aquí basados en los datos ingresados...
-                </div>
-            </div>
-
-            <div class="narrative-section" id="upper-extremity-findings">
-                <h4>💪 Hallazgos de Extremidades Superiores</h4>
-                <div class="narrative-text" id="upper-extremity-narrative">
-                    La evaluación de hombros, codos y muñecas revela...
-                </div>
-            </div>
-
-            <div class="narrative-section" id="lower-extremity-findings">
-                <h4>🦵 Hallazgos de Extremidades Inferiores</h4>
-                <div class="narrative-text" id="lower-extremity-narrative">
-                    El examen de caderas, rodillas y tobillos muestra...
-                </div>
-            </div>
-
-            <div class="narrative-section" id="neurological-findings">
-                <h4>🧠 Hallazgos Neurológicos Asociados</h4>
-                <div class="narrative-text" id="neurological-narrative">
-                    La evaluación neurológica complementaria evidencia...
-                </div>
-            </div>
-
-            <!-- Negativos Pertinentes -->
-            <div class="pertinent-negatives" id="pertinent-negatives">
-                <strong>Negativos Pertinentes:</strong> <span id="negatives-text">Se destacan los siguientes hallazgos negativos de relevancia clínica...</span>
-            </div>
-
-            <!-- Conclusión Técnica Original -->
-            <div class="conclusion-text" id="conclusion-text">
-                Seleccione los parámetros para generar la conclusión completa...
-            </div>
-        </div>
-
-        <div class="control-buttons">
-            <button class="btn btn-primary" onclick="generateNarrativeReport()">📋 Generar Informe Narrativo</button>
-            <button class="btn btn-primary" onclick="printConclusion()">Imprimir Conclusión</button>
-            <button class="btn btn-secondary" onclick="clearForm()">Limpiar Formulario</button>
-            <button class="btn btn-secondary" onclick="expandAllSections()">Expandir Todo</button>
         </div>
     </div>
 
+    <script src="medical-unified.js"></script>
     <script>
-        // ===== FUNCIONES EXISTENTES (SIN CAMBIOS) =====
-        function updateSectionHeight(contentElement) {
-            if (contentElement && contentElement.classList.contains('expanded')) {
-                setTimeout(() => {
-                    contentElement.style.maxHeight = contentElement.scrollHeight + 'px';
-                }, 50);
-            }
-        }
-
-        function toggleSection(headerElement) {
-            const content = headerElement.nextElementSibling;
-            const section = headerElement.parentElement;
+        document.addEventListener('DOMContentLoaded', function() {
+            // Funcionalidad de expansión de secciones
+            const sectionHeaders = document.querySelectorAll('.section-header');
             
-            headerElement.classList.toggle('expanded');
-            section.classList.toggle('active');
-            
-            if (content.classList.toggle('expanded')) {
-                content.style.maxHeight = content.scrollHeight + 'px';
-            } else {
-                content.style.maxHeight = '0';
-            }
-        }
-
-        function expandAllSections() {
-            document.querySelectorAll('.section-header:not(.expanded)').forEach(header => toggleSection(header));
-        }
-        
-        function handleNoComplaints() {
-            const noComplaintsCheckbox = document.getElementById('no-complaints');
-            const otherCheckboxes = document.querySelectorAll('#general-inspection input[type="checkbox"]:not(#no-complaints)');
-            
-            otherCheckboxes.forEach(checkbox => {
-                checkbox.disabled = noComplaintsCheckbox.checked;
-                if (noComplaintsCheckbox.checked) checkbox.checked = false;
-            });
-            updateConclusion();
-        }
-        
-        function handleMutuallyExclusive(positiveId, negativeId, checkbox) {
-            if (checkbox.checked) {
-                const oppositeId = checkbox.id === positiveId ? negativeId : positiveId;
-                document.getElementById(oppositeId).checked = false;
-            }
-            updateConclusion();
-        }
-
-        function calculateSchober() {
-            const initial = document.getElementById('schober-initial').value;
-            const final = document.getElementById('schober-final').value;
-            const resultEl = document.getElementById('schober-result');
-            
-            if (initial && final) {
-                const diff = parseFloat(final) - parseFloat(initial);
-                if (!isNaN(diff)) {
-                    resultEl.textContent = `${diff.toFixed(1)} cm`;
-                    resultEl.style.color = diff >= 5 ? '#27ae60' : '#e74c3c';
-                } else {
-                    resultEl.textContent = '';
-                }
-            } else {
-                resultEl.textContent = '';
-            }
-            updateConclusion();
-        }
-
-        function updateConclusion() {
-            const conclusionEl = document.getElementById('conclusion-text');
-            let text = 'GENERANDO CONCLUSIÓN...';
-            // Lógica completa de generación de texto de conclusión aquí...
-            conclusionEl.textContent = text;
-        }
-
-        function printConclusion() {
-            window.print();
-        }
-
-        function clearForm() {
-            if (confirm('¿Está seguro de que desea limpiar todo el formulario?')) {
-                document.querySelectorAll('input[type="checkbox"], input[type="number"], input[type="text"], textarea, select').forEach(el => {
-                    if (el.type === 'checkbox') {
-                        el.checked = false;
-                        el.disabled = false;
-                    } else if (el.tagName === 'SELECT') {
-                        el.selectedIndex = -1;
-                        // Para selects múltiples, deseleccionar todas las opciones
-                        Array.from(el.options).forEach(option => option.selected = false);
+            sectionHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const section = this.closest('.exam-section');
+                    const content = section.querySelector('.section-content');
+                    const chevron = this.querySelector('.fa-chevron-down, .fa-chevron-up');
+                    
+                    if (content.style.display === 'none' || !content.style.display) {
+                        content.style.display = 'block';
+                        if (chevron) chevron.classList.replace('fa-chevron-down', 'fa-chevron-up');
                     } else {
-                        el.value = '';
+                        content.style.display = 'none';
+                        if (chevron) chevron.classList.replace('fa-chevron-up', 'fa-chevron-down');
                     }
                 });
-                document.querySelectorAll('.intensity-number').forEach(el => el.classList.remove('selected'));
-                document.getElementById('pain-intensity').value = '';
-                document.getElementById('schober-result').textContent = '';
-                updateConclusion();
-                generateNarrativeReport();
-                generateRealTimeConclusion();
-            }
-        }
-
-        // ===== NUEVAS FUNCIONES PARA LAS MEJORAS =====
-
-        // Función para manejar la selección de intensidad del dolor
-        function selectIntensity(value) {
-            document.querySelectorAll('.intensity-number').forEach(el => el.classList.remove('selected'));
-            event.target.classList.add('selected');
-            document.getElementById('pain-intensity').value = value;
-            updateConclusion();
-            generateRealTimeConclusion();
-        }
-
-        // Función para generar la conclusión en tiempo real de la barra lateral
-        function generateRealTimeConclusion() {
-            let conclusion = "EXAMEN MUSCULOESQUELÉTICO\n\n";
-            
-            // ANAMNESIS
-            conclusion += "ANAMNESIS:\n";
-            const painIntensity = document.getElementById('pain-intensity').value;
-            if (painIntensity) {
-                conclusion += `• Dolor intensidad ${painIntensity}/10\n`;
-            }
-            
-            // Características del dolor
-            const caracteristicas = getSelectedAliciaValues();
-            if (caracteristicas.aparicion.length > 0) {
-                conclusion += `• Aparición: ${caracteristicas.aparicion.join(', ')}\n`;
-            }
-            if (caracteristicas.localizacion.length > 0) {
-                conclusion += `• Localización: ${caracteristicas.localizacion.join(', ')}\n`;
-            }
-            if (caracteristicas.caracter.length > 0) {
-                conclusion += `• Carácter: ${caracteristicas.caracter.join(', ')}\n`;
-            }
-            if (caracteristicas.irradiacion.length > 0) {
-                conclusion += `• Irradiación: ${caracteristicas.irradiacion.join(', ')}\n`;
-            }
-            
-            conclusion += "\n";
-            
-            // EXAMEN FÍSICO
-            conclusion += "EXAMEN FÍSICO:\n";
-            const hallazgos = getPhysicalExamFindings();
-            if (hallazgos.length > 0) {
-                hallazgos.forEach(hallazgo => conclusion += `• ${hallazgo}\n`);
-            } else {
-                conclusion += "• [Pendiente de evaluación]\n";
-            }
-            
-            conclusion += "\n";
-            
-            // EVALUACIÓN FUNCIONAL
-            conclusion += "EVALUACIÓN FUNCIONAL:\n";
-            const funcionaels = getFunctionalFindings();
-            if (funcionaels.length > 0) {
-                funcionaels.forEach(funcional => conclusion += `• ${funcional}\n`);
-            } else {
-                conclusion += "• [Pendiente de pruebas]\n";
-            }
-            
-            conclusion += "\n";
-            
-            // IMPRESIÓN DIAGNÓSTICA
-            conclusion += "IMPRESIÓN DIAGNÓSTICA:\n";
-            conclusion += "[Pendiente de correlación clínico-patológica]\n\n";
-            
-            // PLAN DE MANEJO
-            conclusion += "PLAN DE MANEJO:\n";
-            conclusion += "[A determinar según impresión diagnóstica definitiva]";
-            
-            document.getElementById('real-time-conclusion').textContent = conclusion;
-        }
-
-        // Función para obtener valores seleccionados de ALICIA
-        function getSelectedAliciaValues() {
-            const valores = {
-                aparicion: [],
-                localizacion: [],
-                caracter: [],
-                irradiacion: [],
-                agravantes: [],
-                atenuantes: [],
-                temporalidad: []
-            };
-            
-            // Aparición
-            const aparicionChecks = [
-                {id: 'aparicion-subita', text: 'súbita'},
-                {id: 'aparicion-gradual', text: 'gradual'},
-                {id: 'aparicion-trauma', text: 'post-trauma'},
-                {id: 'aparicion-ejercicio', text: 'durante ejercicio'},
-                {id: 'aparicion-reposo', text: 'en reposo'},
-                {id: 'aparicion-nocturna', text: 'nocturna'}
-            ];
-            aparicionChecks.forEach(check => {
-                if (document.getElementById(check.id)?.checked) {
-                    valores.aparicion.push(check.text);
-                }
             });
-            
-            // Localización (select múltiple)
-            const localizacionSelect = document.getElementById('localizacion-select');
-            if (localizacionSelect) {
-                Array.from(localizacionSelect.selectedOptions).forEach(option => {
-                    valores.localizacion.push(option.text);
-                });
-            }
-            
-            // Carácter
-            const caracterChecks = [
-                {id: 'caracter-punzante', text: 'punzante'},
-                {id: 'caracter-sordo', text: 'sordo'},
-                {id: 'caracter-quemante', text: 'quemante'},
-                {id: 'caracter-pulsatil', text: 'pulsátil'},
-                {id: 'caracter-lancinante', text: 'lancinante'},
-                {id: 'caracter-constrictivo', text: 'constrictivo'},
-                {id: 'caracter-electrico', text: 'eléctrico'},
-                {id: 'caracter-calambre', text: 'calambre'}
-            ];
-            caracterChecks.forEach(check => {
-                if (document.getElementById(check.id)?.checked) {
-                    valores.caracter.push(check.text);
-                }
-            });
-            
-            // Irradiación
-            const irradiacionChecks = [
-                {id: 'irradiacion-ninguna', text: 'sin irradiación'},
-                {id: 'irradiacion-cuello', text: 'hacia cuello'},
-                {id: 'irradiacion-brazo', text: 'hacia brazo'},
-                {id: 'irradiacion-espalda', text: 'hacia espalda'},
-                {id: 'irradiacion-pierna', text: 'hacia pierna'},
-                {id: 'irradiacion-gluteo', text: 'hacia glúteo'}
-            ];
-            irradiacionChecks.forEach(check => {
-                if (document.getElementById(check.id)?.checked) {
-                    valores.irradiacion.push(check.text);
-                }
-            });
-            
-            return valores;
-        }
 
-        // Función para obtener hallazgos del examen físico
-        function getPhysicalExamFindings() {
-            const hallazgos = [];
-            
-            // Columna vertebral
-            if (document.getElementById('spine-normal')?.checked) {
-                hallazgos.push('Columna: curvaturas fisiológicas conservadas');
-            } else {
-                if (document.getElementById('kyphosis')?.checked) hallazgos.push('Columna: cifosis aumentada');
-                if (document.getElementById('lordosis')?.checked) hallazgos.push('Columna: lordosis aumentada');
-                if (document.getElementById('scoliosis')?.checked) hallazgos.push('Columna: escoliosis');
-            }
-            
-            // Hombros
-            if (document.getElementById('shoulders-normal')?.checked) {
-                hallazgos.push('Hombros: sin hallazgos visibles');
-            } else {
-                if (document.getElementById('shoulder-swelling')?.checked) hallazgos.push('Hombros: hinchazón presente');
-                if (document.getElementById('shoulder-deformity')?.checked) hallazgos.push('Hombros: deformidad presente');
-            }
-            
-            // Otros sistemas articulares
-            const sistemas = [
-                {normal: 'elbows-normal', swelling: 'elbow-swelling', name: 'Codos'},
-                {normal: 'wrists-normal', swelling: 'wrist-swelling', name: 'Muñecas'},
-                {normal: 'hips-normal', swelling: 'hip-swelling', name: 'Caderas'},
-                {normal: 'knees-normal', swelling: 'knee-swelling', name: 'Rodillas'},
-                {normal: 'ankles-normal', swelling: 'ankle-swelling', name: 'Tobillos'}
-            ];
-            
-            sistemas.forEach(sistema => {
-                if (document.getElementById(sistema.normal)?.checked) {
-                    hallazgos.push(`${sistema.name}: sin hallazgos visibles`);
-                } else if (document.getElementById(sistema.swelling)?.checked) {
-                    hallazgos.push(`${sistema.name}: hinchazón presente`);
-                }
-            });
-            
-            return hallazgos;
-        }
-
-        // Función para obtener hallazgos funcionales
-        function getFunctionalFindings() {
-            const funcionales = [];
-            
-            // Rangos de movimiento principales
-            const movimientos = [
-                {id: 'cervical-active-flexion', name: 'Flexión cervical', normal: 45},
-                {id: 'lumbar-active-flexion', name: 'Flexión lumbar', normal: 60},
-                {id: 'shoulder-r-active-flexion', name: 'Flexión hombro derecho', normal: 180},
-                {id: 'shoulder-l-active-flexion', name: 'Flexión hombro izquierdo', normal: 180}
-            ];
-            
-            movimientos.forEach(mov => {
-                const valor = document.getElementById(mov.id)?.value;
-                if (valor) {
-                    const estado = parseInt(valor) >= mov.normal ? 'normal' : 'limitado';
-                    funcionales.push(`${mov.name}: ${valor}° (${estado})`);
-                }
-            });
-            
-            // Prueba de Schober
-            const schoberResult = document.getElementById('schober-result')?.textContent;
-            if (schoberResult) {
-                funcionales.push(`Prueba de Schober: ${schoberResult}`);
-            }
-            
-            // Signos especiales
-            if (document.getElementById('tension-positive')?.checked) {
-                funcionales.push('Lasègue: positivo');
-            } else if (document.getElementById('tension-negative')?.checked) {
-                funcionales.push('Lasègue: negativo');
-            }
-            
-            return funcionales;
-        }
-
-        // Función para copiar la conclusión en tiempo real
-        function copyRealTimeConclusion() {
-            const text = document.getElementById('real-time-conclusion').textContent;
-            navigator.clipboard.writeText(text).then(() => {
-                alert('Conclusión copiada al portapapeles');
-            }).catch(() => {
-                // Fallback para navegadores que no soportan la API moderna
-                const textArea = document.createElement('textarea');
-                textArea.value = text;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textArea);
-                alert('Conclusión copiada al portapapeles');
-            });
-        }
-
-        // Función para generar el informe narrativo mejorado
-        function generateNarrativeReport() {
-            generateOpeningParagraph();
-            generateSpineNarrative();
-            generateUpperExtremityNarrative();
-            generateLowerExtremityNarrative();
-            generateNeurologicalNarrative();
-            generatePertinentNegatives();
-        }
-
-        function generateOpeningParagraph() {
-            let paragraph = "Se evalúa el sistema musculoesquelético de un paciente";
-            
-            // Obtener intensidad del dolor
-            const painIntensity = document.getElementById('pain-intensity').value;
-            if (painIntensity) {
-                paragraph += ` que refiere dolor de intensidad ${painIntensity}/10`;
+            // Expandir primera sección por defecto
+            const firstSection = document.querySelector('.exam-section .section-content');
+            if (firstSection) {
+                firstSection.style.display = 'block';
+                const firstChevron = document.querySelector('.exam-section .fa-chevron-down');
+                if (firstChevron) firstChevron.classList.replace('fa-chevron-down', 'fa-chevron-up');
             }
 
-            // Obtener características ALICIA del dolor
-            const caracteristicas = getSelectedAliciaValues();
+            // Actualizar valor EVA en tiempo real
+            const evaSlider = document.getElementById('eva-dolor');
+            const evaValue = document.getElementById('eva-value');
             
-            if (caracteristicas.aparicion.length > 0) {
-                paragraph += `, con aparición ${caracteristicas.aparicion.join(' y ')}`;
-            }
-            if (caracteristicas.localizacion.length > 0) {
-                paragraph += `, localizado en ${caracteristicas.localizacion.join(', ')}`;
-            }
-            if (caracteristicas.caracter.length > 0) {
-                paragraph += `, de carácter ${caracteristicas.caracter.join(' y ')}`;
-            }
-
-            // Obtener detalles adicionales de las textareas
-            const aparicionOther = document.getElementById('aparicion-other')?.value;
-            const irradiacionOther = document.getElementById('irradiacion-other')?.value;
-            
-            if (aparicionOther) {
-                paragraph += `. Detalles adicionales: ${aparicionOther}`;
-            }
-            if (irradiacionOther) {
-                paragraph += `. Patrón de irradiación: ${irradiacionOther}`;
-            }
-
-            // Agregar quejas principales
-            const quejas = [];
-            if (document.getElementById('pain-joints').checked) quejas.push('dolor articular');
-            if (document.getElementById('morning-stiffness').checked) quejas.push('rigidez matutina');
-            if (document.getElementById('limited-mobility').checked) quejas.push('limitación de la movilidad');
-            if (document.getElementById('muscle-weakness').checked) quejas.push('debilidad muscular');
-
-            if (quejas.length > 0) {
-                paragraph += `. Las quejas principales incluyen: ${quejas.join(', ')}`;
-            }
-
-            if (document.getElementById('no-complaints').checked) {
-                paragraph = "Se evalúa el sistema musculoesquelético de un paciente asintomático, sin quejas específicas al momento del examen.";
-            }
-
-            paragraph += ".";
-            document.getElementById('opening-paragraph').innerHTML = `<strong>Perfil del Paciente:</strong> ${paragraph}`;
-        }
-
-        function generateSpineNarrative() {
-            let narrative = "";
-            
-            // Estado general de la columna
-            if (document.getElementById('spine-normal').checked) {
-                narrative += "La columna vertebral presenta curvaturas fisiológicas conservadas. ";
-            } else {
-                const alteraciones = [];
-                if (document.getElementById('kyphosis').checked) alteraciones.push('cifosis aumentada');
-                if (document.getElementById('lordosis').checked) alteraciones.push('lordosis aumentada');
-                if (document.getElementById('scoliosis').checked) alteraciones.push('escoliosis');
-                if (document.getElementById('kyphoscoliosis').checked) alteraciones.push('cifoescoliosis');
-                
-                if (alteraciones.length > 0) {
-                    narrative += `La columna vertebral presenta ${alteraciones.join(', ')}. `;
-                }
-            }
-
-            // Evaluación segmentaria
-            narrative += addSegmentNarrative('cervical', 'Segmento cervical');
-            narrative += addSegmentNarrative('lumbar', 'Segmento lumbar');
-
-            // Pruebas especiales
-            const schoberResult = document.getElementById('schober-result').textContent;
-            if (schoberResult) {
-                const expansion = parseFloat(schoberResult.replace(' cm', ''));
-                if (expansion >= 5) {
-                    narrative += `La prueba de Schober es normal (${schoberResult}), indicando buena flexibilidad lumbar. `;
-                } else {
-                    narrative += `La prueba de Schober está limitada (${schoberResult}), sugiriendo restricción de la flexibilidad lumbar. `;
-                }
-            }
-
-            if (document.getElementById('tension-positive').checked) {
-                narrative += "El signo de Lasègue es positivo, sugiriendo compromiso radicular. ";
-            } else if (document.getElementById('tension-negative').checked) {
-                narrative += "El signo de Lasègue es negativo, descartando tensión radicular significativa. ";
-            }
-
-            document.getElementById('spine-narrative').textContent = narrative || "No se han registrado hallazgos específicos en la columna vertebral.";
-        }
-
-        function addSegmentNarrative(segment, segmentName) {
-            let text = "";
-            
-            // Evaluar rangos de movimiento
-            const activeFlexion = document.getElementById(`${segment}-active-flexion`).value;
-            const passiveFlexion = document.getElementById(`${segment}-passive-flexion`).value;
-            
-            if (activeFlexion || passiveFlexion) {
-                text += `${segmentName}: `;
-                if (activeFlexion) text += `flexión activa ${activeFlexion}°`;
-                if (passiveFlexion && passiveFlexion !== activeFlexion) text += `, flexión pasiva ${passiveFlexion}°`;
-                text += ". ";
-            }
-
-            // Evaluar fuerza muscular MRC
-            const flexorsMRC = document.getElementById(`${segment}-flexors-mrc`)?.value;
-            const extensorsMRC = document.getElementById(`${segment}-extensors-mrc`)?.value;
-            
-            if (flexorsMRC || extensorsMRC) {
-                text += `Fuerza muscular: `;
-                if (flexorsMRC) text += `flexores ${flexorsMRC}/5`;
-                if (extensorsMRC) text += `${flexorsMRC ? ', ' : ''}extensores ${extensorsMRC}/5`;
-                text += ". ";
-            }
-
-            return text;
-        }
-
-        function generateUpperExtremityNarrative() {
-            let narrative = "";
-            
-            // Hombros
-            narrative += generateJointNarrative('shoulder', 'hombros', 'Hombro', ['flexión', 'abducción', 'rotación externa']);
-            
-            // Codos
-            narrative += generateJointNarrative('elbow', 'codos', 'Codo', ['flexión', 'extensión', 'pronación', 'supinación']);
-            
-            // Muñecas
-            narrative += generateJointNarrative('wrist', 'muñecas', 'Muñeca', ['flexión', 'extensión']);
-
-            document.getElementById('upper-extremity-narrative').textContent = narrative || "No se han registrado hallazgos específicos en las extremidades superiores.";
-        }
-
-        function generateLowerExtremityNarrative() {
-            let narrative = "";
-            
-            // Caderas
-            narrative += generateJointNarrative('hip', 'caderas', 'Cadera', ['flexión', 'extensión', 'abducción']);
-            
-            // Rodillas
-            narrative += generateJointNarrative('knee', 'rodillas', 'Rodilla', ['flexión', 'extensión']);
-            
-            // Tobillos
-            narrative += generateJointNarrative('ankle', 'tobillos', 'Tobillo', ['dorsiflexión', 'flexión plantar']);
-
-            document.getElementById('lower-extremity-narrative').textContent = narrative || "No se han registrado hallazgos específicos en las extremidades inferiores.";
-        }
-
-        function generateJointNarrative(jointPrefix, pluralName, singularName, movements) {
-            let narrative = "";
-            
-            // Verificar hallazgos generales
-            const normalCheckId = `${jointPrefix}s-normal` || `${jointPrefix}-normal`;
-            if (document.getElementById(normalCheckId)?.checked) {
-                narrative += `Los ${pluralName} no presentan hallazgos visibles. `;
-                return narrative;
-            }
-
-            // Evaluar cada lado
-            ['r', 'l'].forEach(side => {
-                const sideName = side === 'r' ? 'derecho' : 'izquierdo';
-                let sideNarrative = "";
-                
-                // Evaluar rangos de movimiento
-                movements.forEach(movement => {
-                    const activeValue = document.getElementById(`${jointPrefix}-${side}-active-${movement.replace(' ', '')}`)?.value;
-                    if (activeValue) {
-                        sideNarrative += `${movement} activa ${activeValue}°, `;
+            if (evaSlider && evaValue) {
+                evaSlider.addEventListener('input', function() {
+                    evaValue.textContent = this.value;
+                    
+                    // Alertas según intensidad del dolor
+                    if (window.medicalInterface) {
+                        const valor = parseInt(this.value);
+                        if (valor >= 7) {
+                            window.medicalInterface.showAlert('dolor-severo', 'error', `Dolor severo detectado: ${valor}/10`);
+                        } else if (valor >= 4) {
+                            window.medicalInterface.showAlert('dolor-moderado', 'warning', `Dolor moderado: ${valor}/10`);
+                        }
                     }
                 });
-
-                // Evaluar fuerza MRC si existe
-                const deltoidMRC = document.getElementById(`${jointPrefix}-${side}-deltoid-mrc`)?.value;
-                if (deltoidMRC) {
-                    sideNarrative += `fuerza deltoides ${deltoidMRC}/5, `;
-                }
-
-                if (sideNarrative) {
-                    narrative += `${singularName} ${sideName}: ${sideNarrative.slice(0, -2)}. `;
-                }
-            });
-
-            return narrative;
-        }
-
-        function generateNeurologicalNarrative() {
-            let narrative = "";
-            
-            // Reflejos
-            const reflexes = [
-                {id: 'bicipital', name: 'reflejo bicipital', level: 'C5-C6'},
-                {id: 'tricipital', name: 'reflejo tricipital', level: 'C7-C8'},
-                {id: 'patellar', name: 'reflejo rotuliano', level: 'L3-L4'},
-                {id: 'achilles', name: 'reflejo aquíleo', level: 'S1-S2'}
-            ];
-
-            const normalReflexes = [];
-            const alteredReflexes = [];
-
-            reflexes.forEach(reflex => {
-                if (document.getElementById(`${reflex.id}-normal`)?.checked) {
-                    normalReflexes.push(`${reflex.name} (${reflex.level})`);
-                } else if (document.getElementById(`${reflex.id}-altered`)?.checked) {
-                    alteredReflexes.push(`${reflex.name} (${reflex.level})`);
-                }
-            });
-
-            if (normalReflexes.length > 0) {
-                narrative += `Reflejos osteotendinosos normales: ${normalReflexes.join(', ')}. `;
             }
-            if (alteredReflexes.length > 0) {
-                narrative += `Reflejos osteotendinosos alterados: ${alteredReflexes.join(', ')}. `;
-            }
-
-            // Sensibilidad
-            if (document.getElementById('cervical-sensation-normal')?.checked) {
-                narrative += "Sensibilidad cervical conservada. ";
-            } else if (document.getElementById('cervical-sensation-altered')?.checked) {
-                narrative += "Alteraciones de la sensibilidad a nivel cervical. ";
-            }
-
-            if (document.getElementById('lumbar-sensation-normal')?.checked) {
-                narrative += "Sensibilidad lumbar conservada. ";
-            } else if (document.getElementById('lumbar-sensation-altered')?.checked) {
-                narrative += "Alteraciones de la sensibilidad a nivel lumbar. ";
-            }
-
-            document.getElementById('neurological-narrative').textContent = narrative || "No se han realizado evaluaciones neurológicas específicas.";
-        }
-
-        function generatePertinentNegatives() {
-            let negatives = [];
-
-            // Analizar negativos pertinentes basados en hallazgos positivos
-            if (document.getElementById('pain-joints').checked) {
-                if (!document.getElementById('joint-swelling').checked) {
-                    negatives.push('ausencia de hinchazón articular');
-                }
-                if (!document.getElementById('morning-stiffness').checked) {
-                    negatives.push('sin rigidez matutina significativa');
-                }
-            }
-
-            if (document.getElementById('back-pain').checked) {
-                if (document.getElementById('tension-negative')?.checked) {
-                    negatives.push('signo de Lasègue negativo (descarta compromiso radicular)');
-                }
-            }
-
-            // Evaluación de deformidades
-            const deformityChecks = ['shoulder-deformity', 'elbow-deformity', 'hip-deformity', 'foot-deformity'];
-            const hasDeformities = deformityChecks.some(id => document.getElementById(id)?.checked);
-            if (!hasDeformities && document.getElementById('pain-joints').checked) {
-                negatives.push('sin deformidades visibles en articulaciones principales');
-            }
-
-            const negativesText = negatives.length > 0 ? negatives.join(', ') + '.' : 'Sin negativos pertinentes específicos registrados.';
-            document.getElementById('negatives-text').textContent = negativesText;
-        }
-
-        // Event Listeners
-        document.addEventListener('DOMContentLoaded', () => {
-             document.querySelectorAll('input, select, textarea').forEach(el => {
-                el.addEventListener('change', () => {
-                    updateConclusion();
-                    generateNarrativeReport();
-                    generateRealTimeConclusion();
-                });
-             });
-             
-             document.querySelector('.main-container').addEventListener('change', (event) => {
-                const sectionContent = event.target.closest('.section-content.expanded');
-                if (sectionContent) {
-                    updateSectionHeight(sectionContent);
-                }
-             });
-
-             document.getElementById('schober-initial').addEventListener('input', calculateSchober);
-             document.getElementById('schober-final').addEventListener('input', calculateSchober);
-             
-             // Expandir la primera sección por defecto
-             toggleSection(document.querySelector('.section-header'));
-             
-             // Generar informes iniciales
-             generateNarrativeReport();
-             generateRealTimeConclusion();
         });
     </script>
+</body>
+</html>
