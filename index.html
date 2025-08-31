@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-    <title>Portal de Exámenes Médicos</title>
+    <title>Dashboard Médico - Portal de Especialidades</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -33,784 +33,640 @@
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         }
 
-        .exam-card {
+        .specialty-card {
             background: var(--card-bg);
             backdrop-filter: blur(16px);
             border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 1rem;
+            border-radius: 16px;
+            padding: 1.5rem;
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
             color: inherit;
+            position: relative;
             overflow: hidden;
         }
 
-        .exam-card:hover {
+        .specialty-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--specialty-color, #4f46e5) 0%, var(--specialty-color-end, #7c3aed) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .specialty-card:hover::before {
+            opacity: 1;
+        }
+
+        .specialty-card:hover {
             background: var(--hover-bg);
-            transform: translateY(-2px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+            transform: translateY(-4px);
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
         }
 
-        .progress-bar {
-            width: 4rem;
-            height: 0.5rem;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 9999px;
-            overflow: hidden;
+        .specialty-icon {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
         }
 
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #60a5fa 0%, #3b82f6 100%);
-            transition: width 0.3s ease;
-            width: 0%;
+        .specialty-card:hover .specialty-icon {
+            transform: scale(1.1);
         }
 
-        .chevron {
-            transition: transform 0.3s ease;
-        }
-
-        .exam-card.expanded .chevron {
-            transform: rotate(180deg);
-        }
-
-        .sidebar-card {
+        .stats-card {
             background: var(--card-bg);
             backdrop-filter: blur(24px);
             border: 1px solid var(--card-border);
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-        }
-
-        .search-input {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            padding: 0.5rem 1rem 0.5rem 2.5rem;
-            color: white;
-            width: 100%;
-        }
-
-        .search-input::placeholder {
-            color: rgba(59, 130, 246, 0.5);
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: rgba(59, 130, 246, 0.5);
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-        }
-
-        .filter-button {
-            padding: 0.25rem 0.75rem;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            transition: all 0.3s ease;
-            border: 1px solid;
-        }
-
-        .filter-button.active {
-            background: rgba(59, 130, 246, 0.3);
-            color: rgb(147, 197, 253);
-            border-color: rgba(59, 130, 246, 0.3);
-        }
-
-        .filter-button:not(.active) {
-            background: rgba(255, 255, 255, 0.1);
-            color: rgba(255, 255, 255, 0.6);
-            border-color: var(--card-border);
-        }
-
-        .filter-button:not(.active):hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .alert-card {
-            border-radius: 12px;
-            backdrop-filter: blur(8px);
-            border: 1px solid;
-            padding: 1rem;
-        }
-
-        .alert-warning {
-            background: rgba(249, 115, 22, 0.2);
-            border-color: rgba(249, 115, 22, 0.5);
-            color: rgb(254, 215, 170);
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 0.75rem;
+            border-radius: 20px;
+            padding: 2rem;
             text-align: center;
+            transition: all 0.3s ease;
         }
 
-        .stat-item {
-            padding: 0.75rem;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px);
-            border-radius: 12px;
-            border: 1px solid var(--card-border);
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
         }
 
-        .finalize-button {
+        .quick-action-btn {
             background: linear-gradient(90deg, rgba(59, 130, 246, 0.8) 0%, rgba(99, 102, 241, 0.8) 100%);
             backdrop-filter: blur(24px);
             border: 1px solid var(--card-border);
             color: white;
-            font-weight: bold;
+            font-weight: 600;
             padding: 1rem 2rem;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            border-radius: 12px;
             transition: all 0.3s ease;
-            width: 100%;
+            cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 0.5rem;
-        }
-
-        .finalize-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-        }
-
-        .back-button {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid var(--card-border);
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 8px;
-            backdrop-filter: blur(16px);
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
             text-decoration: none;
         }
 
-        .back-button:hover {
-            background: rgba(255, 255, 255, 0.2);
+        .quick-action-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
         }
 
-        .header-badge {
-            background: rgba(79, 70, 229, 0.2);
-            color: rgb(196, 181, 253);
-            border: 1px solid rgba(79, 70, 229, 0.3);
-            padding: 0.25rem 0.75rem;
-            border-radius: 9999px;
-            font-size: 0.75rem;
-            font-weight: 600;
+        .dashboard-header {
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.2) 100%);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--card-border);
         }
 
-        .icon-container {
+        .welcome-section {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .specialty-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .recent-activity {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+
+        .activity-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
             padding: 0.75rem;
-            background: rgba(79, 70, 229, 0.2);
-            border-radius: 9999px;
-            border: 1px solid rgba(79, 70, 229, 0.3);
+            border-radius: 8px;
+            transition: background 0.3s ease;
         }
+
+        .activity-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .activity-icon {
+            width: 2rem;
+            height: 2rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.875rem;
+        }
+
+        /* Colores específicos por especialidad */
+        .cardio { --specialty-color: #ef4444; --specialty-color-end: #dc2626; }
+        .pneumo { --specialty-color: #3b82f6; --specialty-color-end: #2563eb; }
+        .gastro { --specialty-color: #10b981; --specialty-color-end: #059669; }
+        .endocrino { --specialty-color: #8b5cf6; --specialty-color-end: #7c3aed; }
+        .hemato { --specialty-color: #ef4444; --specialty-color-end: #dc2626; }
+        .neuro { --specialty-color: #ec4899; --specialty-color-end: #db2777; }
+        .oftalmo { --specialty-color: #06b6d4; --specialty-color-end: #0891b2; }
+        .otorrino { --specialty-color: #eab308; --specialty-color-end: #ca8a04; }
+        .reumato { --specialty-color: #f97316; --specialty-color-end: #ea580c; }
+        .dermato { --specialty-color: #ec4899; --specialty-color-end: #db2777; }
+        .traumato { --specialty-color: #10b981; --specialty-color-end: #059669; }
+        .urologia { --specialty-color: #6366f1; --specialty-color-end: #4f46e5; }
+        .psiquiatria { --specialty-color: #8b5cf6; --specialty-color-end: #7c3aed; }
+        .infectologia { --specialty-color: #ef4444; --specialty-color-end: #dc2626; }
     </style>
 </head>
 <body>
-    <!-- Botón de volver -->
-    <div class="absolute top-4 left-4 z-10">
-        <a href="#" class="back-button">
-            <i class="fas fa-arrow-left w-4 h-4"></i>
-            Volver
-        </a>
-    </div>
-
     <div class="min-h-screen bg-gradient-to-br from-indigo-900 via-slate-900 to-blue-800">
-        <!-- Header -->
-        <div class="backdrop-blur-md bg-black/30 border-b border-white/10 p-6">
+        <!-- Header del Dashboard -->
+        <div class="dashboard-header p-6">
             <div class="max-w-7xl mx-auto">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-4">
-                        <div class="icon-container">
-                            <i class="fas fa-user-md h-8 w-8 text-indigo-300"></i>
+                        <div class="p-3 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-full border border-indigo-500/30">
+                            <i class="fas fa-hospital h-8 w-8 text-indigo-300"></i>
                         </div>
                         <div>
-                            <h1 class="text-3xl font-bold text-white">Portal Médico Avanzado</h1>
-                            <p class="text-white/70">Framework Universal - Principio ZERO-TYPING</p>
+                            <h1 class="text-3xl font-bold text-white">MedScap Dashboard</h1>
+                            <p class="text-white/70">Portal Integral de Especialidades Médicas</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
-                        <div class="header-badge">0% Completado</div>
-                        <button class="back-button">
-                            <i class="fas fa-file-text w-4 h-4"></i>
-                            Ver Informe
+                        <div class="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-green-500/20 text-green-200 border border-green-500/30">
+                            <i class="fas fa-circle w-2 h-2 mr-2"></i>
+                            Sistema Activo
+                        </div>
+                        <button class="quick-action-btn">
+                            <i class="fas fa-plus w-4 h-4"></i>
+                            Nuevo Paciente
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Contenido principal -->
-        <div class="flex gap-6 p-6">
-            <!-- Lista de exámenes -->
-            <div class="transition-all duration-300 w-full max-w-4xl mx-auto">
-                <div class="space-y-4">
-                    <!-- Examen Cardiovascular -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-heartbeat w-5 h-5 text-red-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Cardiovascular</h3>
-                                        <p class="text-sm text-white/70">Evaluación completa del sistema cardiovascular</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="cardiologia_algoritmo_completo1.html" class="block w-full h-full absolute top-0 left-0"></a>
+        <div class="max-w-7xl mx-auto p-6">
+            <!-- Sección de bienvenida -->
+            <div class="welcome-section">
+                <div class="flex items-center justify-center gap-4 mb-4">
+                    <div class="p-4 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full">
+                        <i class="fas fa-stethoscope h-12 w-12 text-blue-300"></i>
                     </div>
-
-                    <!-- Examen Neumológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-lungs w-5 h-5 text-blue-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Neumológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación del sistema respiratorio</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="pneumology_exam.html" class="block w-full h-full absolute top-0 left-0"></a>
+                    <div class="text-left">
+                        <h2 class="text-2xl font-bold text-white mb-2">Bienvenido al Portal Médico</h2>
+                        <p class="text-white/70">Selecciona una especialidad para comenzar la evaluación médica integral</p>
                     </div>
-
-                    <!-- Examen Gastroenterológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-stomach w-5 h-5 text-green-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Gastroenterológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación del sistema digestivo</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="gastro.html" class="block w-full h-full absolute top-0 left-0"></a>
+                </div>
+                
+                <!-- Estadísticas rápidas -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+                    <div class="stats-card">
+                        <div class="text-3xl font-bold text-blue-400 mb-2">14</div>
+                        <div class="text-sm text-white/70">Especialidades</div>
                     </div>
-
-                    <!-- Examen Endocrinológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-dna w-5 h-5 text-purple-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Endocrinológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación del sistema endocrino</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="endocrinology_exam.html" class="block w-full h-full absolute top-0 left-0"></a>
+                    <div class="stats-card">
+                        <div class="text-3xl font-bold text-green-400 mb-2">0</div>
+                        <div class="text-sm text-white/70">Exámenes Activos</div>
                     </div>
-
-                    <!-- Examen Hematológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-tint w-5 h-5 text-red-400"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Hematológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación del sistema hematológico</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="hematology_exam.html" class="block w-full h-full absolute top-0 left-0"></a>
+                    <div class="stats-card">
+                        <div class="text-3xl font-bold text-purple-400 mb-2">0</div>
+                        <div class="text-sm text-white/70">Alertas Críticas</div>
                     </div>
-
-                    <!-- Examen Neurológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-brain w-5 h-5 text-pink-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Neurológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación del sistema nervioso</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="neurology_exam.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen Oftalmológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-eye w-5 h-5 text-cyan-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Oftalmológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación ocular completa</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="Oftalmo.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen Otorrinolaringológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-ear-listen w-5 h-5 text-yellow-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Otorrinolaringológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación de oído, nariz y garganta</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="otolaryngology_exam_es.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen Reumatológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-bone w-5 h-5 text-orange-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Reumatológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación de articulaciones y músculos</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="rheumatology_exam.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen Dermatológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-hand-paper w-5 h-5 text-pink-400"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Dermatológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación de la piel y anexos</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="derma.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen Musculoesquelético -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-running w-5 h-5 text-green-400"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Musculoesquelético</h3>
-                                        <p class="text-sm text-white/70">Evaluación del sistema locomotor</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="trama.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen Urológico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-kidneys w-5 h-5 text-indigo-400"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Urológico</h3>
-                                        <p class="text-sm text-white/70">Evaluación del sistema urológico</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="urology_exam.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen Geriátrico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-user-clock w-5 h-5 text-amber-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Geriátrico</h3>
-                                        <p class="text-sm text-white/70">Evaluación integral del adulto mayor</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="geriatric_exam.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen Psiquiátrico -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-head-side-virus w-5 h-5 text-violet-500"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Examen Psiquiátrico</h3>
-                                        <p class="text-sm text-white/70">Evaluación del estado mental</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="psychiatric_exam_system.html" class="block w-full h-full absolute top-0 left-0"></a>
-                    </div>
-
-                    <!-- Examen de Enfermedades Infecciosas -->
-                    <div class="exam-card glassmorphism">
-                        <div class="p-4 hover:bg-white/5 transition-colors">
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-3">
-                                    <i class="fas fa-virus w-5 h-5 text-red-300"></i>
-                                    <div>
-                                        <h3 class="font-semibold text-white">Enfermedades Infecciosas</h3>
-                                        <p class="text-sm text-white/70">Evaluación de procesos infecciosos</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-2">
-                                        <div class="progress-bar">
-                                            <div class="progress-fill"></div>
-                                        </div>
-                                        <span class="text-xs text-white/70">0%</span>
-                                    </div>
-                                    <i class="fas fa-chevron-down w-5 h-5 text-white/70 chevron"></i>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="infectious_diseases_exam.html" class="block w-full h-full absolute top-0 left-0"></a>
+                    <div class="stats-card">
+                        <div class="text-3xl font-bold text-orange-400 mb-2">100%</div>
+                        <div class="text-sm text-white/70">Sistema Operativo</div>
                     </div>
                 </div>
             </div>
 
-            <!-- Sidebar -->
-            <div class="w-80 space-y-4">
-                <!-- Búsqueda y filtros -->
-                <div class="sidebar-card">
-                    <div class="p-4">
-                        <div class="space-y-3">
-                            <div class="relative">
-                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-blue-200 w-4 h-4"></i>
-                                <input type="text" class="search-input" placeholder="Buscar alertas, escalas..." id="global-search">
-                            </div>
-                            <div class="flex gap-2">
-                                <button class="filter-button active" data-filter="all">Todos</button>
-                                <button class="filter-button" data-filter="critical">Críticas</button>
-                                <button class="filter-button" style="background: rgba(168, 85, 247, 0.3); color: rgb(196, 181, 253); border-color: rgba(168, 85, 247, 0.3);">
-                                    <i class="fas fa-th w-3 h-3 mr-1"></i>
-                                    Especialidades
-                                </button>
-                            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Especialidades Médicas -->
+                <div class="lg:col-span-2">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-white">Especialidades Médicas</h2>
+                        <div class="flex gap-2">
+                            <button class="px-3 py-1 rounded-lg text-xs bg-blue-500/30 text-blue-200 border border-blue-400/30">Todas</button>
+                            <button class="px-3 py-1 rounded-lg text-xs bg-white/10 text-white/60 border border-white/20 hover:bg-white/20">Críticas</button>
+                            <button class="px-3 py-1 rounded-lg text-xs bg-purple-500/30 text-purple-200 border border-purple-400/30">Favoritas</button>
                         </div>
                     </div>
-                </div>
 
-                <!-- Alertas activas -->
-                <div class="sidebar-card">
-                    <div class="p-6 pb-3">
-                        <div class="font-semibold text-white text-sm flex items-center gap-2">
-                            <i class="fas fa-triangle-exclamation h-4 w-4 text-red-400"></i>
-                            Alertas Activas
-                        </div>
-                    </div>
-                    <div class="p-6 pt-0 space-y-3">
-                        <div class="alert-card alert-warning">
-                            <div class="text-xs">⚠️ 0 factores de riesgo detectados</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Escalas médicas -->
-                <div class="sidebar-card">
-                    <div class="p-6 pb-3">
-                        <div class="font-semibold text-white text-sm flex items-center gap-2">
-                            <i class="fas fa-calculator h-4 w-4 text-purple-400"></i>
-                            Escalas Médicas
-                        </div>
-                    </div>
-                    <div class="p-6 pt-0 space-y-3">
-                        <div class="text-center py-6">
-                            <i class="fas fa-calculator h-8 w-8 text-blue-400 mx-auto mb-2"></i>
-                            <p class="text-blue-200 text-xs">Escalas aparecerán aquí conforme completes el examen</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Progreso del examen -->
-                <div class="sidebar-card">
-                    <div class="p-6 pb-3">
-                        <div class="font-semibold text-white text-sm flex items-center gap-2">
-                            <i class="fas fa-chart-line h-4 w-4 text-blue-400"></i>
-                            Progreso del Examen
-                            <div class="ml-auto">
-                                <div class="header-badge text-xs">0%</div>
+                    <div class="specialty-grid">
+                        <!-- Cardiología -->
+                        <a href="cardiologia_algoritmo_completo1.html" class="specialty-card cardio">
+                            <div class="specialty-icon bg-red-500/20 border border-red-500/30">
+                                <i class="fas fa-heartbeat text-red-300 text-xl"></i>
                             </div>
-                        </div>
-                    </div>
-                    <div class="p-6 pt-0">
-                        <div class="space-y-4">
+                            <h3 class="text-lg font-semibold text-white mb-2">Cardiología</h3>
+                            <p class="text-sm text-white/70 mb-4">Sistema cardiovascular, presión arterial, arritmias</p>
                             <div class="flex items-center justify-between">
-                                <span class="text-blue-200 text-xs">Completado</span>
-                                <span class="text-white text-sm font-bold">0%</span>
+                                <span class="text-xs text-red-200 bg-red-500/20 px-2 py-1 rounded-full">Alta prioridad</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
                             </div>
-                            <div class="relative w-full overflow-hidden h-3 bg-white/20 rounded-xl">
-                                <div class="h-full w-full flex-1 bg-gradient-to-r from-blue-400 to-indigo-500 transition-all" style="transform: translateX(-100%);"></div>
+                        </a>
+
+                        <!-- Neumología -->
+                        <a href="pneumology_exam.html" class="specialty-card pneumo">
+                            <div class="specialty-icon bg-blue-500/20 border border-blue-500/30">
+                                <i class="fas fa-lungs text-blue-300 text-xl"></i>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 text-xs">
-                                <div class="flex items-center justify-between p-2 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20">
-                                    <span class="text-blue-200/60">cardiovascular</span>
-                                    <span class="text-white/40">○</span>
+                            <h3 class="text-lg font-semibold text-white mb-2">Neumología</h3>
+                            <p class="text-sm text-white/70 mb-4">Sistema respiratorio, disnea, saturación</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-blue-200 bg-blue-500/20 px-2 py-1 rounded-full">Esencial</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Gastroenterología -->
+                        <a href="gastro.html" class="specialty-card gastro">
+                            <div class="specialty-icon bg-green-500/20 border border-green-500/30">
+                                <i class="fas fa-stomach text-green-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Gastroenterología</h3>
+                            <p class="text-sm text-white/70 mb-4">Sistema digestivo, dolor abdominal, EVA</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-green-200 bg-green-500/20 px-2 py-1 rounded-full">Común</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Endocrinología -->
+                        <a href="endocrinology_exam.html" class="specialty-card endocrino">
+                            <div class="specialty-icon bg-purple-500/20 border border-purple-500/30">
+                                <i class="fas fa-dna text-purple-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Endocrinología</h3>
+                            <p class="text-sm text-white/70 mb-4">Diabetes, tiroides, hormonas</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-purple-200 bg-purple-500/20 px-2 py-1 rounded-full">Especializada</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Hematología -->
+                        <a href="hematology_exam.html" class="specialty-card hemato">
+                            <div class="specialty-icon bg-red-500/20 border border-red-500/30">
+                                <i class="fas fa-tint text-red-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Hematología</h3>
+                            <p class="text-sm text-white/70 mb-4">Hemograma, anemia, coagulación</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-red-200 bg-red-500/20 px-2 py-1 rounded-full">Laboratorio</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Neurología -->
+                        <a href="neurology_exam.html" class="specialty-card neuro">
+                            <div class="specialty-icon bg-pink-500/20 border border-pink-500/30">
+                                <i class="fas fa-brain text-pink-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Neurología</h3>
+                            <p class="text-sm text-white/70 mb-4">Glasgow, función motora, coordinación</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-pink-200 bg-pink-500/20 px-2 py-1 rounded-full">Crítica</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Oftalmología -->
+                        <a href="Oftalmo.html" class="specialty-card oftalmo">
+                            <div class="specialty-icon bg-cyan-500/20 border border-cyan-500/30">
+                                <i class="fas fa-eye text-cyan-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Oftalmología</h3>
+                            <p class="text-sm text-white/70 mb-4">Agudeza visual, presión intraocular</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-cyan-200 bg-cyan-500/20 px-2 py-1 rounded-full">Sensorial</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Otorrinolaringología -->
+                        <a href="otolaryngology_exam_es.html" class="specialty-card otorrino">
+                            <div class="specialty-icon bg-yellow-500/20 border border-yellow-500/30">
+                                <i class="fas fa-ear-listen text-yellow-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Otorrinolaringología</h3>
+                            <p class="text-sm text-white/70 mb-4">Oído, nariz, garganta, audición</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-yellow-200 bg-yellow-500/20 px-2 py-1 rounded-full">Sensorial</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Reumatología -->
+                        <a href="rheumatology_exam.html" class="specialty-card reumato">
+                            <div class="specialty-icon bg-orange-500/20 border border-orange-500/30">
+                                <i class="fas fa-bone text-orange-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Reumatología</h3>
+                            <p class="text-sm text-white/70 mb-4">Artritis, marcadores inflamatorios</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-orange-200 bg-orange-500/20 px-2 py-1 rounded-full">Articular</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Dermatología -->
+                        <a href="derma.html" class="specialty-card dermato">
+                            <div class="specialty-icon bg-pink-500/20 border border-pink-500/30">
+                                <i class="fas fa-hand-paper text-pink-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Dermatología</h3>
+                            <p class="text-sm text-white/70 mb-4">Lesiones cutáneas, signos de alarma</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-pink-200 bg-pink-500/20 px-2 py-1 rounded-full">Visual</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Traumatología -->
+                        <a href="trama.html" class="specialty-card traumato">
+                            <div class="specialty-icon bg-green-500/20 border border-green-500/30">
+                                <i class="fas fa-running text-green-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Traumatología</h3>
+                            <p class="text-sm text-white/70 mb-4">Dolor musculoesquelético, movilidad</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-green-200 bg-green-500/20 px-2 py-1 rounded-full">Locomotor</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Urología -->
+                        <a href="urology_exam.html" class="specialty-card urologia">
+                            <div class="specialty-icon bg-indigo-500/20 border border-indigo-500/30">
+                                <i class="fas fa-kidneys text-indigo-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Urología</h3>
+                            <p class="text-sm text-white/70 mb-4">Tracto urinario, síntomas obstructivos</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-indigo-200 bg-indigo-500/20 px-2 py-1 rounded-full">Genitourinario</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Psiquiatría -->
+                        <a href="psychiatric_exam_system.html" class="specialty-card psiquiatria">
+                            <div class="specialty-icon bg-violet-500/20 border border-violet-500/30">
+                                <i class="fas fa-head-side-virus text-violet-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Psiquiatría</h3>
+                            <p class="text-sm text-white/70 mb-4">Estado mental, PHQ-9, GAD-7</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-violet-200 bg-violet-500/20 px-2 py-1 rounded-full">Mental</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+
+                        <!-- Infectología -->
+                        <a href="infectious_diseases_exam.html" class="specialty-card infectologia">
+                            <div class="specialty-icon bg-red-500/20 border border-red-500/30">
+                                <i class="fas fa-virus text-red-300 text-xl"></i>
+                            </div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Infectología</h3>
+                            <p class="text-sm text-white/70 mb-4">Síndrome febril, marcadores inflamatorios</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-red-200 bg-red-500/20 px-2 py-1 rounded-full">Urgente</span>
+                                <i class="fas fa-arrow-right text-white/50"></i>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Panel lateral -->
+                <div class="space-y-6">
+                    <!-- Acciones rápidas -->
+                    <div class="glassmorphism rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-bolt text-yellow-400"></i>
+                            Acciones Rápidas
+                        </h3>
+                        <div class="space-y-3">
+                            <button class="w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/20">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-user-plus text-blue-400"></i>
+                                    <div>
+                                        <div class="text-sm font-medium text-white">Nuevo Paciente</div>
+                                        <div class="text-xs text-white/60">Registrar paciente</div>
+                                    </div>
                                 </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20">
-                                    <span class="text-blue-200/60">neumológico</span>
-                                    <span class="text-white/40">○</span>
+                            </button>
+                            <button class="w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/20">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-search text-green-400"></i>
+                                    <div>
+                                        <div class="text-sm font-medium text-white">Buscar Historial</div>
+                                        <div class="text-xs text-white/60">Consultar registros</div>
+                                    </div>
                                 </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20">
-                                    <span class="text-blue-200/60">gastro</span>
-                                    <span class="text-white/40">○</span>
+                            </button>
+                            <button class="w-full text-left p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors border border-white/20">
+                                <div class="flex items-center gap-3">
+                                    <i class="fas fa-chart-line text-purple-400"></i>
+                                    <div>
+                                        <div class="text-sm font-medium text-white">Estadísticas</div>
+                                        <div class="text-xs text-white/60">Ver métricas</div>
+                                    </div>
                                 </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20">
-                                    <span class="text-blue-200/60">endocrino</span>
-                                    <span class="text-white/40">○</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Actividad reciente -->
+                    <div class="recent-activity">
+                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-clock text-blue-400"></i>
+                            Actividad Reciente
+                        </h3>
+                        <div class="space-y-2">
+                            <div class="activity-item">
+                                <div class="activity-icon bg-blue-500/20 text-blue-300">
+                                    <i class="fas fa-heartbeat"></i>
                                 </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20">
-                                    <span class="text-blue-200/60">hemato</span>
-                                    <span class="text-white/40">○</span>
-                                </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20">
-                                    <span class="text-blue-200/60">neuro</span>
-                                    <span class="text-white/40">○</span>
-                                </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20">
-                                    <span class="text-blue-200/60">oftalmo</span>
-                                    <span class="text-white/40">○</span>
-                                </div>
-                                <div class="flex items-center justify-between p-2 rounded-lg backdrop-blur-sm bg-white/10 border border-white/20">
-                                    <span class="text-blue-200/60">otorrino</span>
-                                    <span class="text-white/40">○</span>
+                                <div class="flex-1">
+                                    <div class="text-sm text-white">Sistema iniciado</div>
+                                    <div class="text-xs text-white/60">Hace 2 minutos</div>
                                 </div>
                             </div>
-                            <div class="mt-4 p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
-                                <div class="stats-grid">
-                                    <div>
-                                        <div class="text-lg font-bold text-white">0</div>
-                                        <div class="text-xs text-blue-200">Secciones</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-lg font-bold text-white">1</div>
-                                        <div class="text-xs text-blue-200">Alertas</div>
-                                    </div>
-                                    <div>
-                                        <div class="text-lg font-bold text-white">0</div>
-                                        <div class="text-xs text-blue-200">Escalas</div>
-                                    </div>
+                            <div class="activity-item">
+                                <div class="activity-icon bg-green-500/20 text-green-300">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm text-white">Todas las especialidades cargadas</div>
+                                    <div class="text-xs text-white/60">Hace 2 minutos</div>
+                                </div>
+                            </div>
+                            <div class="activity-item">
+                                <div class="activity-icon bg-purple-500/20 text-purple-300">
+                                    <i class="fas fa-database"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <div class="text-sm text-white">Base de datos conectada</div>
+                                    <div class="text-xs text-white/60">Hace 3 minutos</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Estado del sistema -->
+                    <div class="glassmorphism rounded-2xl p-6">
+                        <h3 class="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                            <i class="fas fa-server text-green-400"></i>
+                            Estado del Sistema
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-white/70">Servidor</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <span class="text-xs text-green-400">Activo</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-white/70">Base de datos</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <span class="text-xs text-green-400">Conectada</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-white/70">Especialidades</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                                    <span class="text-xs text-green-400">14/14</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-white/70">Alertas</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 bg-blue-400 rounded-full"></div>
+                                    <span class="text-xs text-blue-400">0 activas</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- Botón finalizar -->
-                <button class="finalize-button">
-                    <i class="fas fa-circle-check h-5 w-5"></i>
-                    Finalizar Evaluación
-                </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Funcionalidad de búsqueda
-        document.getElementById('global-search').addEventListener('input', function(e) {
-            const query = e.target.value.toLowerCase();
-            const examCards = document.querySelectorAll('.exam-card');
+        // Animaciones de entrada
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.specialty-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        });
+
+        // Funcionalidad de búsqueda en tiempo real
+        function setupSearch() {
+            const searchInput = document.querySelector('input[placeholder*="Buscar"]');
+            if (searchInput) {
+                searchInput.addEventListener('input', function(e) {
+                    const query = e.target.value.toLowerCase();
+                    const cards = document.querySelectorAll('.specialty-card');
+                    
+                    cards.forEach(card => {
+                        const title = card.querySelector('h3').textContent.toLowerCase();
+                        const description = card.querySelector('p').textContent.toLowerCase();
+                        const isVisible = title.includes(query) || description.includes(query);
+                        
+                        card.style.display = isVisible ? 'block' : 'none';
+                        
+                        if (isVisible) {
+                            card.style.animation = 'fadeIn 0.3s ease';
+                        }
+                    });
+                });
+            }
+        }
+
+        // Efectos de hover mejorados
+        document.querySelectorAll('.specialty-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
             
-            examCards.forEach(card => {
-                const title = card.querySelector('h3').textContent.toLowerCase();
-                const description = card.querySelector('p').textContent.toLowerCase();
-                const isVisible = title.includes(query) || description.includes(query);
-                card.style.display = isVisible ? 'block' : 'none';
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
             });
         });
 
         // Funcionalidad de filtros
-        document.querySelectorAll('.filter-button').forEach(button => {
+        document.querySelectorAll('button[data-filter], .lg\\:col-span-2 button').forEach(button => {
             button.addEventListener('click', function() {
-                // Remover clase active de todos los botones
-                document.querySelectorAll('.filter-button').forEach(btn => {
-                    btn.classList.remove('active');
+                // Remover clase active de botones hermanos
+                const siblings = this.parentElement.querySelectorAll('button');
+                siblings.forEach(btn => {
+                    btn.classList.remove('bg-blue-500/30', 'text-blue-200', 'border-blue-400/30');
+                    btn.classList.add('bg-white/10', 'text-white/60', 'border-white/20');
                 });
                 
-                // Agregar clase active al botón clickeado
-                this.classList.add('active');
+                // Agregar clase active al botón actual
+                this.classList.remove('bg-white/10', 'text-white/60', 'border-white/20');
+                this.classList.add('bg-blue-500/30', 'text-blue-200', 'border-blue-400/30');
                 
-                // Aplicar filtro (aquí puedes agregar lógica específica)
-                const filter = this.dataset.filter;
-                console.log('Filtro aplicado:', filter);
+                // Aplicar filtro (lógica personalizable)
+                const filterText = this.textContent.toLowerCase();
+                console.log('Filtro aplicado:', filterText);
             });
         });
 
-        // Animación de hover en cards
-        document.querySelectorAll('.exam-card').forEach(card => {
-            card.addEventListener('mouseenter', function() {
-                this.classList.add('expanded');
-            });
+        // Actualizar estadísticas en tiempo real
+        function updateDashboardStats() {
+            const specialtyCount = document.querySelectorAll('.specialty-card').length;
+            const activeExams = 0; // Se actualizará dinámicamente
+            const criticalAlerts = 0; // Se actualizará dinámicamente
             
-            card.addEventListener('mouseleave', function() {
-                this.classList.remove('expanded');
-            });
-        });
+            // Actualizar contadores si existen
+            const statsCards = document.querySelectorAll('.stats-card .text-3xl');
+            if (statsCards.length >= 4) {
+                statsCards[0].textContent = specialtyCount;
+                statsCards[1].textContent = activeExams;
+                statsCards[2].textContent = criticalAlerts;
+            }
+        }
 
-        // Funcionalidad del botón finalizar
-        document.querySelector('.finalize-button').addEventListener('click', function() {
-            alert('Funcionalidad de finalización en desarrollo');
-        });
+        // Inicializar funcionalidades
+        setupSearch();
+        updateDashboardStats();
+
+        // Animación CSS para fadeIn
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
